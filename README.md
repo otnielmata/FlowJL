@@ -1,1 +1,119 @@
-# FlowJL
+# Flow JL API
+
+Estrutura inicial da API Rest do projeto Flow JL, construída com JavaScript, Express, autenticação JWT e conexão com MongoDB.
+
+## Objetivo desta base
+
+Esta entrega prepara a fundação da API para evoluir a partir das User Stories do Jira, sem ainda entrar no ciclo completo de funcionalidades do produto.
+
+Ela já deixa o projeto pronto para:
+
+- autenticação com JWT
+- persistência com MongoDB
+- documentação com Swagger
+- arquitetura em camadas
+- futura integração com GitHub Actions
+- futuro deploy em Vercel
+
+## Stack
+
+- Node.js 20+
+- Express
+- MongoDB com Mongoose
+- JWT com `jsonwebtoken`
+- Hash de senha com `bcryptjs`
+- Swagger UI
+- Validação com `zod`
+
+## Arquitetura
+
+```text
+src
+├── config
+├── controllers
+├── middleware
+├── models
+├── routes
+├── services
+├── utils
+├── app.js
+└── server.js
+```
+
+## Endpoints iniciais
+
+- `GET /health`
+- `GET /docs`
+- `GET /api/v1`
+- `POST /api/v1/auth/login`
+- `POST /api/v1/profiles`
+- `PUT /api/v1/profiles/:id`
+- `GET /api/v1/profiles`
+- `PUT /api/v1/users/:id`
+
+## Variáveis de ambiente
+
+Use o arquivo `.env.example` como base para criar o seu `.env`.
+
+Variáveis disponíveis:
+
+- `NODE_ENV`
+- `PORT`
+- `BASE_URL`
+- `MONGODB_URI`
+- `JWT_SECRET`
+- `JWT_EXPIRES_IN`
+- `DEFAULT_ADMIN_NAME`
+- `DEFAULT_ADMIN_EMAIL`
+- `DEFAULT_ADMIN_PASSWORD`
+
+## Scripts
+
+```bash
+pnpm dev
+```
+
+Inicia a API em modo observação e reinicia automaticamente quando arquivos forem alterados.
+
+```bash
+pnpm start
+```
+
+Inicia a API em modo estático.
+
+```bash
+pnpm test
+```
+
+Executa os testes básicos da aplicação.
+
+## Como rodar localmente
+
+1. Instale as dependências:
+
+```bash
+pnpm install
+```
+
+2. Crie o arquivo `.env` com base no `.env.example`
+
+3. Garanta que o MongoDB esteja acessível pela `MONGODB_URI`
+
+4. Inicie a API:
+
+```bash
+pnpm dev
+```
+
+## Swagger
+
+A documentação fica disponível em:
+
+- [Swagger YAML](/Users/otnielmata/projects/flow-jl/docs/swagger.yaml:1)
+- `GET /docs`
+
+## Observações importantes
+
+- Na primeira subida da API, um usuário administrador padrão é criado automaticamente, usando as variáveis `DEFAULT_ADMIN_*`.
+- Os endpoints protegidos exigem token JWT no header `Authorization: Bearer <token>`.
+- O projeto `Mentoria 2.0 Desafios` não faz parte desta entrega e não foi alterado.
