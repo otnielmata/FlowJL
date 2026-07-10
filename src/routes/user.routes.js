@@ -6,4 +6,5 @@ import { asyncHandler } from "../utils/async-handler.js";
 
 export const userRoutes = Router();
 
+userRoutes.post("/bootstrap-admin", asyncHandler(userController.createBootstrapAdmin.bind(userController)));
 userRoutes.put("/:id", authMiddleware, asyncHandler(userController.update.bind(userController)));
