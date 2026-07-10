@@ -20,8 +20,7 @@ export function errorMiddleware(error, _request, response, _next) {
 
   if (error?.code === 11000) {
     response.status(409).json({
-      message: "A unique field already exists",
-      details: error.keyValue
+      message: "A unique resource already exists"
     });
     return;
   }
