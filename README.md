@@ -12,6 +12,7 @@ Ela já deixa o projeto pronto para:
 - persistência com MongoDB
 - documentação com Swagger
 - arquitetura em camadas
+- bootstrap controlado do primeiro administrador
 - futura integração com GitHub Actions
 - futuro deploy em Vercel
 
@@ -46,6 +47,7 @@ src
 - `GET /docs`
 - `GET /api/v1`
 - `POST /api/v1/auth/login`
+- `POST /api/v1/users/bootstrap-admin`
 - `POST /api/v1/profiles`
 - `PUT /api/v1/profiles/:id`
 - `GET /api/v1/profiles`
@@ -63,9 +65,6 @@ Variáveis disponíveis:
 - `MONGODB_URI`
 - `JWT_SECRET`
 - `JWT_EXPIRES_IN`
-- `DEFAULT_ADMIN_NAME`
-- `DEFAULT_ADMIN_EMAIL`
-- `DEFAULT_ADMIN_PASSWORD`
 
 ## Scripts
 
@@ -114,6 +113,7 @@ A documentação fica disponível em:
 
 ## Observações importantes
 
-- Na primeira subida da API, um usuário administrador padrão é criado automaticamente, usando as variáveis `DEFAULT_ADMIN_*`.
+- Na primeira subida da API, o catálogo base de cargos e permissões do Core é semeado de forma idempotente.
+- O primeiro administrador deve ser criado explicitamente via `POST /api/v1/users/bootstrap-admin`.
 - Os endpoints protegidos exigem token JWT no header `Authorization: Bearer <token>`.
 - O projeto `Mentoria 2.0 Desafios` não faz parte desta entrega e não foi alterado.
