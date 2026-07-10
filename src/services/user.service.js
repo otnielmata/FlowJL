@@ -1,26 +1,71 @@
 import bcrypt from "bcryptjs";
 
-import { env } from "../config/env.js";
 import { Profile } from "../models/profile.model.js";
+import { Role } from "../models/role.model.js";
 import { User } from "../models/user.model.js";
 
-class UserService {
-  async ensureDefaultAdmin() {
-    const existingAdmin = await User.findOne({ email: env.DEFAULT_ADMIN_EMAIL.toLowerCase() });
+export function toPublicUser(user) {
+  const roleValue =
+    typeof user.roleId === "object" && user.roleId !== null
+      ? user.roleId._id?.toString?.() ?? user.roleId.id ?? null
+      : user.roleId?.toString?.() ?? user.roleId ?? null;
 
-    if (existingAdmin) {
-      return existingAdmin;
+  return {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    status: user.status,
+    roleId: roleValue,
+    createdAt: user.createdAt,
+    updatedAt: user.updatedAt,
+    createdBy: user.createdBy ?? null,
+    updatedBy: user.updatedBy ?? null,
+    lastLoginAt: user.lastLoginAt ?? null,
+    deactivatedAt: user.deactivatedAt ?? null
+  };
+}
+
+class UserService {
+  async createBootstrapAdmin(data) {
+    const normalizedEmail = data.email.trim().toLowerCase();
+    const existingUserWithEmail = await User.findOne({ email: normalizedEmail });
+
+    if (existingUserWithEmail) {
+      throw {
+        statusCode: 409,
+        message: "A user with this email already exists"
+      };
     }
 
-    const password = await bcrypt.hash(env.DEFAULT_ADMIN_PASSWORD, 10);
+    const existingUser = await User.exists({});
+
+    if (existingUser) {
+      throw {
+        statusCode: 409,
+        message: "Initial bootstrap has already been completed"
+      };
+    }
+
+    const adminRole = await Role.findOne({ code: "ADMIN", active: true });
+
+    if (!adminRole) {
+      throw {
+        statusCode: 503,
+        message: "Core access catalog is not initialized"
+      };
+    }
+
+    const passwordHash = await bcrypt.hash(data.password, 10);
 
     const admin = await User.create({
-      name: env.DEFAULT_ADMIN_NAME,
-      email: env.DEFAULT_ADMIN_EMAIL.toLowerCase(),
-      password
+      name: data.name.trim(),
+      email: normalizedEmail,
+      passwordHash,
+      roleId: adminRole._id,
+      status: "ACTIVE"
     });
 
-    return admin;
+    return toPublicUser(admin);
   }
 
   async update(userId, data) {
@@ -39,8 +84,21 @@ class UserService {
       ...data
     };
 
+    if (data.email) {
+      updateData.email = data.email.trim().toLowerCase();
+    }
+
     if (data.password) {
-      updateData.password = await bcrypt.hash(data.password, 10);
+      updateData.passwordHash = await bcrypt.hash(data.password, 10);
+      delete updateData.password;
+    }
+
+    if (data.status === "INACTIVE") {
+      updateData.deactivatedAt = new Date();
+    }
+
+    if (data.status === "ACTIVE") {
+      updateData.deactivatedAt = null;
     }
 
     const user = await User.findByIdAndUpdate(userId, updateData, {
@@ -55,7 +113,7 @@ class UserService {
       };
     }
 
-    return user;
+    return toPublicUser(user);
   }
 }
 
