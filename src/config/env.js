@@ -16,10 +16,7 @@ const envSchema = z.object({
   BASE_URL: z.preprocess(optionalEnvString, z.string().url().default("http://localhost:3000")),
   MONGODB_URI: z.preprocess(optionalEnvString, z.string().min(1).default("mongodb://127.0.0.1:27017/flow-jl")),
   JWT_SECRET: z.preprocess(optionalEnvString, z.string().min(10).default("change-this-secret")),
-  JWT_EXPIRES_IN: z.preprocess(optionalEnvString, z.string().default("1d")),
-  DEFAULT_ADMIN_NAME: z.preprocess(optionalEnvString, z.string().default("Flow JL Admin")),
-  DEFAULT_ADMIN_EMAIL: z.preprocess(optionalEnvString, z.string().email().default("admin@flowjl.local")),
-  DEFAULT_ADMIN_PASSWORD: z.preprocess(optionalEnvString, z.string().min(8).default("Admin@123"))
+  JWT_EXPIRES_IN: z.preprocess(optionalEnvString, z.string().default("1d"))
 });
 
 export const env = envSchema.parse(process.env);
