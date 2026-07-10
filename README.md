@@ -47,6 +47,9 @@ src
 - `GET /docs`
 - `GET /api/v1`
 - `POST /api/v1/auth/login`
+- `POST /api/v1/auth/refresh`
+- `POST /api/v1/auth/logout`
+- `GET /api/v1/auth/me`
 - `POST /api/v1/users/bootstrap-admin`
 - `POST /api/v1/profiles`
 - `PUT /api/v1/profiles/:id`
@@ -65,6 +68,8 @@ Variáveis disponíveis:
 - `MONGODB_URI`
 - `JWT_SECRET`
 - `JWT_EXPIRES_IN`
+- `JWT_REFRESH_SECRET`
+- `JWT_REFRESH_EXPIRES_IN`
 
 ## Scripts
 
@@ -116,4 +121,5 @@ A documentação fica disponível em:
 - Na primeira subida da API, o catálogo base de cargos e permissões do Core é semeado de forma idempotente.
 - O primeiro administrador deve ser criado explicitamente via `POST /api/v1/users/bootstrap-admin`.
 - Os endpoints protegidos exigem token JWT no header `Authorization: Bearer <token>`.
+- O fluxo de autenticação usa `accessToken` para acesso aos endpoints protegidos e `refreshToken` para renovação e logout da sessão.
 - O projeto `Mentoria 2.0 Desafios` não faz parte desta entrega e não foi alterado.
