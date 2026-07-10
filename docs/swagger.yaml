@@ -10,6 +10,7 @@ tags:
   - name: Auth
   - name: Profiles
   - name: Users
+  - name: Roles
 paths:
   /health:
     get:
@@ -40,6 +41,25 @@ paths:
           description: Usuario autenticado
         '401':
           description: Credenciais invalidas
+  /api/v1/users/bootstrap-admin:
+    post:
+      tags: [Users]
+      summary: Cadastra o primeiro administrador da plataforma
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BootstrapAdminRequest'
+      responses:
+        '201':
+          description: Primeiro administrador criado
+        '400':
+          description: Campos invalidos ou ausentes
+        '409':
+          description: Bootstrap ja concluido ou e-mail em uso
+        '503':
+          description: Catalogo base de acesso nao inicializado
   /api/v1/profiles:
     get:
       tags: [Profiles]
@@ -169,5 +189,20 @@ components:
           type: string
         profile:
           type: string
-        active:
-          type: boolean
+        status:
+          type: string
+          enum: [ACTIVE, INACTIVE, PENDING]
+    BootstrapAdminRequest:
+      type: object
+      required: [name, email, password]
+      properties:
+        name:
+          type: string
+          minLength: 3
+          maxLength: 120
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 8
