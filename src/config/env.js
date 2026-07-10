@@ -16,7 +16,9 @@ const envSchema = z.object({
   BASE_URL: z.preprocess(optionalEnvString, z.string().url().default("http://localhost:3000")),
   MONGODB_URI: z.preprocess(optionalEnvString, z.string().min(1).default("mongodb://127.0.0.1:27017/flow-jl")),
   JWT_SECRET: z.preprocess(optionalEnvString, z.string().min(10).default("change-this-secret")),
-  JWT_EXPIRES_IN: z.preprocess(optionalEnvString, z.string().default("1d"))
+  JWT_EXPIRES_IN: z.preprocess(optionalEnvString, z.string().default("1d")),
+  JWT_REFRESH_SECRET: z.preprocess(optionalEnvString, z.string().min(10).default("change-this-refresh-secret")),
+  JWT_REFRESH_EXPIRES_IN: z.preprocess(optionalEnvString, z.string().default("7d"))
 });
 
 export const env = envSchema.parse(process.env);
