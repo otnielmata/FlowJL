@@ -6,7 +6,9 @@ import { User } from "../models/user.model.js";
 
 class AuthService {
   async login({ email, password }) {
-    const user = await User.findOne({ email: email.toLowerCase(), active: true }).populate("profile");
+    const user = await User.findOne({ email: email.toLowerCase(), status: "ACTIVE" })
+      .populate("profile")
+      .populate("roleId");
 
     if (!user) {
       throw {
@@ -15,7 +17,7 @@ class AuthService {
       };
     }
 
-    const passwordMatches = await bcrypt.compare(password, user.password);
+    const passwordMatches = await bcrypt.compare(password, user.passwordHash);
 
     if (!passwordMatches) {
       throw {
@@ -31,6 +33,7 @@ class AuthService {
       {
         sub: user.id,
         email: user.email,
+        roleId: user.roleId?._id?.toString?.() ?? user.roleId?.toString?.() ?? null,
         profileId: user.profile?._id?.toString() ?? null
       },
       env.JWT_SECRET,
@@ -47,7 +50,8 @@ class AuthService {
         id: user.id,
         name: user.name,
         email: user.email,
-        active: user.active,
+        status: user.status,
+        roleId: user.roleId?._id?.toString?.() ?? user.roleId?.toString?.() ?? null,
         profile: user.profile
           ? {
               id: user.profile._id,
