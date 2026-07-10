@@ -1,11 +1,11 @@
 import { app } from "./app.js";
 import { connectDatabase } from "./config/database.js";
 import { env } from "./config/env.js";
-import { userService } from "./services/user.service.js";
+import { accessSeedService } from "./services/access-seed.service.js";
 
 async function bootstrap() {
   await connectDatabase();
-  await userService.ensureDefaultAdmin();
+  await accessSeedService.ensureCoreAccessSeed();
 
   app.listen(env.PORT, () => {
     console.log(`flow-jl-api running on port ${env.PORT}`);
