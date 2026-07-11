@@ -22,6 +22,10 @@ const tokenServiceMock = {
   parseExpirationDate: vi.fn()
 };
 
+const auditServiceMock = {
+  record: vi.fn()
+};
+
 vi.mock("../src/models/user.model.js", () => ({
   User: userModel
 }));
@@ -36,6 +40,10 @@ vi.mock("bcryptjs", () => ({
 
 vi.mock("../src/services/token.service.js", () => ({
   tokenService: tokenServiceMock
+}));
+
+vi.mock("../src/services/audit.service.js", () => ({
+  auditService: auditServiceMock
 }));
 
 process.env.JWT_SECRET = "change-this-secret";
@@ -80,6 +88,7 @@ describe("authService", () => {
     tokenServiceMock.generateAccessToken.mockReturnValue("access-token");
     tokenServiceMock.generateRefreshToken.mockReturnValue("refresh-token");
     tokenServiceMock.parseExpirationDate.mockReturnValue(new Date("2026-07-17T00:00:00.000Z"));
+    auditServiceMock.record.mockResolvedValue(undefined);
   });
 
   it("logs in an active user with normalized email and rotates session tokens", async () => {
@@ -103,6 +112,15 @@ describe("authService", () => {
         expiresAt: new Date("2026-07-17T00:00:00.000Z")
       })
     );
+    expect(auditServiceMock.record).toHaveBeenCalledWith({
+      actorUserId: "user-1",
+      action: "USER_AUTHENTICATED",
+      targetType: "USER",
+      targetId: "user-1",
+      context: {
+        sessionId: expect.any(String)
+      }
+    });
     expect(result).toMatchObject({
       accessToken: "access-token",
       refreshToken: "refresh-token",
