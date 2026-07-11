@@ -170,6 +170,18 @@ const corePermissions = [
     name: "Atualizar plano de conteudo",
     description: "Permite evoluir o plano de conteudo de um lancamento preservando o historico.",
     module: "strategy"
+  },
+  {
+    code: "SMART_SCHEDULE_CREATE",
+    name: "Gerar cronograma inteligente",
+    description: "Permite gerar o cronograma inteligente vigente de um lancamento.",
+    module: "strategy"
+  },
+  {
+    code: "SMART_SCHEDULE_UPDATE",
+    name: "Atualizar cronograma inteligente",
+    description: "Permite ajustar o cronograma inteligente de um lancamento preservando o historico.",
+    module: "strategy"
   }
 ];
 
