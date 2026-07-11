@@ -89,4 +89,41 @@ describe("requireUserUpdatePermission", () => {
       message: "Access denied"
     });
   });
+
+  it("requires USER_ACTIVATE permission to reactivate an inactive collaborator", async () => {
+    const next = vi.fn();
+    userModel.findById.mockResolvedValue({
+      id: "manager-id",
+      roleId: "role-id",
+      status: "ACTIVE"
+    });
+    roleModel.findOne.mockResolvedValue({
+      _id: "role-id",
+      permissionIds: ["perm-1"],
+      active: true
+    });
+    permissionModel.findOne.mockResolvedValue({
+      _id: "perm-1",
+      code: "USER_ACTIVATE",
+      active: true
+    });
+
+    await requireUserUpdatePermission(
+      {
+        auth: { sub: "manager-id" },
+        body: { status: "ACTIVE" }
+      },
+      {},
+      next
+    );
+
+    expect(permissionModel.findOne).toHaveBeenCalledWith({
+      _id: {
+        $in: ["perm-1"]
+      },
+      code: "USER_ACTIVATE",
+      active: true
+    });
+    expect(next).toHaveBeenCalledWith();
+  });
 });
