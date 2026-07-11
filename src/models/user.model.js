@@ -50,6 +50,14 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: null
     },
+    lastRoleChangeAt: {
+      type: Date,
+      default: null
+    },
+    lastRoleChangeBy: {
+      type: String,
+      default: null
+    },
     lastLoginAt: {
       type: Date,
       default: null
