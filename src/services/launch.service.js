@@ -2,9 +2,11 @@ import { Avatar } from "../models/avatar.model.js";
 import { CompetitorResearch } from "../models/competitor-research.model.js";
 import { Launch } from "../models/launch.model.js";
 import { MarketResearch } from "../models/market-research.model.js";
+import { Offer } from "../models/offer.model.js";
 import { auditService } from "./audit.service.js";
 import { toPublicAvatar } from "./avatar.service.js";
 import { groupByChannelAndDate, toPublicCompetitorResearch } from "./competitor-research.service.js";
+import { toPublicOffer } from "./offer.service.js";
 
 function normalizeDate(value) {
   return new Date(value);
@@ -107,6 +109,7 @@ class LaunchService {
     const marketResearchHistory = await MarketResearch.find({ launchId }).sort({ version: -1, createdAt: -1 });
     const competitorResearchEntries = await CompetitorResearch.find({ launchId, active: true }).sort({ competitorName: 1, updatedAt: -1 });
     const avatarHistory = await Avatar.find({ launchId }).sort({ version: -1, createdAt: -1 });
+    const offerHistory = await Offer.find({ launchId }).sort({ version: -1, createdAt: -1 });
 
     return {
       ...toPublicLaunch(launch),
@@ -146,6 +149,10 @@ class LaunchService {
       avatar: {
         current: avatarHistory.find((avatar) => avatar.isCurrent) ? toPublicAvatar(avatarHistory.find((avatar) => avatar.isCurrent)) : null,
         history: avatarHistory.map((avatar) => toPublicAvatar(avatar))
+      },
+      offer: {
+        current: offerHistory.find((offer) => offer.isCurrent) ? toPublicOffer(offerHistory.find((offer) => offer.isCurrent)) : null,
+        history: offerHistory.map((offer) => toPublicOffer(offer))
       }
     };
   }
