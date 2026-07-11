@@ -6,7 +6,8 @@ const userModel = {
   create: vi.fn(),
   findByIdAndUpdate: vi.fn(),
   findById: vi.fn(),
-  find: vi.fn()
+  find: vi.fn(),
+  countDocuments: vi.fn()
 };
 
 const roleModel = {
@@ -328,5 +329,146 @@ describe("userService queries", () => {
         deactivatedAt: null
       }
     ]);
+  });
+});
+
+describe("userService.update", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("updates collaborator data, normalizes email and records audit metadata", async () => {
+    userModel.findById.mockResolvedValue({
+      id: "target-user-id",
+      roleId: "role-current-id",
+      status: "ACTIVE"
+    });
+    userModel.findOne.mockResolvedValue(null);
+    userModel.findByIdAndUpdate.mockReturnValue({
+      populate: vi.fn().mockResolvedValue({
+        id: "target-user-id",
+        name: "Novo Nome",
+        email: "novo@flowjl.com",
+        status: "ACTIVE",
+        roleId: "role-new-id",
+        createdAt: "2026-07-11T00:00:00.000Z",
+        updatedAt: "2026-07-11T01:00:00.000Z",
+        createdBy: "creator-id",
+        updatedBy: "admin-user-id",
+        lastLoginAt: null,
+        deactivatedAt: null
+      })
+    });
+    roleModel.findOne.mockResolvedValue({ _id: "role-new-id", active: true });
+
+    const result = await userService.update("admin-user-id", "target-user-id", {
+      name: "Novo Nome",
+      email: " Novo@FlowJL.com ",
+      roleId: "role-new-id"
+    });
+
+    expect(userModel.findByIdAndUpdate).toHaveBeenCalledWith(
+      "target-user-id",
+      expect.objectContaining({
+        name: "Novo Nome",
+        email: "novo@flowjl.com",
+        roleId: "role-new-id",
+        updatedBy: "admin-user-id",
+        lastRoleChangeBy: "admin-user-id"
+      }),
+      {
+        new: true,
+        runValidators: true
+      }
+    );
+    expect(result).toEqual({
+      id: "target-user-id",
+      name: "Novo Nome",
+      email: "novo@flowjl.com",
+      status: "ACTIVE",
+      roleId: "role-new-id",
+      createdAt: "2026-07-11T00:00:00.000Z",
+      updatedAt: "2026-07-11T01:00:00.000Z",
+      createdBy: "creator-id",
+      updatedBy: "admin-user-id",
+      lastLoginAt: null,
+      deactivatedAt: null
+    });
+  });
+
+  it("rejects self-deactivation", async () => {
+    userModel.findById.mockResolvedValue({
+      id: "user-id",
+      roleId: "role-user-id",
+      status: "ACTIVE"
+    });
+
+    await expect(
+      userService.update("user-id", "user-id", {
+        status: "INACTIVE"
+      })
+    ).rejects.toMatchObject({
+      statusCode: 409,
+      message: "You cannot deactivate your own account"
+    });
+  });
+
+  it("rejects deactivation of the last active administrator", async () => {
+    userModel.findById.mockResolvedValue({
+      id: "admin-id",
+      roleId: "role-admin-id",
+      status: "ACTIVE"
+    });
+    roleModel.findOne.mockResolvedValue({ _id: "role-admin-id", code: "ADMIN", active: true });
+    userModel.countDocuments.mockResolvedValue(0);
+
+    await expect(
+      userService.update("other-admin-id", "admin-id", {
+        status: "INACTIVE"
+      })
+    ).rejects.toMatchObject({
+      statusCode: 409,
+      message: "The last active administrator cannot be deactivated"
+    });
+  });
+
+  it("clears deactivatedAt when reactivating an inactive collaborator", async () => {
+    userModel.findById.mockResolvedValue({
+      id: "inactive-user-id",
+      roleId: "role-user-id",
+      status: "INACTIVE"
+    });
+    userModel.findByIdAndUpdate.mockReturnValue({
+      populate: vi.fn().mockResolvedValue({
+        id: "inactive-user-id",
+        name: "User",
+        email: "user@flowjl.com",
+        status: "ACTIVE",
+        roleId: "role-user-id",
+        createdAt: "2026-07-11T00:00:00.000Z",
+        updatedAt: "2026-07-11T01:00:00.000Z",
+        createdBy: "creator-id",
+        updatedBy: "admin-user-id",
+        lastLoginAt: null,
+        deactivatedAt: null
+      })
+    });
+
+    await userService.update("admin-user-id", "inactive-user-id", {
+      status: "ACTIVE"
+    });
+
+    expect(userModel.findByIdAndUpdate).toHaveBeenCalledWith(
+      "inactive-user-id",
+      expect.objectContaining({
+        status: "ACTIVE",
+        deactivatedAt: null,
+        updatedBy: "admin-user-id"
+      }),
+      {
+        new: true,
+        runValidators: true
+      }
+    );
   });
 });
