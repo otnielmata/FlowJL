@@ -21,6 +21,12 @@ const corePermissions = [
     module: "user"
   },
   {
+    code: "USER_CREATE",
+    name: "Cadastrar colaboradores",
+    description: "Permite cadastrar colaboradores no modulo core.",
+    module: "user"
+  },
+  {
     code: "ROLE_READ",
     name: "Consultar cargos",
     description: "Permite consultar cargos disponiveis no core.",
@@ -31,6 +37,45 @@ const corePermissions = [
     name: "Consultar permissoes",
     description: "Permite consultar permissoes disponiveis no core.",
     module: "permission"
+  }
+];
+
+const coreRoles = [
+  {
+    code: "ADMIN",
+    name: "Administrador",
+    description: "Cargo inicial com acesso amplo ao core da plataforma.",
+    permissionCodes: corePermissions.map((permission) => permission.code)
+  },
+  {
+    code: "DIGITAL_STRATEGIST",
+    name: "Estrategista Digital",
+    description: "Cargo de estrategia digital do Flow JL.",
+    permissionCodes: []
+  },
+  {
+    code: "EXPERT",
+    name: "Expert",
+    description: "Cargo de especialista de conteudo do Flow JL.",
+    permissionCodes: []
+  },
+  {
+    code: "TRAFFIC_MANAGER",
+    name: "Gestor de Trafego",
+    description: "Cargo de gestao de trafego pago do Flow JL.",
+    permissionCodes: []
+  },
+  {
+    code: "OPERATIONS",
+    name: "Operacoes Administrativas",
+    description: "Cargo operacional administrativo do Flow JL.",
+    permissionCodes: []
+  },
+  {
+    code: "SOCIAL_MEDIA",
+    name: "Social Media",
+    description: "Cargo responsavel por redes sociais do Flow JL.",
+    permissionCodes: []
   }
 ];
 
@@ -61,21 +106,27 @@ class AccessSeedService {
       { _id: 1 }
     ).sort({ code: 1 });
 
-    await Role.updateOne(
-      { code: "ADMIN" },
-      {
-        $setOnInsert: {
-          code: "ADMIN"
+    for (const role of coreRoles) {
+      const permissionIds = permissions
+        .filter((permission) => role.permissionCodes.includes(permission.code))
+        .map((permission) => permission._id);
+
+      await Role.updateOne(
+        { code: role.code },
+        {
+          $setOnInsert: {
+            code: role.code
+          },
+          $set: {
+            name: role.name,
+            description: role.description,
+            permissionIds,
+            active: true
+          }
         },
-        $set: {
-          name: "Administrator",
-          description: "Cargo inicial com acesso amplo ao core da plataforma.",
-          permissionIds: permissions.map((permission) => permission._id),
-          active: true
-        }
-      },
-      { upsert: true }
-    );
+        { upsert: true }
+      );
+    }
   }
 }
 
