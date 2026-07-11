@@ -2,6 +2,7 @@ import { Router } from "express";
 
 import { avatarController } from "../controllers/avatar.controller.js";
 import { competitorResearchController } from "../controllers/competitor-research.controller.js";
+import { editorialLineController } from "../controllers/editorial-line.controller.js";
 import { launchController } from "../controllers/launch.controller.js";
 import { marketResearchController } from "../controllers/market-research.controller.js";
 import { offerController } from "../controllers/offer.controller.js";
@@ -47,4 +48,16 @@ launchRoutes.put(
   authMiddleware,
   asyncHandler(requirePermission("POSITIONING_UPDATE")),
   asyncHandler(positioningController.update.bind(positioningController))
+);
+launchRoutes.post(
+  "/:launchId/editorial-lines",
+  authMiddleware,
+  asyncHandler(requirePermission("EDITORIAL_LINE_CREATE")),
+  asyncHandler(editorialLineController.create.bind(editorialLineController))
+);
+launchRoutes.put(
+  "/:launchId/editorial-lines",
+  authMiddleware,
+  asyncHandler(requirePermission("EDITORIAL_LINE_UPDATE")),
+  asyncHandler(editorialLineController.update.bind(editorialLineController))
 );
