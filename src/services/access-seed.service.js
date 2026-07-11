@@ -122,6 +122,18 @@ const corePermissions = [
     name: "Gerar sugestoes de avatar",
     description: "Permite solicitar apoio de IA para complementar o avatar do publico.",
     module: "strategy"
+  },
+  {
+    code: "OFFER_CREATE",
+    name: "Cadastrar oferta",
+    description: "Permite definir a oferta vigente de um lancamento.",
+    module: "strategy"
+  },
+  {
+    code: "OFFER_UPDATE",
+    name: "Atualizar oferta",
+    description: "Permite evoluir a oferta de um lancamento preservando o historico.",
+    module: "strategy"
   }
 ];
 
