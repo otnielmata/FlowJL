@@ -129,7 +129,16 @@ class UserService {
     return this.getById(userId);
   }
 
-  async update(userId, data) {
+  async update(authenticatedUserId, userId, data) {
+    const currentUser = await User.findById(userId);
+
+    if (!currentUser) {
+      throw {
+        statusCode: 404,
+        message: "User not found"
+      };
+    }
+
     if (data.roleId) {
       const role = await Role.findOne({
         _id: data.roleId,
@@ -140,6 +149,21 @@ class UserService {
         throw {
           statusCode: 400,
           message: "Role is invalid or inactive"
+        };
+      }
+    }
+
+    if (data.email) {
+      const normalizedEmail = data.email.trim().toLowerCase();
+      const existingUserWithEmail = await User.findOne({
+        email: normalizedEmail
+      });
+      const existingUserId = existingUserWithEmail?.id ?? existingUserWithEmail?._id?.toString?.();
+
+      if (existingUserWithEmail && existingUserId !== currentUser.id) {
+        throw {
+          statusCode: 409,
+          message: "A user with this email already exists"
         };
       }
     }
@@ -156,7 +180,8 @@ class UserService {
     }
 
     const updateData = {
-      ...data
+      ...data,
+      updatedBy: authenticatedUserId
     };
 
     if (data.email) {
@@ -169,24 +194,65 @@ class UserService {
     }
 
     if (data.status === "INACTIVE") {
+      if (currentUser.status !== "ACTIVE") {
+        throw {
+          statusCode: 409,
+          message: "User is already inactive"
+        };
+      }
+
+      if (authenticatedUserId === currentUser.id) {
+        throw {
+          statusCode: 409,
+          message: "You cannot deactivate your own account"
+        };
+      }
+
+      const adminRole = await Role.findOne({ code: "ADMIN", active: true });
+      const currentRoleId = currentUser.roleId?.toString?.() ?? currentUser.roleId;
+
+      if (adminRole && currentRoleId === adminRole._id) {
+        const otherActiveAdmins = await User.countDocuments({
+          roleId: adminRole._id,
+          status: "ACTIVE",
+          _id: {
+            $ne: currentUser.id
+          }
+        });
+
+        if (otherActiveAdmins === 0) {
+          throw {
+            statusCode: 409,
+            message: "The last active administrator cannot be deactivated"
+          };
+        }
+      }
+
       updateData.deactivatedAt = new Date();
     }
 
     if (data.status === "ACTIVE") {
+      if (currentUser.status !== "INACTIVE") {
+        throw {
+          statusCode: 409,
+          message: "User is already active"
+        };
+      }
+
       updateData.deactivatedAt = null;
+    }
+
+    const currentRoleId = currentUser.roleId?.toString?.() ?? currentUser.roleId;
+
+    if (data.roleId && data.roleId !== currentRoleId) {
+      updateData.lastRoleChangeAt = new Date();
+      updateData.lastRoleChangeBy = authenticatedUserId;
     }
 
     const user = await User.findByIdAndUpdate(userId, updateData, {
       new: true,
       runValidators: true
     }).populate("profile");
-
-    if (!user) {
-      throw {
-        statusCode: 404,
-        message: "User not found"
-      };
-    }
 
     return toPublicUser(user);
   }
