@@ -101,6 +101,28 @@ paths:
           description: JWT ausente ou invalido
         '403':
           description: Acesso negado
+  /api/v1/dashboards/strategist:
+    get:
+      tags: [Dashboards]
+      summary: Consulta o dashboard consolidado da estrategista
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: launchId
+          required: false
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Dashboard consolidado retornado com sucesso
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento nao encontrado
   /api/v1/launches:
     post:
       tags: [Launches]

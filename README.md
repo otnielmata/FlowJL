@@ -51,6 +51,7 @@ src
 - `POST /api/v1/auth/logout`
 - `GET /api/v1/auth/me`
 - `GET /api/v1/audits`
+- `GET /api/v1/dashboards/strategist`
 - `POST /api/v1/launches`
 - `GET /api/v1/launches/:launchId`
 - `POST /api/v1/launches/:launchId/market-researches`
@@ -162,6 +163,7 @@ A documentação fica disponível em:
 - A consulta individual de cargo via `GET /api/v1/roles/:id` retorna somente os campos públicos e os códigos de permissões associadas, quando existirem.
 - O mapeamento de permissões por cargo via `PUT /api/v1/roles/:code/permissions` rejeita códigos inexistentes e passa a influenciar diretamente a autorização dos endpoints protegidos.
 - A trilha de auditoria inicial pode ser consultada em `GET /api/v1/audits` por usuários com `AUDIT_READ` e registra criação, atualização, inativação, mudança de cargo e autenticação bem-sucedida.
+- O dashboard da estrategista pode ser consultado em `GET /api/v1/dashboards/strategist`, aceita filtro opcional por `launchId`, consolida progresso, pendências, atrasos e status por etapa a partir do estado atual dos módulos estratégicos, e exige a permissão `STRATEGIST_DASHBOARD_READ`.
 - O cadastro de lançamentos via `POST /api/v1/launches` exige `LAUNCH_CREATE`, persiste marcos operacionais em UTC e rejeita duplicidade ativa com a mesma combinação de nome, produto e período.
 - A consulta de lançamentos via `GET /api/v1/launches/:launchId` exige `LAUNCH_READ` e retorna o histórico versionado das pesquisas de mercado já associadas.
 - A geração de pesquisa de mercado via `POST /api/v1/launches/:launchId/market-researches` exige `MARKET_RESEARCH_CREATE`, depende de um lançamento existente, marca o resultado para revisão humana e não expõe detalhes internos do mecanismo de geração.

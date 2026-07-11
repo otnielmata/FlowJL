@@ -194,6 +194,12 @@ const corePermissions = [
     name: "Decidir aprovacao do planejamento",
     description: "Permite ao expert aprovar ou reprovar o planejamento submetido.",
     module: "strategy"
+  },
+  {
+    code: "STRATEGIST_DASHBOARD_READ",
+    name: "Consultar dashboard da estrategista",
+    description: "Permite consultar indicadores consolidados do modulo estrategico por lancamento.",
+    module: "strategy"
   }
 ];
 
