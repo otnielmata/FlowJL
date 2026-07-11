@@ -23,6 +23,7 @@ function toRolePermissionResponse(role, permissionCodes) {
 class RoleService {
   async list() {
     const roles = await Role.find({
+      active: true,
       code: {
         $in: [...allowedRoleCodes]
       }
