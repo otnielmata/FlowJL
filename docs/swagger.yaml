@@ -411,6 +411,67 @@ paths:
           description: Acesso negado
         '404':
           description: Lancamento ou posicionamento nao encontrado
+  /api/v1/launches/{launchId}/editorial-lines:
+    post:
+      tags: [Launches]
+      summary: Cadastra a linha editorial vigente do lancamento
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: launchId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EditorialLineRequest'
+      responses:
+        '201':
+          description: Linha editorial criada
+        '400':
+          description: Dados invalidos ou contexto estrategico insuficiente
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento nao encontrado
+        '409':
+          description: Ja existe uma linha editorial vigente para o lancamento
+    put:
+      tags: [Launches]
+      summary: Atualiza a linha editorial vigente preservando historico
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: launchId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EditorialLineRequest'
+      responses:
+        '200':
+          description: Linha editorial atualizada
+        '400':
+          description: Dados invalidos ou contexto estrategico insuficiente
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento ou linha editorial nao encontrada
   /api/v1/roles:
     get:
       tags: [Roles]
@@ -858,6 +919,24 @@ components:
           type: array
           items:
             type: string
+    EditorialLineRequest:
+      type: object
+      required: [pillars]
+      properties:
+        pillars:
+          type: array
+          items:
+            type: object
+            required: [name, objective, priority]
+            properties:
+              name:
+                type: string
+              objective:
+                type: string
+              priority:
+                type: integer
+              active:
+                type: boolean
     CreateRoleRequest:
       type: object
       required: [code, name, description]
