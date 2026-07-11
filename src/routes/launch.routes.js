@@ -1,5 +1,6 @@
 import { Router } from "express";
 
+import { avatarController } from "../controllers/avatar.controller.js";
 import { competitorResearchController } from "../controllers/competitor-research.controller.js";
 import { launchController } from "../controllers/launch.controller.js";
 import { marketResearchController } from "../controllers/market-research.controller.js";
@@ -22,4 +23,12 @@ launchRoutes.post(
   authMiddleware,
   asyncHandler(requirePermission("COMPETITOR_RESEARCH_CREATE")),
   asyncHandler(competitorResearchController.create.bind(competitorResearchController))
+);
+launchRoutes.post("/:launchId/avatars", authMiddleware, asyncHandler(requirePermission("AVATAR_CREATE")), asyncHandler(avatarController.create.bind(avatarController)));
+launchRoutes.put("/:launchId/avatars", authMiddleware, asyncHandler(requirePermission("AVATAR_UPDATE")), asyncHandler(avatarController.update.bind(avatarController)));
+launchRoutes.post(
+  "/:launchId/avatar-suggestions",
+  authMiddleware,
+  asyncHandler(requirePermission("AVATAR_SUGGEST")),
+  asyncHandler(avatarController.suggest.bind(avatarController))
 );
