@@ -472,6 +472,67 @@ paths:
           description: Acesso negado
         '404':
           description: Lancamento ou linha editorial nao encontrada
+  /api/v1/launches/{launchId}/content-plans:
+    post:
+      tags: [Launches]
+      summary: Cadastra o plano de conteudo vigente do lancamento
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: launchId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContentPlanRequest'
+      responses:
+        '201':
+          description: Plano de conteudo criado
+        '400':
+          description: Dados invalidos ou ausencia de linha editorial vigente
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento nao encontrado
+        '409':
+          description: Ja existe um plano de conteudo vigente para o lancamento
+    put:
+      tags: [Launches]
+      summary: Atualiza o plano de conteudo vigente preservando historico
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: launchId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContentPlanRequest'
+      responses:
+        '200':
+          description: Plano de conteudo atualizado
+        '400':
+          description: Dados invalidos ou ausencia de linha editorial vigente
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento ou plano de conteudo nao encontrado
   /api/v1/roles:
     get:
       tags: [Roles]
@@ -935,6 +996,30 @@ components:
                 type: string
               priority:
                 type: integer
+              active:
+                type: boolean
+    ContentPlanRequest:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            type: object
+            required: [theme, format, objective, cta, stage, periodLabel]
+            properties:
+              theme:
+                type: string
+              format:
+                type: string
+              objective:
+                type: string
+              cta:
+                type: string
+              stage:
+                type: string
+              periodLabel:
+                type: string
               active:
                 type: boolean
     CreateRoleRequest:
