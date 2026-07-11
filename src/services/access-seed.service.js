@@ -134,6 +134,18 @@ const corePermissions = [
     name: "Atualizar oferta",
     description: "Permite evoluir a oferta de um lancamento preservando o historico.",
     module: "strategy"
+  },
+  {
+    code: "POSITIONING_CREATE",
+    name: "Cadastrar posicionamento",
+    description: "Permite definir o posicionamento vigente de um lancamento.",
+    module: "strategy"
+  },
+  {
+    code: "POSITIONING_UPDATE",
+    name: "Atualizar posicionamento",
+    description: "Permite evoluir o posicionamento de um lancamento preservando o historico.",
+    module: "strategy"
   }
 ];
 
