@@ -8,6 +8,7 @@ import { launchController } from "../controllers/launch.controller.js";
 import { marketResearchController } from "../controllers/market-research.controller.js";
 import { offerController } from "../controllers/offer.controller.js";
 import { positioningController } from "../controllers/positioning.controller.js";
+import { smartScheduleController } from "../controllers/smart-schedule.controller.js";
 import { authMiddleware } from "../middleware/auth.middleware.js";
 import { requirePermission } from "../middleware/permission.middleware.js";
 import { asyncHandler } from "../utils/async-handler.js";
@@ -73,4 +74,16 @@ launchRoutes.put(
   authMiddleware,
   asyncHandler(requirePermission("CONTENT_PLAN_UPDATE")),
   asyncHandler(contentPlanController.update.bind(contentPlanController))
+);
+launchRoutes.post(
+  "/:launchId/smart-schedules",
+  authMiddleware,
+  asyncHandler(requirePermission("SMART_SCHEDULE_CREATE")),
+  asyncHandler(smartScheduleController.create.bind(smartScheduleController))
+);
+launchRoutes.put(
+  "/:launchId/smart-schedules",
+  authMiddleware,
+  asyncHandler(requirePermission("SMART_SCHEDULE_UPDATE")),
+  asyncHandler(smartScheduleController.update.bind(smartScheduleController))
 );
