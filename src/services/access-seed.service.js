@@ -146,6 +146,18 @@ const corePermissions = [
     name: "Atualizar posicionamento",
     description: "Permite evoluir o posicionamento de um lancamento preservando o historico.",
     module: "strategy"
+  },
+  {
+    code: "EDITORIAL_LINE_CREATE",
+    name: "Cadastrar linha editorial",
+    description: "Permite definir a linha editorial vigente de um lancamento.",
+    module: "strategy"
+  },
+  {
+    code: "EDITORIAL_LINE_UPDATE",
+    name: "Atualizar linha editorial",
+    description: "Permite evoluir a linha editorial de um lancamento preservando o historico.",
+    module: "strategy"
   }
 ];
 
