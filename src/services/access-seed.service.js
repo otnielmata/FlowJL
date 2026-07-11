@@ -158,6 +158,18 @@ const corePermissions = [
     name: "Atualizar linha editorial",
     description: "Permite evoluir a linha editorial de um lancamento preservando o historico.",
     module: "strategy"
+  },
+  {
+    code: "CONTENT_PLAN_CREATE",
+    name: "Cadastrar plano de conteudo",
+    description: "Permite definir o plano de conteudo vigente de um lancamento.",
+    module: "strategy"
+  },
+  {
+    code: "CONTENT_PLAN_UPDATE",
+    name: "Atualizar plano de conteudo",
+    description: "Permite evoluir o plano de conteudo de um lancamento preservando o historico.",
+    module: "strategy"
   }
 ];
 
