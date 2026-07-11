@@ -212,6 +212,18 @@ const corePermissions = [
     name: "Inativar ideias de conteudo",
     description: "Permite realizar exclusao logica de ideias de conteudo preservando historico.",
     module: "content"
+  },
+  {
+    code: "REEL_CREATE",
+    name: "Cadastrar reels",
+    description: "Permite cadastrar reels com contexto minimo de producao e metadados essenciais.",
+    module: "content"
+  },
+  {
+    code: "REEL_UPDATE",
+    name: "Atualizar reels",
+    description: "Permite atualizar roteiro, legenda, aprovacao e status operacional de reels.",
+    module: "content"
   }
 ];
 
