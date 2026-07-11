@@ -379,7 +379,7 @@ paths:
         '403':
           description: Acesso negado
         '409':
-          description: Transicao invalida, e-mail duplicado ou regra de negocio violada
+          description: Transicao invalida, e-mail duplicado, usuario ja ativo ou regra de negocio violada
         '404':
           description: Usuario nao encontrado
 components:
