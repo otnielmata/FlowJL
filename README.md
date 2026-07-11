@@ -55,6 +55,9 @@ src
 - `GET /api/v1/launches/:launchId`
 - `POST /api/v1/launches/:launchId/market-researches`
 - `POST /api/v1/launches/:launchId/competitor-researches`
+- `POST /api/v1/launches/:launchId/avatars`
+- `PUT /api/v1/launches/:launchId/avatars`
+- `POST /api/v1/launches/:launchId/avatar-suggestions`
 - `GET /api/v1/roles`
 - `GET /api/v1/roles/:id`
 - `POST /api/v1/roles`
@@ -151,6 +154,8 @@ A documentação fica disponível em:
 - A consulta de lançamentos via `GET /api/v1/launches/:launchId` exige `LAUNCH_READ` e retorna o histórico versionado das pesquisas de mercado já associadas.
 - A geração de pesquisa de mercado via `POST /api/v1/launches/:launchId/market-researches` exige `MARKET_RESEARCH_CREATE`, depende de um lançamento existente, marca o resultado para revisão humana e não expõe detalhes internos do mecanismo de geração.
 - O registro de pesquisa de concorrentes via `POST /api/v1/launches/:launchId/competitor-researches` exige `COMPETITOR_RESEARCH_CREATE`, agrupa múltiplas evidências por concorrente e a consulta do lançamento devolve esse material organizado por canal e data.
+- O avatar do público pode ser cadastrado e evoluído via `POST` e `PUT /api/v1/launches/:launchId/avatars`, preserva histórico versionado e registra auditoria de alteração.
+- As sugestões de avatar via `POST /api/v1/launches/:launchId/avatar-suggestions` exigem `AVATAR_SUGGEST`, retornam estrutura complementar revisável por humano e não expõem detalhes internos do mecanismo de IA.
 - A autorização da API é resolvida pelas permissões vinculadas ao cargo do usuário autenticado.
 - Os endpoints protegidos exigem token JWT no header `Authorization: Bearer <token>`.
 - O fluxo de autenticação usa `accessToken` para acesso aos endpoints protegidos e `refreshToken` para renovação e logout da sessão.
