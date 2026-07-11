@@ -121,6 +121,27 @@ paths:
           description: Acesso negado
         '409':
           description: Cargo duplicado
+  /api/v1/roles/{id}:
+    get:
+      tags: [Roles]
+      summary: Consulta um cargo por identificador
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Cargo consultado
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Cargo nao encontrado
   /api/v1/roles/{code}/permissions:
     get:
       tags: [Roles]
