@@ -350,6 +350,67 @@ paths:
           description: Acesso negado
         '404':
           description: Lancamento ou oferta nao encontrado
+  /api/v1/launches/{launchId}/positionings:
+    post:
+      tags: [Launches]
+      summary: Cadastra o posicionamento vigente do lancamento
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: launchId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PositioningRequest'
+      responses:
+        '201':
+          description: Posicionamento criado
+        '400':
+          description: Dados invalidos ou insuficientes
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento nao encontrado
+        '409':
+          description: Ja existe um posicionamento vigente para o lancamento
+    put:
+      tags: [Launches]
+      summary: Atualiza o posicionamento vigente preservando historico
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: launchId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PositioningRequest'
+      responses:
+        '200':
+          description: Posicionamento atualizado
+        '400':
+          description: Dados invalidos ou insuficientes
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento ou posicionamento nao encontrado
   /api/v1/roles:
     get:
       tags: [Roles]
@@ -779,6 +840,24 @@ components:
             type: string
         positioningContext:
           type: string
+    PositioningRequest:
+      type: object
+      required: [thesis, centralPromise, differentiators, references]
+      properties:
+        thesis:
+          type: string
+          minLength: 10
+        centralPromise:
+          type: string
+          minLength: 10
+        differentiators:
+          type: array
+          items:
+            type: string
+        references:
+          type: array
+          items:
+            type: string
     CreateRoleRequest:
       type: object
       required: [code, name, description]
