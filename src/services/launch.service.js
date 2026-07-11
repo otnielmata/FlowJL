@@ -1,7 +1,9 @@
+import { Avatar } from "../models/avatar.model.js";
 import { CompetitorResearch } from "../models/competitor-research.model.js";
 import { Launch } from "../models/launch.model.js";
 import { MarketResearch } from "../models/market-research.model.js";
 import { auditService } from "./audit.service.js";
+import { toPublicAvatar } from "./avatar.service.js";
 import { groupByChannelAndDate, toPublicCompetitorResearch } from "./competitor-research.service.js";
 
 function normalizeDate(value) {
@@ -104,6 +106,7 @@ class LaunchService {
 
     const marketResearchHistory = await MarketResearch.find({ launchId }).sort({ version: -1, createdAt: -1 });
     const competitorResearchEntries = await CompetitorResearch.find({ launchId, active: true }).sort({ competitorName: 1, updatedAt: -1 });
+    const avatarHistory = await Avatar.find({ launchId }).sort({ version: -1, createdAt: -1 });
 
     return {
       ...toPublicLaunch(launch),
@@ -139,6 +142,10 @@ class LaunchService {
       competitorResearch: {
         items: competitorResearchEntries.map((entry) => toPublicCompetitorResearch(entry)),
         groupedByChannel: groupByChannelAndDate(competitorResearchEntries)
+      },
+      avatar: {
+        current: avatarHistory.find((avatar) => avatar.isCurrent) ? toPublicAvatar(avatarHistory.find((avatar) => avatar.isCurrent)) : null,
+        history: avatarHistory.map((avatar) => toPublicAvatar(avatar))
       }
     };
   }
