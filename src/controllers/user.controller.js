@@ -8,6 +8,13 @@ const createBootstrapAdminSchema = z.object({
   password: z.string().min(8)
 });
 
+const createCollaboratorSchema = z.object({
+  name: z.string().trim().min(3).max(120),
+  email: z.string().trim().email(),
+  password: z.string().min(8),
+  roleId: z.string().uuid()
+});
+
 const updateUserSchema = z
   .object({
     name: z.string().min(3).optional(),
@@ -22,6 +29,13 @@ class UserController {
   async createBootstrapAdmin(request, response) {
     const payload = createBootstrapAdminSchema.parse(request.body);
     const user = await userService.createBootstrapAdmin(payload);
+
+    response.status(201).json(user);
+  }
+
+  async createCollaborator(request, response) {
+    const payload = createCollaboratorSchema.parse(request.body);
+    const user = await userService.createCollaborator(request.auth.sub, payload);
 
     response.status(201).json(user);
   }
