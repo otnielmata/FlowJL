@@ -374,7 +374,8 @@ describe("userService.update", () => {
         email: "novo@flowjl.com",
         roleId: "role-new-id",
         updatedBy: "admin-user-id",
-        lastRoleChangeBy: "admin-user-id"
+        lastRoleChangeBy: "admin-user-id",
+        lastRoleChangeAt: expect.any(Date)
       }),
       {
         new: true,
@@ -393,6 +394,24 @@ describe("userService.update", () => {
       updatedBy: "admin-user-id",
       lastLoginAt: null,
       deactivatedAt: null
+    });
+  });
+
+  it("rejects role change when the target role is invalid or inactive", async () => {
+    userModel.findById.mockResolvedValue({
+      id: "target-user-id",
+      roleId: "role-current-id",
+      status: "ACTIVE"
+    });
+    roleModel.findOne.mockResolvedValue(null);
+
+    await expect(
+      userService.update("admin-user-id", "target-user-id", {
+        roleId: "missing-role-id"
+      })
+    ).rejects.toMatchObject({
+      statusCode: 400,
+      message: "Role is invalid or inactive"
     });
   });
 
