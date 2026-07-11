@@ -52,6 +52,9 @@ src
 - `GET /api/v1/auth/me`
 - `POST /api/v1/users/bootstrap-admin`
 - `POST /api/v1/users`
+- `GET /api/v1/users`
+- `GET /api/v1/users/:id`
+- `GET /api/v1/users/me`
 - `POST /api/v1/profiles`
 - `PUT /api/v1/profiles/:id`
 - `GET /api/v1/profiles`
@@ -122,6 +125,7 @@ A documentação fica disponível em:
 - Na primeira subida da API, o catálogo base de cargos e permissões do Core é semeado de forma idempotente.
 - O primeiro administrador deve ser criado explicitamente via `POST /api/v1/users/bootstrap-admin`.
 - O cadastro de colaboradores via `POST /api/v1/users` exige autenticação com JWT válido e perfil administrativo.
+- A consulta de colaboradores usa permissões de papel: `USER_LIST` para listagem e `USER_READ` para consulta individual.
 - Os endpoints protegidos exigem token JWT no header `Authorization: Bearer <token>`.
 - O fluxo de autenticação usa `accessToken` para acesso aos endpoints protegidos e `refreshToken` para renovação e logout da sessão.
 - O projeto `Mentoria 2.0 Desafios` não faz parte desta entrega e não foi alterado.

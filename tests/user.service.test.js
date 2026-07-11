@@ -4,7 +4,9 @@ const userModel = {
   findOne: vi.fn(),
   exists: vi.fn(),
   create: vi.fn(),
-  findByIdAndUpdate: vi.fn()
+  findByIdAndUpdate: vi.fn(),
+  findById: vi.fn(),
+  find: vi.fn()
 };
 
 const roleModel = {
@@ -249,5 +251,82 @@ describe("toPublicUser", () => {
       deactivatedAt: null
     });
     expect(result).not.toHaveProperty("passwordHash");
+  });
+});
+
+describe("userService queries", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("returns a collaborator by id with allowed fields only", async () => {
+    userModel.findById.mockResolvedValue({
+      id: "user-id",
+      name: "Flow JL User",
+      email: "user@flowjl.com",
+      passwordHash: "secret",
+      status: "ACTIVE",
+      roleId: "role-id",
+      createdAt: "2026-07-11T00:00:00.000Z",
+      updatedAt: "2026-07-11T00:00:00.000Z",
+      createdBy: "admin-id",
+      updatedBy: "admin-id",
+      lastLoginAt: null,
+      deactivatedAt: null
+    });
+
+    const result = await userService.getById("user-id");
+
+    expect(result).toEqual({
+      id: "user-id",
+      name: "Flow JL User",
+      email: "user@flowjl.com",
+      status: "ACTIVE",
+      roleId: "role-id",
+      createdAt: "2026-07-11T00:00:00.000Z",
+      updatedAt: "2026-07-11T00:00:00.000Z",
+      createdBy: "admin-id",
+      updatedBy: "admin-id",
+      lastLoginAt: null,
+      deactivatedAt: null
+    });
+  });
+
+  it("lists collaborators ordered by creation date descending", async () => {
+    userModel.find.mockReturnValue({
+      sort: vi.fn().mockResolvedValue([
+        {
+          id: "user-2",
+          name: "User 2",
+          email: "user2@flowjl.com",
+          status: "ACTIVE",
+          roleId: "role-2",
+          createdAt: "2026-07-11T00:00:00.000Z",
+          updatedAt: "2026-07-11T00:00:00.000Z",
+          createdBy: "admin-id",
+          updatedBy: "admin-id",
+          lastLoginAt: null,
+          deactivatedAt: null
+        }
+      ])
+    });
+
+    const result = await userService.list();
+
+    expect(result).toEqual([
+      {
+        id: "user-2",
+        name: "User 2",
+        email: "user2@flowjl.com",
+        status: "ACTIVE",
+        roleId: "role-2",
+        createdAt: "2026-07-11T00:00:00.000Z",
+        updatedAt: "2026-07-11T00:00:00.000Z",
+        createdBy: "admin-id",
+        updatedBy: "admin-id",
+        lastLoginAt: null,
+        deactivatedAt: null
+      }
+    ]);
   });
 });
