@@ -121,6 +121,55 @@ paths:
           description: Acesso negado
         '409':
           description: Cargo duplicado
+  /api/v1/roles/{code}/permissions:
+    get:
+      tags: [Roles]
+      summary: Consulta as permissoes de um cargo
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: code
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Permissoes do cargo consultadas
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Cargo nao encontrado
+    put:
+      tags: [Roles]
+      summary: Atualiza as permissoes de um cargo
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: code
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateRolePermissionsRequest'
+      responses:
+        '200':
+          description: Permissoes do cargo atualizadas
+        '400':
+          description: Conjunto de permissoes invalido
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Cargo nao encontrado
   /api/v1/roles/{code}:
     put:
       tags: [Roles]
@@ -349,6 +398,14 @@ components:
           type: string
         active:
           type: boolean
+    UpdateRolePermissionsRequest:
+      type: object
+      required: [permissions]
+      properties:
+        permissions:
+          type: array
+          items:
+            type: string
     ProfileRequest:
       type: object
       required: [name, code, description]
