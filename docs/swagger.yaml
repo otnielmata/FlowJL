@@ -183,6 +183,59 @@ paths:
           description: Ideia nao encontrada
         '409':
           description: Ideia ja esta inativa
+  /api/v1/reels:
+    post:
+      tags: [Reels]
+      summary: Cadastra um reel com contexto minimo e metadados essenciais
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateReelRequest'
+      responses:
+        '201':
+          description: Reel cadastrado com sucesso
+        '400':
+          description: Dados invalidos ou contexto minimo ausente
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento, plano ou ideia nao encontrados
+  /api/v1/reels/{reelId}:
+    put:
+      tags: [Reels]
+      summary: Atualiza roteiro, legenda e status de um reel
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: reelId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateReelRequest'
+      responses:
+        '200':
+          description: Reel atualizado com sucesso
+        '400':
+          description: Dados invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Reel nao encontrado
   /api/v1/launches:
     post:
       tags: [Launches]
@@ -1245,6 +1298,60 @@ components:
           type: string
         observations:
           type: string
+    CreateReelRequest:
+      type: object
+      required: [sourceType, theme, objective, hook, cta, operationalStatus]
+      properties:
+        launchId:
+          type: string
+          format: uuid
+        contentPlanId:
+          type: string
+          format: uuid
+        contentIdeaId:
+          type: string
+          format: uuid
+        sourceType:
+          type: string
+          enum: [MANUAL, IDEA, CONTENT_PLAN, AI]
+        theme:
+          type: string
+        objective:
+          type: string
+        hook:
+          type: string
+        cta:
+          type: string
+        script:
+          type: string
+        caption:
+          type: string
+        operationalStatus:
+          type: string
+          enum: [DRAFT, IN_REVIEW, APPROVED, SCHEDULED, PUBLISHED]
+        approvalStatus:
+          type: string
+          enum: [PENDING, APPROVED, REJECTED]
+        scheduledAt:
+          type: string
+          format: date-time
+    UpdateReelRequest:
+      type: object
+      required: [script, operationalStatus]
+      properties:
+        script:
+          type: string
+        caption:
+          type: string
+        operationalStatus:
+          type: string
+          enum: [DRAFT, IN_REVIEW, APPROVED, SCHEDULED, PUBLISHED]
+        approvalStatus:
+          type: string
+          enum: [PENDING, APPROVED, REJECTED]
+        scheduledAt:
+          type: string
+          format: date-time
     CreateSmartScheduleRequest:
       type: object
       required: [objective, periodStart, periodEnd]
