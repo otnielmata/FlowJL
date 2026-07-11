@@ -26,6 +26,10 @@ const positioningModel = {
   find: vi.fn()
 };
 
+const editorialLineModel = {
+  find: vi.fn()
+};
+
 const auditServiceMock = {
   record: vi.fn()
 };
@@ -54,6 +58,10 @@ vi.mock("../src/models/positioning.model.js", () => ({
   Positioning: positioningModel
 }));
 
+vi.mock("../src/models/editorial-line.model.js", () => ({
+  EditorialLine: editorialLineModel
+}));
+
 vi.mock("../src/services/audit.service.js", () => ({
   auditService: auditServiceMock
 }));
@@ -74,6 +82,9 @@ describe("launchService.create", () => {
       sort: vi.fn().mockResolvedValue([])
     });
     positioningModel.find.mockReturnValue({
+      sort: vi.fn().mockResolvedValue([])
+    });
+    editorialLineModel.find.mockReturnValue({
       sort: vi.fn().mockResolvedValue([])
     });
   });
@@ -315,6 +326,27 @@ describe("launchService.create", () => {
         }
       ])
     });
+    editorialLineModel.find.mockReturnValue({
+      sort: vi.fn().mockResolvedValue([
+        {
+          id: "editorial-v2",
+          launchId: "launch-id",
+          version: 2,
+          pillars: [
+            { id: "pillar-1", name: "Educacao", objective: "Nutrir audiencia", priority: 1, active: true }
+          ],
+          avatarVersion: 2,
+          offerVersion: 2,
+          positioningVersion: 2,
+          isCurrent: true,
+          active: true,
+          createdAt: new Date("2026-07-11T13:00:00.000Z"),
+          updatedAt: new Date("2026-07-11T13:00:00.000Z"),
+          createdBy: "strategist-id",
+          updatedBy: "strategist-id"
+        }
+      ])
+    });
 
     const result = await launchService.getById("launch-id");
 
@@ -324,6 +356,7 @@ describe("launchService.create", () => {
     expect(avatarModel.find).toHaveBeenCalledWith({ launchId: "launch-id" });
     expect(offerModel.find).toHaveBeenCalledWith({ launchId: "launch-id" });
     expect(positioningModel.find).toHaveBeenCalledWith({ launchId: "launch-id" });
+    expect(editorialLineModel.find).toHaveBeenCalledWith({ launchId: "launch-id" });
     expect(result.marketResearchHistory).toEqual([
       {
         id: "research-id",
@@ -517,6 +550,44 @@ describe("launchService.create", () => {
           active: true,
           createdAt: new Date("2026-07-11T12:55:00.000Z"),
           updatedAt: new Date("2026-07-11T12:55:00.000Z"),
+          createdBy: "strategist-id",
+          updatedBy: "strategist-id"
+        }
+      ]
+    });
+    expect(result.editorialLine).toEqual({
+      current: {
+        id: "editorial-v2",
+        launchId: "launch-id",
+        version: 2,
+        pillars: [
+          { id: "pillar-1", name: "Educacao", objective: "Nutrir audiencia", priority: 1, active: true }
+        ],
+        avatarVersion: 2,
+        offerVersion: 2,
+        positioningVersion: 2,
+        isCurrent: true,
+        active: true,
+        createdAt: new Date("2026-07-11T13:00:00.000Z"),
+        updatedAt: new Date("2026-07-11T13:00:00.000Z"),
+        createdBy: "strategist-id",
+        updatedBy: "strategist-id"
+      },
+      history: [
+        {
+          id: "editorial-v2",
+          launchId: "launch-id",
+          version: 2,
+          pillars: [
+            { id: "pillar-1", name: "Educacao", objective: "Nutrir audiencia", priority: 1, active: true }
+          ],
+          avatarVersion: 2,
+          offerVersion: 2,
+          positioningVersion: 2,
+          isCurrent: true,
+          active: true,
+          createdAt: new Date("2026-07-11T13:00:00.000Z"),
+          updatedAt: new Date("2026-07-11T13:00:00.000Z"),
           createdBy: "strategist-id",
           updatedBy: "strategist-id"
         }
