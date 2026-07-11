@@ -5,6 +5,7 @@ import bcrypt from "bcryptjs";
 import { env } from "../config/env.js";
 import { AuthSession } from "../models/auth-session.model.js";
 import { User } from "../models/user.model.js";
+import { auditService } from "./audit.service.js";
 import { tokenService } from "./token.service.js";
 import { toPublicUser } from "./user.service.js";
 
@@ -80,6 +81,16 @@ class AuthService {
       userId: user.id,
       refreshTokenHash: await bcrypt.hash(authPayload.refreshToken, 10),
       expiresAt: tokenService.parseExpirationDate(env.JWT_REFRESH_EXPIRES_IN)
+    });
+
+    await auditService.record({
+      actorUserId: user.id,
+      action: "USER_AUTHENTICATED",
+      targetType: "USER",
+      targetId: user.id,
+      context: {
+        sessionId
+      }
     });
 
     return authPayload;
