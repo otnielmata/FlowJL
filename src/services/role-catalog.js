@@ -35,7 +35,10 @@ export const roleCatalog = [
       "SMART_SCHEDULE_CREATE",
       "SMART_SCHEDULE_UPDATE",
       "EXPERT_APPROVAL_SUBMIT",
-      "EXPERT_APPROVAL_DECIDE"
+      "EXPERT_APPROVAL_DECIDE",
+      "CONTENT_IDEA_CREATE",
+      "CONTENT_IDEA_READ",
+      "CONTENT_IDEA_DEACTIVATE"
     ]
   },
   {
@@ -66,7 +69,7 @@ export const roleCatalog = [
     code: "SOCIAL_MEDIA",
     name: "Social Media",
     description: "Cargo responsavel por redes sociais do Flow JL.",
-    permissionCodes: []
+    permissionCodes: ["CONTENT_IDEA_CREATE", "CONTENT_IDEA_READ", "CONTENT_IDEA_DEACTIVATE"]
   }
 ];
 
