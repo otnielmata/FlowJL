@@ -16,14 +16,15 @@ export const roleCatalog = [
       "USER_CHANGE_ROLE",
       "ROLE_READ",
       "AUDIT_READ",
-      "PERMISSION_READ"
+      "PERMISSION_READ",
+      "LAUNCH_CREATE"
     ]
   },
   {
     code: "DIGITAL_STRATEGIST",
     name: "Estrategista Digital",
     description: "Cargo de estrategia digital do Flow JL.",
-    permissionCodes: []
+    permissionCodes: ["LAUNCH_CREATE"]
   },
   {
     code: "EXPERT",
