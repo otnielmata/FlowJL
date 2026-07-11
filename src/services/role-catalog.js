@@ -40,7 +40,9 @@ export const roleCatalog = [
       "CONTENT_IDEA_READ",
       "CONTENT_IDEA_DEACTIVATE",
       "REEL_CREATE",
-      "REEL_UPDATE"
+      "REEL_UPDATE",
+      "CAROUSEL_CREATE",
+      "CAROUSEL_UPDATE"
     ]
   },
   {
@@ -71,7 +73,7 @@ export const roleCatalog = [
     code: "SOCIAL_MEDIA",
     name: "Social Media",
     description: "Cargo responsavel por redes sociais do Flow JL.",
-    permissionCodes: ["CONTENT_IDEA_CREATE", "CONTENT_IDEA_READ", "CONTENT_IDEA_DEACTIVATE", "REEL_CREATE", "REEL_UPDATE"]
+    permissionCodes: ["CONTENT_IDEA_CREATE", "CONTENT_IDEA_READ", "CONTENT_IDEA_DEACTIVATE", "REEL_CREATE", "REEL_UPDATE", "CAROUSEL_CREATE", "CAROUSEL_UPDATE"]
   }
 ];
 
