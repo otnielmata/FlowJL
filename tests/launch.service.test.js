@@ -10,6 +10,10 @@ const marketResearchModel = {
   find: vi.fn()
 };
 
+const competitorResearchModel = {
+  find: vi.fn()
+};
+
 const auditServiceMock = {
   record: vi.fn()
 };
@@ -22,6 +26,10 @@ vi.mock("../src/models/market-research.model.js", () => ({
   MarketResearch: marketResearchModel
 }));
 
+vi.mock("../src/models/competitor-research.model.js", () => ({
+  CompetitorResearch: competitorResearchModel
+}));
+
 vi.mock("../src/services/audit.service.js", () => ({
   auditService: auditServiceMock
 }));
@@ -32,6 +40,9 @@ describe("launchService.create", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     auditServiceMock.record.mockResolvedValue(undefined);
+    competitorResearchModel.find.mockReturnValue({
+      sort: vi.fn().mockResolvedValue([])
+    });
   });
 
   it("creates a launch with UUID id and UTC milestone period", async () => {
@@ -175,11 +186,39 @@ describe("launchService.create", () => {
         }
       ])
     });
+    competitorResearchModel.find.mockReturnValue({
+      sort: vi.fn().mockResolvedValue([
+        {
+          id: "competitor-id",
+          launchId: "launch-id",
+          competitorName: "Concorrente X",
+          evidences: [
+            {
+              id: "evidence-id",
+              channel: "Instagram",
+              headline: "Headline 1",
+              promise: "Promessa 1",
+              trigger: "Escassez",
+              observations: "Observacao 1",
+              capturedAt: new Date("2026-07-11T12:30:00.000Z"),
+              createdBy: "strategist-id",
+              updatedBy: "strategist-id"
+            }
+          ],
+          active: true,
+          createdAt: new Date("2026-07-11T12:30:00.000Z"),
+          updatedAt: new Date("2026-07-11T12:30:00.000Z"),
+          createdBy: "strategist-id",
+          updatedBy: "strategist-id"
+        }
+      ])
+    });
 
     const result = await launchService.getById("launch-id");
 
     expect(launchModel.findById).toHaveBeenCalledWith("launch-id");
     expect(marketResearchModel.find).toHaveBeenCalledWith({ launchId: "launch-id" });
+    expect(competitorResearchModel.find).toHaveBeenCalledWith({ launchId: "launch-id", active: true });
     expect(result.marketResearchHistory).toEqual([
       {
         id: "research-id",
@@ -199,6 +238,59 @@ describe("launchService.create", () => {
         updatedBy: "strategist-id"
       }
     ]);
+    expect(result.competitorResearch).toEqual({
+      items: [
+        {
+          id: "competitor-id",
+          launchId: "launch-id",
+          competitorName: "Concorrente X",
+          evidences: [
+            {
+              id: "evidence-id",
+              channel: "Instagram",
+              headline: "Headline 1",
+              promise: "Promessa 1",
+              trigger: "Escassez",
+              observations: "Observacao 1",
+              capturedAt: new Date("2026-07-11T12:30:00.000Z"),
+              createdBy: "strategist-id",
+              updatedBy: "strategist-id"
+            }
+          ],
+          active: true,
+          createdAt: new Date("2026-07-11T12:30:00.000Z"),
+          updatedAt: new Date("2026-07-11T12:30:00.000Z"),
+          createdBy: "strategist-id",
+          updatedBy: "strategist-id"
+        }
+      ],
+      groupedByChannel: [
+        {
+          channel: "Instagram",
+          entriesByDate: [
+            {
+              capturedAt: "2026-07-11T12:30:00.000Z",
+              entries: [
+                {
+                  competitorName: "Concorrente X",
+                  evidence: {
+                    id: "evidence-id",
+                    channel: "Instagram",
+                    headline: "Headline 1",
+                    promise: "Promessa 1",
+                    trigger: "Escassez",
+                    observations: "Observacao 1",
+                    capturedAt: new Date("2026-07-11T12:30:00.000Z"),
+                    createdBy: "strategist-id",
+                    updatedBy: "strategist-id"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    });
   });
 
   it("rejects launch lookup when the launch does not exist", async () => {
