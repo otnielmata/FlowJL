@@ -130,6 +130,20 @@ class UserService {
   }
 
   async update(userId, data) {
+    if (data.roleId) {
+      const role = await Role.findOne({
+        _id: data.roleId,
+        active: true
+      });
+
+      if (!role) {
+        throw {
+          statusCode: 400,
+          message: "Role is invalid or inactive"
+        };
+      }
+    }
+
     if (data.profile) {
       const profile = await Profile.findById(data.profile);
 
