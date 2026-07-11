@@ -206,6 +206,89 @@ paths:
           description: Acesso negado
         '404':
           description: Lancamento nao encontrado
+  /api/v1/launches/{launchId}/avatars:
+    post:
+      tags: [Launches]
+      summary: Cadastra o avatar principal do publico de um lancamento
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: launchId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AvatarRequest'
+      responses:
+        '201':
+          description: Avatar criado
+        '400':
+          description: Dados invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento nao encontrado
+        '409':
+          description: Ja existe um avatar atual para o lancamento
+    put:
+      tags: [Launches]
+      summary: Atualiza o avatar atual preservando historico
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: launchId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AvatarRequest'
+      responses:
+        '200':
+          description: Avatar atualizado
+        '400':
+          description: Dados invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento ou avatar nao encontrado
+  /api/v1/launches/{launchId}/avatar-suggestions:
+    post:
+      tags: [Launches]
+      summary: Gera sugestoes estruturadas para complementar o avatar
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: launchId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Sugestoes retornadas
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento nao encontrado
   /api/v1/roles:
     get:
       tags: [Roles]
@@ -589,6 +672,29 @@ components:
         capturedAt:
           type: string
           format: date-time
+    AvatarRequest:
+      type: object
+      required: [profile, pains, dreams, objections, language]
+      properties:
+        profile:
+          type: string
+          minLength: 10
+        pains:
+          type: array
+          items:
+            type: string
+        dreams:
+          type: array
+          items:
+            type: string
+        objections:
+          type: array
+          items:
+            type: string
+        language:
+          type: array
+          items:
+            type: string
     CreateRoleRequest:
       type: object
       required: [code, name, description]
