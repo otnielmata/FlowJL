@@ -194,6 +194,24 @@ const corePermissions = [
     name: "Decidir aprovacao do planejamento",
     description: "Permite ao expert aprovar ou reprovar o planejamento submetido.",
     module: "strategy"
+  },
+  {
+    code: "CONTENT_IDEA_CREATE",
+    name: "Cadastrar ideias de conteudo",
+    description: "Permite registrar ideias reaproveitaveis para futuras pecas de conteudo.",
+    module: "content"
+  },
+  {
+    code: "CONTENT_IDEA_READ",
+    name: "Consultar banco de ideias",
+    description: "Permite listar e filtrar ideias de conteudo do banco de producao.",
+    module: "content"
+  },
+  {
+    code: "CONTENT_IDEA_DEACTIVATE",
+    name: "Inativar ideias de conteudo",
+    description: "Permite realizar exclusao logica de ideias de conteudo preservando historico.",
+    module: "content"
   }
 ];
 
