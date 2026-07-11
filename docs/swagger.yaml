@@ -289,6 +289,67 @@ paths:
           description: Acesso negado
         '404':
           description: Lancamento nao encontrado
+  /api/v1/launches/{launchId}/offers:
+    post:
+      tags: [Launches]
+      summary: Cadastra a oferta vigente do lancamento
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: launchId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OfferRequest'
+      responses:
+        '201':
+          description: Oferta criada
+        '400':
+          description: Dados invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento nao encontrado
+        '409':
+          description: Ja existe uma oferta vigente para o lancamento
+    put:
+      tags: [Launches]
+      summary: Atualiza a oferta vigente preservando historico
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: launchId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OfferRequest'
+      responses:
+        '200':
+          description: Oferta atualizada
+        '400':
+          description: Dados invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento ou oferta nao encontrado
   /api/v1/roles:
     get:
       tags: [Roles]
@@ -695,6 +756,29 @@ components:
           type: array
           items:
             type: string
+    OfferRequest:
+      type: object
+      required: [product, transformation, promise, benefits, differentials]
+      properties:
+        product:
+          type: string
+          minLength: 3
+        transformation:
+          type: string
+          minLength: 10
+        promise:
+          type: string
+          minLength: 10
+        benefits:
+          type: array
+          items:
+            type: string
+        differentials:
+          type: array
+          items:
+            type: string
+        positioningContext:
+          type: string
     CreateRoleRequest:
       type: object
       required: [code, name, description]
