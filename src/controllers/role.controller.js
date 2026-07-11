@@ -15,6 +15,10 @@ const updateRoleSchema = z.object({
   active: z.boolean()
 });
 
+const updateRolePermissionsSchema = z.object({
+  permissions: z.array(z.string().trim().min(2)).min(1)
+});
+
 class RoleController {
   async list(_request, response) {
     const roles = await roleService.list();
@@ -36,6 +40,19 @@ class RoleController {
     const role = await roleService.update(request.params.code, payload);
 
     response.status(200).json(role);
+  }
+
+  async getPermissions(request, response) {
+    const result = await roleService.getPermissions(request.params.code);
+
+    response.status(200).json(result);
+  }
+
+  async updatePermissions(request, response) {
+    const payload = updateRolePermissionsSchema.parse(request.body);
+    const result = await roleService.updatePermissions(request.params.code, payload.permissions);
+
+    response.status(200).json(result);
   }
 }
 

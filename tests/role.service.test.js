@@ -7,8 +7,16 @@ const roleModel = {
   findOneAndUpdate: vi.fn()
 };
 
+const permissionModel = {
+  find: vi.fn()
+};
+
 vi.mock("../src/models/role.model.js", () => ({
   Role: roleModel
+}));
+
+vi.mock("../src/models/permission.model.js", () => ({
+  Permission: permissionModel
 }));
 
 const { roleService } = await import("../src/services/role.service.js");
@@ -142,6 +150,47 @@ describe("roleService", () => {
       name: "Social Media",
       description: "Atualizado",
       active: false
+    });
+  });
+
+  it("returns the permission codes linked to a role", async () => {
+    roleModel.findOne.mockResolvedValue({
+      id: "role-1",
+      code: "ADMIN",
+      permissionIds: ["perm-1", "perm-2"]
+    });
+    permissionModel.find.mockReturnValue({
+      sort: vi.fn().mockResolvedValue([{ code: "ROLE_READ" }, { code: "USER_READ" }])
+    });
+
+    const result = await roleService.getPermissions("admin");
+
+    expect(result).toEqual({
+      id: "role-1",
+      code: "ADMIN",
+      permissions: ["ROLE_READ", "USER_READ"]
+    });
+  });
+
+  it("updates the permission set of a role with valid codes only", async () => {
+    const save = vi.fn().mockResolvedValue(undefined);
+    roleModel.findOne.mockResolvedValue({
+      id: "role-1",
+      code: "ADMIN",
+      permissionIds: [],
+      save
+    });
+    permissionModel.find.mockReturnValue({
+      sort: vi.fn().mockResolvedValue([{ _id: "perm-1", code: "ROLE_READ" }, { _id: "perm-2", code: "USER_LIST" }])
+    });
+
+    const result = await roleService.updatePermissions("admin", ["user_list", "role_read"]);
+
+    expect(save).toHaveBeenCalled();
+    expect(result).toEqual({
+      id: "role-1",
+      code: "ADMIN",
+      permissions: ["ROLE_READ", "USER_LIST"]
     });
   });
 });
