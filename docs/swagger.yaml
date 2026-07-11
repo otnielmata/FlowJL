@@ -89,7 +89,7 @@ paths:
   /api/v1/roles:
     get:
       tags: [Roles]
-      summary: Lista os cargos predefinidos do Flow JL
+      summary: Lista os cargos ativos predefinidos do Flow JL
       security:
         - bearerAuth: []
       responses:
