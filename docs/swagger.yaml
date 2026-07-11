@@ -533,6 +533,67 @@ paths:
           description: Acesso negado
         '404':
           description: Lancamento ou plano de conteudo nao encontrado
+  /api/v1/launches/{launchId}/smart-schedules:
+    post:
+      tags: [Launches]
+      summary: Gera o cronograma inteligente vigente do lancamento
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: launchId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSmartScheduleRequest'
+      responses:
+        '201':
+          description: Cronograma inteligente criado
+        '400':
+          description: Dados invalidos ou ausencia de plano de conteudo vigente
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento nao encontrado
+        '409':
+          description: Ja existe um cronograma inteligente vigente para o lancamento
+    put:
+      tags: [Launches]
+      summary: Atualiza o cronograma inteligente vigente preservando historico
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: launchId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSmartScheduleRequest'
+      responses:
+        '200':
+          description: Cronograma inteligente atualizado
+        '400':
+          description: Dados invalidos ou ausencia de plano de conteudo vigente
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento ou cronograma inteligente nao encontrado
   /api/v1/roles:
     get:
       tags: [Roles]
@@ -1022,6 +1083,57 @@ components:
                 type: string
               active:
                 type: boolean
+    CreateSmartScheduleRequest:
+      type: object
+      required: [objective, periodStart, periodEnd]
+      properties:
+        objective:
+          type: string
+        periodStart:
+          type: string
+          format: date-time
+        periodEnd:
+          type: string
+          format: date-time
+        operationalCadenceDays:
+          type: integer
+    UpdateSmartScheduleRequest:
+      type: object
+      required: [objective, periodStart, periodEnd, operationalCadenceDays, activities]
+      properties:
+        objective:
+          type: string
+        periodStart:
+          type: string
+          format: date-time
+        periodEnd:
+          type: string
+          format: date-time
+        operationalCadenceDays:
+          type: integer
+        activities:
+          type: array
+          items:
+            type: object
+            required: [theme, objective, stage, deliveryType, area, suggestedResponsibleRole, dueAt, status]
+            properties:
+              theme:
+                type: string
+              objective:
+                type: string
+              stage:
+                type: string
+              deliveryType:
+                type: string
+              area:
+                type: string
+              suggestedResponsibleRole:
+                type: string
+              dueAt:
+                type: string
+                format: date-time
+              status:
+                type: string
     CreateRoleRequest:
       type: object
       required: [code, name, description]
