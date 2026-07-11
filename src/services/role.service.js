@@ -1,3 +1,4 @@
+import { Permission } from "../models/permission.model.js";
 import { Role } from "../models/role.model.js";
 import { allowedRoleCodes, findCatalogRole } from "./role-catalog.js";
 
@@ -8,6 +9,14 @@ function toPublicRole(role) {
     name: role.name,
     description: role.description,
     active: role.active
+  };
+}
+
+function toRolePermissionResponse(role, permissionCodes) {
+  return {
+    id: role.id,
+    code: role.code,
+    permissions: permissionCodes
   };
 }
 
@@ -79,6 +88,61 @@ class RoleService {
     }
 
     return toPublicRole(role);
+  }
+
+  async getPermissions(code) {
+    const normalizedCode = code.trim().toUpperCase();
+    const role = await Role.findOne({ code: normalizedCode });
+
+    if (!role) {
+      throw {
+        statusCode: 404,
+        message: "Role not found"
+      };
+    }
+
+    const permissions = await Permission.find(
+      {
+        _id: {
+          $in: role.permissionIds
+        }
+      },
+      { code: 1 }
+    ).sort({ code: 1 });
+
+    return toRolePermissionResponse(role, permissions.map((permission) => permission.code));
+  }
+
+  async updatePermissions(code, permissionCodes) {
+    const normalizedCode = code.trim().toUpperCase();
+    const role = await Role.findOne({ code: normalizedCode });
+
+    if (!role) {
+      throw {
+        statusCode: 404,
+        message: "Role not found"
+      };
+    }
+
+    const normalizedPermissionCodes = [...new Set(permissionCodes.map((item) => item.trim().toUpperCase()))];
+    const permissions = await Permission.find({
+      code: {
+        $in: normalizedPermissionCodes
+      },
+      active: true
+    }).sort({ code: 1 });
+
+    if (permissions.length !== normalizedPermissionCodes.length) {
+      throw {
+        statusCode: 400,
+        message: "Permission set is invalid"
+      };
+    }
+
+    role.permissionIds = permissions.map((permission) => permission._id);
+    await role.save();
+
+    return toRolePermissionResponse(role, permissions.map((permission) => permission.code));
   }
 }
 
