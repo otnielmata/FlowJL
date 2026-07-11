@@ -2,6 +2,7 @@ import { Router } from "express";
 
 import { auditRoutes } from "./audit.routes.js";
 import { authRoutes } from "./auth.routes.js";
+import { carouselRoutes } from "./carousel.routes.js";
 import { contentIdeaRoutes } from "./content-idea.routes.js";
 import { launchRoutes } from "./launch.routes.js";
 import { profileRoutes } from "./profile.routes.js";
@@ -15,12 +16,13 @@ apiRoutes.get("/", (_request, response) => {
   response.status(200).json({
     service: "flow-jl-api",
     version: "v1",
-    modules: ["audits", "auth", "content-ideas", "launches", "profiles", "reels", "roles", "users", "swagger"]
+    modules: ["audits", "auth", "carousels", "content-ideas", "launches", "profiles", "reels", "roles", "users", "swagger"]
   });
 });
 
 apiRoutes.use("/audits", auditRoutes);
 apiRoutes.use("/auth", authRoutes);
+apiRoutes.use("/carousels", carouselRoutes);
 apiRoutes.use("/content-ideas", contentIdeaRoutes);
 apiRoutes.use("/launches", launchRoutes);
 apiRoutes.use("/profiles", profileRoutes);
