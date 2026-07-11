@@ -40,10 +40,40 @@ const corePermissions = [
     module: "user"
   },
   {
+    code: "USER_UPDATE",
+    name: "Atualizar dados basicos",
+    description: "Permite atualizar dados basicos de colaboradores.",
+    module: "user"
+  },
+  {
+    code: "USER_ACTIVATE",
+    name: "Ativar colaborador",
+    description: "Permite ativar colaboradores inativos.",
+    module: "user"
+  },
+  {
+    code: "USER_DEACTIVATE",
+    name: "Inativar colaborador",
+    description: "Permite inativar colaboradores ativos.",
+    module: "user"
+  },
+  {
+    code: "USER_CHANGE_ROLE",
+    name: "Alterar cargo do colaborador",
+    description: "Permite alterar o cargo de um colaborador.",
+    module: "user"
+  },
+  {
     code: "ROLE_READ",
     name: "Consultar cargos",
     description: "Permite consultar cargos disponiveis no core.",
     module: "role"
+  },
+  {
+    code: "AUDIT_READ",
+    name: "Consultar metadados de auditoria",
+    description: "Permite consultar metadados de auditoria basica.",
+    module: "audit"
   },
   {
     code: "PERMISSION_READ",
