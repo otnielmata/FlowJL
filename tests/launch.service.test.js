@@ -18,6 +18,10 @@ const avatarModel = {
   find: vi.fn()
 };
 
+const offerModel = {
+  find: vi.fn()
+};
+
 const auditServiceMock = {
   record: vi.fn()
 };
@@ -38,6 +42,10 @@ vi.mock("../src/models/avatar.model.js", () => ({
   Avatar: avatarModel
 }));
 
+vi.mock("../src/models/offer.model.js", () => ({
+  Offer: offerModel
+}));
+
 vi.mock("../src/services/audit.service.js", () => ({
   auditService: auditServiceMock
 }));
@@ -52,6 +60,9 @@ describe("launchService.create", () => {
       sort: vi.fn().mockResolvedValue([])
     });
     avatarModel.find.mockReturnValue({
+      sort: vi.fn().mockResolvedValue([])
+    });
+    offerModel.find.mockReturnValue({
       sort: vi.fn().mockResolvedValue([])
     });
   });
@@ -251,6 +262,28 @@ describe("launchService.create", () => {
         }
       ])
     });
+    offerModel.find.mockReturnValue({
+      sort: vi.fn().mockResolvedValue([
+        {
+          id: "offer-v2",
+          launchId: "launch-id",
+          version: 2,
+          product: "Produto Y",
+          transformation: "Transformacao clara",
+          promise: "Promessa principal",
+          benefits: ["Beneficio 1"],
+          differentials: ["Diferencial 1"],
+          avatarVersion: 2,
+          positioningContext: "Posicionamento atual",
+          isCurrent: true,
+          active: true,
+          createdAt: new Date("2026-07-11T12:50:00.000Z"),
+          updatedAt: new Date("2026-07-11T12:50:00.000Z"),
+          createdBy: "strategist-id",
+          updatedBy: "strategist-id"
+        }
+      ])
+    });
 
     const result = await launchService.getById("launch-id");
 
@@ -258,6 +291,7 @@ describe("launchService.create", () => {
     expect(marketResearchModel.find).toHaveBeenCalledWith({ launchId: "launch-id" });
     expect(competitorResearchModel.find).toHaveBeenCalledWith({ launchId: "launch-id", active: true });
     expect(avatarModel.find).toHaveBeenCalledWith({ launchId: "launch-id" });
+    expect(offerModel.find).toHaveBeenCalledWith({ launchId: "launch-id" });
     expect(result.marketResearchHistory).toEqual([
       {
         id: "research-id",
@@ -375,6 +409,46 @@ describe("launchService.create", () => {
           },
           createdAt: new Date("2026-07-11T12:40:00.000Z"),
           updatedAt: new Date("2026-07-11T12:40:00.000Z"),
+          createdBy: "strategist-id",
+          updatedBy: "strategist-id"
+        }
+      ]
+    });
+    expect(result.offer).toEqual({
+      current: {
+        id: "offer-v2",
+        launchId: "launch-id",
+        version: 2,
+        product: "Produto Y",
+        transformation: "Transformacao clara",
+        promise: "Promessa principal",
+        benefits: ["Beneficio 1"],
+        differentials: ["Diferencial 1"],
+        avatarVersion: 2,
+        positioningContext: "Posicionamento atual",
+        isCurrent: true,
+        active: true,
+        createdAt: new Date("2026-07-11T12:50:00.000Z"),
+        updatedAt: new Date("2026-07-11T12:50:00.000Z"),
+        createdBy: "strategist-id",
+        updatedBy: "strategist-id"
+      },
+      history: [
+        {
+          id: "offer-v2",
+          launchId: "launch-id",
+          version: 2,
+          product: "Produto Y",
+          transformation: "Transformacao clara",
+          promise: "Promessa principal",
+          benefits: ["Beneficio 1"],
+          differentials: ["Diferencial 1"],
+          avatarVersion: 2,
+          positioningContext: "Posicionamento atual",
+          isCurrent: true,
+          active: true,
+          createdAt: new Date("2026-07-11T12:50:00.000Z"),
+          updatedAt: new Date("2026-07-11T12:50:00.000Z"),
           createdBy: "strategist-id",
           updatedBy: "strategist-id"
         }
