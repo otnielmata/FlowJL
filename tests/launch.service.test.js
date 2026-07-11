@@ -14,6 +14,10 @@ const competitorResearchModel = {
   find: vi.fn()
 };
 
+const avatarModel = {
+  find: vi.fn()
+};
+
 const auditServiceMock = {
   record: vi.fn()
 };
@@ -30,6 +34,10 @@ vi.mock("../src/models/competitor-research.model.js", () => ({
   CompetitorResearch: competitorResearchModel
 }));
 
+vi.mock("../src/models/avatar.model.js", () => ({
+  Avatar: avatarModel
+}));
+
 vi.mock("../src/services/audit.service.js", () => ({
   auditService: auditServiceMock
 }));
@@ -41,6 +49,9 @@ describe("launchService.create", () => {
     vi.clearAllMocks();
     auditServiceMock.record.mockResolvedValue(undefined);
     competitorResearchModel.find.mockReturnValue({
+      sort: vi.fn().mockResolvedValue([])
+    });
+    avatarModel.find.mockReturnValue({
       sort: vi.fn().mockResolvedValue([])
     });
   });
@@ -213,12 +224,40 @@ describe("launchService.create", () => {
         }
       ])
     });
+    avatarModel.find.mockReturnValue({
+      sort: vi.fn().mockResolvedValue([
+        {
+          id: "avatar-v2",
+          launchId: "launch-id",
+          version: 2,
+          profile: "Perfil do publico",
+          pains: ["Dor 1"],
+          dreams: ["Sonho 1"],
+          objections: ["Objecao 1"],
+          language: ["Linguagem 1"],
+          isPrimary: true,
+          isCurrent: true,
+          humanReviewRequired: true,
+          aiSuggestions: {
+            profileAngles: [],
+            painAmplifiers: [],
+            dreamDrivers: [],
+            languageCues: []
+          },
+          createdAt: new Date("2026-07-11T12:40:00.000Z"),
+          updatedAt: new Date("2026-07-11T12:40:00.000Z"),
+          createdBy: "strategist-id",
+          updatedBy: "strategist-id"
+        }
+      ])
+    });
 
     const result = await launchService.getById("launch-id");
 
     expect(launchModel.findById).toHaveBeenCalledWith("launch-id");
     expect(marketResearchModel.find).toHaveBeenCalledWith({ launchId: "launch-id" });
     expect(competitorResearchModel.find).toHaveBeenCalledWith({ launchId: "launch-id", active: true });
+    expect(avatarModel.find).toHaveBeenCalledWith({ launchId: "launch-id" });
     expect(result.marketResearchHistory).toEqual([
       {
         id: "research-id",
@@ -288,6 +327,56 @@ describe("launchService.create", () => {
               ]
             }
           ]
+        }
+      ]
+    });
+    expect(result.avatar).toEqual({
+      current: {
+        id: "avatar-v2",
+        launchId: "launch-id",
+        version: 2,
+        profile: "Perfil do publico",
+        pains: ["Dor 1"],
+        dreams: ["Sonho 1"],
+        objections: ["Objecao 1"],
+        language: ["Linguagem 1"],
+        isPrimary: true,
+        isCurrent: true,
+        humanReviewRequired: true,
+        aiSuggestions: {
+          profileAngles: [],
+          painAmplifiers: [],
+          dreamDrivers: [],
+          languageCues: []
+        },
+        createdAt: new Date("2026-07-11T12:40:00.000Z"),
+        updatedAt: new Date("2026-07-11T12:40:00.000Z"),
+        createdBy: "strategist-id",
+        updatedBy: "strategist-id"
+      },
+      history: [
+        {
+          id: "avatar-v2",
+          launchId: "launch-id",
+          version: 2,
+          profile: "Perfil do publico",
+          pains: ["Dor 1"],
+          dreams: ["Sonho 1"],
+          objections: ["Objecao 1"],
+          language: ["Linguagem 1"],
+          isPrimary: true,
+          isCurrent: true,
+          humanReviewRequired: true,
+          aiSuggestions: {
+            profileAngles: [],
+            painAmplifiers: [],
+            dreamDrivers: [],
+            languageCues: []
+          },
+          createdAt: new Date("2026-07-11T12:40:00.000Z"),
+          updatedAt: new Date("2026-07-11T12:40:00.000Z"),
+          createdBy: "strategist-id",
+          updatedBy: "strategist-id"
         }
       ]
     });
