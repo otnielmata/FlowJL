@@ -333,7 +333,7 @@ paths:
           description: Usuario nao encontrado
     put:
       tags: [Users]
-      summary: Edita um usuario e vincula um perfil valido
+      summary: Mantem os dados, cargo e status de um colaborador
       security:
         - bearerAuth: []
       parameters:
@@ -351,6 +351,14 @@ paths:
       responses:
         '200':
           description: Usuario atualizado
+        '400':
+          description: Dados invalidos, cargo invalido ou perfil invalido
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '409':
+          description: Transicao invalida, e-mail duplicado ou regra de negocio violada
         '404':
           description: Usuario nao encontrado
 components:
@@ -447,6 +455,9 @@ components:
           format: email
         password:
           type: string
+        roleId:
+          type: string
+          format: uuid
         profile:
           type: string
         status:

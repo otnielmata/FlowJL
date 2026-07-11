@@ -131,6 +131,8 @@ A documentação fica disponível em:
 - O primeiro administrador deve ser criado explicitamente via `POST /api/v1/users/bootstrap-admin`.
 - O cadastro de colaboradores via `POST /api/v1/users` exige autenticação com JWT válido e perfil administrativo.
 - A consulta de colaboradores usa permissões de papel: `USER_LIST` para listagem e `USER_READ` para consulta individual.
+- A manutenção de colaboradores via `PUT /api/v1/users/:id` exige as permissões adequadas por ação: `USER_UPDATE`, `USER_CHANGE_ROLE`, `USER_ACTIVATE` e `USER_DEACTIVATE`.
+- A API rejeita auto-inativação e também impede a inativação do último administrador ativo.
 - A estrutura de cargos do Flow JL é fixa nesta etapa e a manutenção aceita apenas códigos do catálogo inicial.
 - A autorização da API é resolvida pelas permissões vinculadas ao cargo do usuário autenticado.
 - Os endpoints protegidos exigem token JWT no header `Authorization: Bearer <token>`.
