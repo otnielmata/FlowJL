@@ -101,6 +101,88 @@ paths:
           description: JWT ausente ou invalido
         '403':
           description: Acesso negado
+  /api/v1/content-ideas:
+    post:
+      tags: [Content Ideas]
+      summary: Cadastra uma nova ideia no banco de conteudo
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContentIdeaRequest'
+      responses:
+        '201':
+          description: Ideia cadastrada com sucesso
+        '400':
+          description: Dados invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento nao encontrado
+    get:
+      tags: [Content Ideas]
+      summary: Lista ideias do banco de conteudo com filtros opcionais
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: launchId
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: objective
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: status
+          required: false
+          schema:
+            type: string
+            enum: [BACKLOG, SELECTED, PRODUCED, DISCARDED]
+        - in: query
+          name: active
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Colecao filtrada de ideias
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+  /api/v1/content-ideas/{ideaId}:
+    delete:
+      tags: [Content Ideas]
+      summary: Realiza a exclusao logica de uma ideia de conteudo
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: ideaId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Ideia inativada com sucesso
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Ideia nao encontrada
+        '409':
+          description: Ideia ja esta inativa
   /api/v1/launches:
     post:
       tags: [Launches]
@@ -1147,6 +1229,22 @@ components:
                 type: string
               active:
                 type: boolean
+    ContentIdeaRequest:
+      type: object
+      required: [theme, objective, suggestedFormat, observations]
+      properties:
+        launchId:
+          type: string
+          format: uuid
+          nullable: true
+        theme:
+          type: string
+        objective:
+          type: string
+        suggestedFormat:
+          type: string
+        observations:
+          type: string
     CreateSmartScheduleRequest:
       type: object
       required: [objective, periodStart, periodEnd]
