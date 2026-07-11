@@ -50,6 +50,7 @@ src
 - `POST /api/v1/auth/refresh`
 - `POST /api/v1/auth/logout`
 - `GET /api/v1/auth/me`
+- `GET /api/v1/audits`
 - `GET /api/v1/roles`
 - `GET /api/v1/roles/:id`
 - `POST /api/v1/roles`
@@ -141,6 +142,7 @@ A documentação fica disponível em:
 - A listagem de cargos via `GET /api/v1/roles` retorna apenas os cargos ativos do catálogo inicial.
 - A consulta individual de cargo via `GET /api/v1/roles/:id` retorna somente os campos públicos e os códigos de permissões associadas, quando existirem.
 - O mapeamento de permissões por cargo via `PUT /api/v1/roles/:code/permissions` rejeita códigos inexistentes e passa a influenciar diretamente a autorização dos endpoints protegidos.
+- A trilha de auditoria inicial pode ser consultada em `GET /api/v1/audits` por usuários com `AUDIT_READ` e registra criação, atualização, inativação, mudança de cargo e autenticação bem-sucedida.
 - A autorização da API é resolvida pelas permissões vinculadas ao cargo do usuário autenticado.
 - Os endpoints protegidos exigem token JWT no header `Authorization: Bearer <token>`.
 - O fluxo de autenticação usa `accessToken` para acesso aos endpoints protegidos e `refreshToken` para renovação e logout da sessão.
