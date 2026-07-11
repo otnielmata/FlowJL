@@ -27,6 +27,7 @@ describe("accessSeedService.ensureCoreAccessSeed", () => {
   it("upserts permissions and the admin role with the initial matrix", async () => {
     permissionModel.find.mockReturnValue({
       sort: vi.fn().mockResolvedValue([
+        { _id: "perm-0", code: "AUDIT_READ" },
         { _id: "perm-1", code: "AUTH_LOGIN" },
         { _id: "perm-2", code: "PERMISSION_READ" },
         { _id: "perm-3", code: "ROLE_READ" },
@@ -34,18 +35,22 @@ describe("accessSeedService.ensureCoreAccessSeed", () => {
         { _id: "perm-5", code: "USER_CREATE" },
         { _id: "perm-6", code: "USER_LIST" },
         { _id: "perm-7", code: "USER_MANAGE" },
-        { _id: "perm-8", code: "USER_READ" }
+        { _id: "perm-8", code: "USER_READ" },
+        { _id: "perm-9", code: "USER_UPDATE" },
+        { _id: "perm-10", code: "USER_ACTIVATE" },
+        { _id: "perm-11", code: "USER_DEACTIVATE" },
+        { _id: "perm-12", code: "USER_CHANGE_ROLE" }
       ])
     });
 
     await accessSeedService.ensureCoreAccessSeed();
 
-    expect(permissionModel.updateOne).toHaveBeenCalledTimes(8);
+    expect(permissionModel.updateOne).toHaveBeenCalledTimes(13);
     expect(roleModel.updateOne).toHaveBeenCalledWith(
       { code: "ADMIN" },
       expect.objectContaining({
         $set: expect.objectContaining({
-          permissionIds: ["perm-1", "perm-2", "perm-3", "perm-4", "perm-5", "perm-6", "perm-7", "perm-8"],
+          permissionIds: ["perm-0", "perm-1", "perm-2", "perm-3", "perm-4", "perm-5", "perm-6", "perm-7", "perm-8", "perm-9", "perm-10", "perm-11", "perm-12"],
           active: true
         })
       }),
