@@ -105,6 +105,29 @@ paths:
           description: Bootstrap ja concluido ou e-mail em uso
         '503':
           description: Catalogo base de acesso nao inicializado
+  /api/v1/users:
+    post:
+      tags: [Users]
+      summary: Cadastra um colaborador com cargo valido
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCollaboratorRequest'
+      responses:
+        '201':
+          description: Colaborador criado
+        '400':
+          description: Cargo invalido ou dados invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '409':
+          description: E-mail ja existente
   /api/v1/profiles:
     get:
       tags: [Profiles]
@@ -257,3 +280,20 @@ components:
         password:
           type: string
           minLength: 8
+    CreateCollaboratorRequest:
+      type: object
+      required: [name, email, password, roleId]
+      properties:
+        name:
+          type: string
+          minLength: 3
+          maxLength: 120
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 8
+        roleId:
+          type: string
+          format: uuid
