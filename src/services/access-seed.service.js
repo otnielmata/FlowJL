@@ -86,6 +86,18 @@ const corePermissions = [
     name: "Cadastrar lancamentos",
     description: "Permite cadastrar novos lancamentos da operacao.",
     module: "launch"
+  },
+  {
+    code: "LAUNCH_READ",
+    name: "Consultar lancamentos",
+    description: "Permite consultar um lancamento e seus insumos estrategicos.",
+    module: "launch"
+  },
+  {
+    code: "MARKET_RESEARCH_CREATE",
+    name: "Gerar pesquisa de mercado",
+    description: "Permite gerar pesquisas de mercado com apoio de IA para um lancamento.",
+    module: "strategy"
   }
 ];
 
