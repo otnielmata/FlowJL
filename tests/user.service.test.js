@@ -125,6 +125,99 @@ describe("userService.createBootstrapAdmin", () => {
   });
 });
 
+describe("userService.createCollaborator", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("creates a collaborator with normalized email, active role and createdBy", async () => {
+    userModel.findOne.mockResolvedValue(null);
+    roleModel.findOne.mockResolvedValue({ _id: "role-digital-strategist" });
+    bcryptMock.hash.mockResolvedValue("hashed-password");
+    userModel.create.mockResolvedValue({
+      id: "user-id",
+      name: "Colaborador Flow JL",
+      email: "colaborador@flowjl.com",
+      status: "ACTIVE",
+      roleId: "role-digital-strategist",
+      createdAt: new Date("2026-07-11T00:00:00.000Z"),
+      updatedAt: new Date("2026-07-11T00:00:00.000Z"),
+      createdBy: "admin-user-id",
+      updatedBy: "admin-user-id",
+      lastLoginAt: null,
+      deactivatedAt: null
+    });
+
+    const result = await userService.createCollaborator("admin-user-id", {
+      name: " Colaborador Flow JL ",
+      email: " Colaborador@FlowJL.com ",
+      password: "Colaborador@123",
+      roleId: "role-digital-strategist"
+    });
+
+    expect(userModel.findOne).toHaveBeenCalledWith({ email: "colaborador@flowjl.com" });
+    expect(roleModel.findOne).toHaveBeenCalledWith({
+      _id: "role-digital-strategist",
+      active: true
+    });
+    expect(userModel.create).toHaveBeenCalledWith({
+      name: "Colaborador Flow JL",
+      email: "colaborador@flowjl.com",
+      passwordHash: "hashed-password",
+      roleId: "role-digital-strategist",
+      status: "ACTIVE",
+      createdBy: "admin-user-id",
+      updatedBy: "admin-user-id"
+    });
+    expect(result).toEqual({
+      id: "user-id",
+      name: "Colaborador Flow JL",
+      email: "colaborador@flowjl.com",
+      status: "ACTIVE",
+      roleId: "role-digital-strategist",
+      createdAt: new Date("2026-07-11T00:00:00.000Z"),
+      updatedAt: new Date("2026-07-11T00:00:00.000Z"),
+      createdBy: "admin-user-id",
+      updatedBy: "admin-user-id",
+      lastLoginAt: null,
+      deactivatedAt: null
+    });
+  });
+
+  it("rejects collaborator creation with duplicate email", async () => {
+    userModel.findOne.mockResolvedValue({ id: "existing-user" });
+
+    await expect(
+      userService.createCollaborator("admin-user-id", {
+        name: "Colaborador Flow JL",
+        email: "colaborador@flowjl.com",
+        password: "Colaborador@123",
+        roleId: "role-digital-strategist"
+      })
+    ).rejects.toMatchObject({
+      statusCode: 409,
+      message: "A user with this email already exists"
+    });
+  });
+
+  it("rejects collaborator creation with invalid or inactive role", async () => {
+    userModel.findOne.mockResolvedValue(null);
+    roleModel.findOne.mockResolvedValue(null);
+
+    await expect(
+      userService.createCollaborator("admin-user-id", {
+        name: "Colaborador Flow JL",
+        email: "colaborador@flowjl.com",
+        password: "Colaborador@123",
+        roleId: "role-digital-strategist"
+      })
+    ).rejects.toMatchObject({
+      statusCode: 400,
+      message: "Role is invalid or inactive"
+    });
+  });
+});
+
 describe("toPublicUser", () => {
   it("omits passwordHash and returns allowed metadata", () => {
     const result = toPublicUser({
