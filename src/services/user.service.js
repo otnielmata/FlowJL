@@ -68,6 +68,44 @@ class UserService {
     return toPublicUser(admin);
   }
 
+  async createCollaborator(authenticatedUserId, data) {
+    const normalizedEmail = data.email.trim().toLowerCase();
+    const existingUserWithEmail = await User.findOne({ email: normalizedEmail });
+
+    if (existingUserWithEmail) {
+      throw {
+        statusCode: 409,
+        message: "A user with this email already exists"
+      };
+    }
+
+    const role = await Role.findOne({
+      _id: data.roleId,
+      active: true
+    });
+
+    if (!role) {
+      throw {
+        statusCode: 400,
+        message: "Role is invalid or inactive"
+      };
+    }
+
+    const passwordHash = await bcrypt.hash(data.password, 10);
+
+    const user = await User.create({
+      name: data.name.trim(),
+      email: normalizedEmail,
+      passwordHash,
+      roleId: role._id,
+      status: "ACTIVE",
+      createdBy: authenticatedUserId,
+      updatedBy: authenticatedUserId
+    });
+
+    return toPublicUser(user);
+  }
+
   async update(userId, data) {
     if (data.profile) {
       const profile = await Profile.findById(data.profile);
