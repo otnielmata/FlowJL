@@ -41,6 +41,11 @@ describe("roleService", () => {
 
     const result = await roleService.list();
 
+    expect(roleModel.find).toHaveBeenCalledWith({
+      code: {
+        $in: expect.any(Array)
+      }
+    });
     expect(result).toEqual([
       {
         id: "role-1",
@@ -50,6 +55,46 @@ describe("roleService", () => {
         active: true
       }
     ]);
+  });
+
+  it("returns a role by id with public fields and permission codes", async () => {
+    roleModel.findOne.mockResolvedValue({
+      id: "role-1",
+      code: "ADMIN",
+      name: "Administrador",
+      description: "Descricao",
+      active: true,
+      permissionIds: ["perm-1", "perm-2"]
+    });
+    permissionModel.find.mockReturnValue({
+      sort: vi.fn().mockResolvedValue([{ code: "ROLE_READ" }, { code: "USER_LIST" }])
+    });
+
+    const result = await roleService.getById("role-1");
+
+    expect(roleModel.findOne).toHaveBeenCalledWith({
+      _id: "role-1",
+      code: {
+        $in: expect.any(Array)
+      }
+    });
+    expect(result).toEqual({
+      id: "role-1",
+      code: "ADMIN",
+      name: "Administrador",
+      description: "Descricao",
+      active: true,
+      permissions: ["ROLE_READ", "USER_LIST"]
+    });
+  });
+
+  it("rejects role lookup by id when the role is not found", async () => {
+    roleModel.findOne.mockResolvedValue(null);
+
+    await expect(roleService.getById("missing-role")).rejects.toMatchObject({
+      statusCode: 404,
+      message: "Role not found"
+    });
   });
 
   it("creates a role only when the code belongs to the initial catalog", async () => {
