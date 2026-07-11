@@ -4,6 +4,7 @@ import { avatarController } from "../controllers/avatar.controller.js";
 import { competitorResearchController } from "../controllers/competitor-research.controller.js";
 import { launchController } from "../controllers/launch.controller.js";
 import { marketResearchController } from "../controllers/market-research.controller.js";
+import { offerController } from "../controllers/offer.controller.js";
 import { authMiddleware } from "../middleware/auth.middleware.js";
 import { requirePermission } from "../middleware/permission.middleware.js";
 import { asyncHandler } from "../utils/async-handler.js";
@@ -32,3 +33,5 @@ launchRoutes.post(
   asyncHandler(requirePermission("AVATAR_SUGGEST")),
   asyncHandler(avatarController.suggest.bind(avatarController))
 );
+launchRoutes.post("/:launchId/offers", authMiddleware, asyncHandler(requirePermission("OFFER_CREATE")), asyncHandler(offerController.create.bind(offerController)));
+launchRoutes.put("/:launchId/offers", authMiddleware, asyncHandler(requirePermission("OFFER_UPDATE")), asyncHandler(offerController.update.bind(offerController)));
