@@ -22,6 +22,15 @@ class LaunchController {
 
     response.status(201).json(launch);
   }
+
+  async getById(request, response) {
+    const params = z.object({
+      launchId: z.string().uuid()
+    }).parse(request.params);
+    const launch = await launchService.getById(params.launchId);
+
+    response.status(200).json(launch);
+  }
 }
 
 export const launchController = new LaunchController();

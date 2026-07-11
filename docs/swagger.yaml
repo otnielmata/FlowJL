@@ -124,6 +124,58 @@ paths:
           description: Acesso negado
         '409':
           description: Lancamento ativo duplicado para o mesmo produto e periodo
+  /api/v1/launches/{launchId}:
+    get:
+      tags: [Launches]
+      summary: Consulta um lancamento com seu historico estrategico
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: launchId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Lancamento consultado
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento nao encontrado
+  /api/v1/launches/{launchId}/market-researches:
+    post:
+      tags: [Launches]
+      summary: Gera uma pesquisa de mercado versionada para um lancamento
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: launchId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMarketResearchRequest'
+      responses:
+        '201':
+          description: Pesquisa de mercado criada
+        '400':
+          description: Briefing, objetivo ou contexto insuficientes
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento nao encontrado
   /api/v1/roles:
     get:
       tags: [Roles]
@@ -469,6 +521,19 @@ components:
         scheduledAt:
           type: string
           format: date-time
+    CreateMarketResearchRequest:
+      type: object
+      required: [briefing, objective, productContext]
+      properties:
+        briefing:
+          type: string
+          minLength: 20
+        objective:
+          type: string
+          minLength: 8
+        productContext:
+          type: string
+          minLength: 20
     CreateRoleRequest:
       type: object
       required: [code, name, description]
