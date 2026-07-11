@@ -163,4 +163,41 @@ describe("requireUserUpdatePermission", () => {
     });
     expect(next).toHaveBeenCalledWith();
   });
+
+  it("requires USER_CHANGE_ROLE permission to change a collaborator role", async () => {
+    const next = vi.fn();
+    userModel.findById.mockResolvedValue({
+      id: "manager-id",
+      roleId: "role-id",
+      status: "ACTIVE"
+    });
+    roleModel.findOne.mockResolvedValue({
+      _id: "role-id",
+      permissionIds: ["perm-3"],
+      active: true
+    });
+    permissionModel.findOne.mockResolvedValue({
+      _id: "perm-3",
+      code: "USER_CHANGE_ROLE",
+      active: true
+    });
+
+    await requireUserUpdatePermission(
+      {
+        auth: { sub: "manager-id" },
+        body: { roleId: "new-role-id" }
+      },
+      {},
+      next
+    );
+
+    expect(permissionModel.findOne).toHaveBeenCalledWith({
+      _id: {
+        $in: ["perm-3"]
+      },
+      code: "USER_CHANGE_ROLE",
+      active: true
+    });
+    expect(next).toHaveBeenCalledWith();
+  });
 });
