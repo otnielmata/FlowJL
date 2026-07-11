@@ -10,7 +10,12 @@ export const roleCatalog = [
       "USER_CREATE",
       "USER_READ",
       "USER_LIST",
+      "USER_UPDATE",
+      "USER_ACTIVATE",
+      "USER_DEACTIVATE",
+      "USER_CHANGE_ROLE",
       "ROLE_READ",
+      "AUDIT_READ",
       "PERMISSION_READ"
     ]
   },
