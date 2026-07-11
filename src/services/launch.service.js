@@ -6,6 +6,7 @@ import { Launch } from "../models/launch.model.js";
 import { MarketResearch } from "../models/market-research.model.js";
 import { Offer } from "../models/offer.model.js";
 import { Positioning } from "../models/positioning.model.js";
+import { SmartSchedule } from "../models/smart-schedule.model.js";
 import { auditService } from "./audit.service.js";
 import { toPublicAvatar } from "./avatar.service.js";
 import { groupByChannelAndDate, toPublicCompetitorResearch } from "./competitor-research.service.js";
@@ -13,6 +14,7 @@ import { toPublicContentPlan } from "./content-plan.service.js";
 import { toPublicEditorialLine } from "./editorial-line.service.js";
 import { toPublicOffer } from "./offer.service.js";
 import { toPublicPositioning } from "./positioning.service.js";
+import { toPublicSmartSchedule } from "./smart-schedule.service.js";
 
 function normalizeDate(value) {
   return new Date(value);
@@ -119,6 +121,7 @@ class LaunchService {
     const positioningHistory = await Positioning.find({ launchId }).sort({ version: -1, createdAt: -1 });
     const editorialLineHistory = await EditorialLine.find({ launchId }).sort({ version: -1, createdAt: -1 });
     const contentPlanHistory = await ContentPlan.find({ launchId }).sort({ version: -1, createdAt: -1 });
+    const smartScheduleHistory = await SmartSchedule.find({ launchId }).sort({ version: -1, createdAt: -1 });
 
     return {
       ...toPublicLaunch(launch),
@@ -174,6 +177,10 @@ class LaunchService {
       contentPlan: {
         current: contentPlanHistory.find((contentPlan) => contentPlan.isCurrent) ? toPublicContentPlan(contentPlanHistory.find((contentPlan) => contentPlan.isCurrent)) : null,
         history: contentPlanHistory.map((contentPlan) => toPublicContentPlan(contentPlan))
+      },
+      smartSchedule: {
+        current: smartScheduleHistory.find((schedule) => schedule.isCurrent) ? toPublicSmartSchedule(smartScheduleHistory.find((schedule) => schedule.isCurrent)) : null,
+        history: smartScheduleHistory.map((schedule) => toPublicSmartSchedule(schedule))
       }
     };
   }
