@@ -176,6 +176,36 @@ paths:
           description: Acesso negado
         '404':
           description: Lancamento nao encontrado
+  /api/v1/launches/{launchId}/competitor-researches:
+    post:
+      tags: [Launches]
+      summary: Registra evidencias de pesquisa de concorrentes para um lancamento
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: launchId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCompetitorResearchRequest'
+      responses:
+        '201':
+          description: Evidencia de concorrente registrada
+        '400':
+          description: Concorrente, canal ou demais campos obrigatorios invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento nao encontrado
   /api/v1/roles:
     get:
       tags: [Roles]
@@ -534,6 +564,31 @@ components:
         productContext:
           type: string
           minLength: 20
+    CreateCompetitorResearchRequest:
+      type: object
+      required: [competitorName, channel, headline, promise, trigger, observations]
+      properties:
+        competitorName:
+          type: string
+          minLength: 3
+        channel:
+          type: string
+          minLength: 2
+        headline:
+          type: string
+          minLength: 3
+        promise:
+          type: string
+          minLength: 3
+        trigger:
+          type: string
+          minLength: 3
+        observations:
+          type: string
+          minLength: 3
+        capturedAt:
+          type: string
+          format: date-time
     CreateRoleRequest:
       type: object
       required: [code, name, description]
