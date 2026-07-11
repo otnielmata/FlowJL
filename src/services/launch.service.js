@@ -1,4 +1,5 @@
 import { Launch } from "../models/launch.model.js";
+import { MarketResearch } from "../models/market-research.model.js";
 import { auditService } from "./audit.service.js";
 
 function normalizeDate(value) {
@@ -87,6 +88,52 @@ class LaunchService {
     });
 
     return toPublicLaunch(launch);
+  }
+
+  async getById(launchId) {
+    const launch = await Launch.findById(launchId);
+
+    if (!launch) {
+      throw {
+        statusCode: 404,
+        message: "Launch not found"
+      };
+    }
+
+    const marketResearchHistory = await MarketResearch.find({ launchId }).sort({ version: -1, createdAt: -1 });
+
+    return {
+      ...toPublicLaunch(launch),
+      marketResearchHistory: marketResearchHistory.map((research) => ({
+        id: research.id,
+        version: research.version,
+        briefing: research.briefing,
+        objective: research.objective,
+        productContext: research.productContext,
+        themes: research.themes.map((theme) => ({
+          title: theme.title,
+          rationale: theme.rationale
+        })),
+        promises: research.promises.map((promise) => ({
+          title: promise.title,
+          rationale: promise.rationale
+        })),
+        objections: research.objections.map((objection) => ({
+          title: objection.title,
+          rebuttal: objection.rebuttal
+        })),
+        ctas: [...research.ctas],
+        suggestedFormats: research.suggestedFormats.map((format) => ({
+          type: format.type,
+          angle: format.angle
+        })),
+        humanReviewRequired: research.humanReviewRequired,
+        createdAt: research.createdAt,
+        updatedAt: research.updatedAt,
+        createdBy: research.createdBy ?? null,
+        updatedBy: research.updatedBy ?? null
+      }))
+    };
   }
 }
 
