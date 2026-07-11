@@ -20,6 +20,7 @@ describe("app", () => {
     const response = await request(app).get("/api/v1");
 
     expect(response.status).toBe(200);
+    expect(response.body.modules).toContain("audits");
     expect(response.body.modules).toContain("auth");
     expect(response.body.modules).toContain("roles");
     expect(response.body.modules).toContain("profiles");
