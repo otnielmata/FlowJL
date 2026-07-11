@@ -24,57 +24,60 @@ vi.mock("../src/models/permission.model.js", () => ({
   Permission: permissionModel
 }));
 
-const { adminMiddleware } = await import("../src/middleware/admin.middleware.js");
+const { requirePermission } = await import("../src/middleware/permission.middleware.js");
 
-describe("adminMiddleware", () => {
+describe("requirePermission", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it("allows active admins to continue", async () => {
+  it("allows authenticated users with the required permission", async () => {
+    const middleware = requirePermission("USER_READ");
     const request = {
       auth: {
-        sub: "admin-user-id"
+        sub: "user-id"
       }
     };
     const next = vi.fn();
 
     userModel.findById.mockResolvedValue({
-      id: "admin-user-id",
-      roleId: "role-admin-id",
+      id: "user-id",
+      roleId: "role-id",
       status: "ACTIVE"
     });
     roleModel.findOne.mockResolvedValue({
-      _id: "role-admin-id",
-      permissionIds: ["perm-user-create"],
+      _id: "role-id",
+      permissionIds: ["perm-id"],
       active: true
     });
     permissionModel.findOne.mockResolvedValue({
-      _id: "perm-user-create",
-      code: "USER_CREATE",
+      _id: "perm-id",
+      code: "USER_READ",
       active: true
     });
 
-    await adminMiddleware(request, {}, next);
+    await middleware(request, {}, next);
 
     expect(next).toHaveBeenCalledWith();
-    expect(request.currentUser).toMatchObject({
-      id: "admin-user-id"
-    });
   });
 
-  it("rejects non-admin users", async () => {
+  it("rejects users without the required permission", async () => {
+    const middleware = requirePermission("USER_LIST");
     const next = vi.fn();
 
     userModel.findById.mockResolvedValue({
       id: "user-id",
-      roleId: "role-user-id",
+      roleId: "role-id",
       status: "ACTIVE"
     });
-    roleModel.findOne.mockResolvedValue(null);
+    roleModel.findOne.mockResolvedValue({
+      _id: "role-id",
+      permissionIds: [],
+      active: true
+    });
     permissionModel.findOne.mockResolvedValue(null);
 
-    await adminMiddleware({ auth: { sub: "user-id" } }, {}, next);
+    await middleware({ auth: { sub: "user-id" } }, {}, next);
 
     expect(next).toHaveBeenCalledWith({
       statusCode: 403,
