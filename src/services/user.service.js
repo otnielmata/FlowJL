@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import { Profile } from "../models/profile.model.js";
 import { Role } from "../models/role.model.js";
 import { User } from "../models/user.model.js";
+import { auditService } from "./audit.service.js";
 
 export function toPublicUser(user) {
   const roleValue =
@@ -65,6 +66,18 @@ class UserService {
       status: "ACTIVE"
     });
 
+    await auditService.record({
+      actorUserId: null,
+      action: "USER_CREATED",
+      targetType: "USER",
+      targetId: admin.id,
+      context: {
+        source: "bootstrap-admin",
+        status: admin.status,
+        roleId: admin.roleId?.toString?.() ?? admin.roleId
+      }
+    });
+
     return toPublicUser(admin);
   }
 
@@ -101,6 +114,17 @@ class UserService {
       status: "ACTIVE",
       createdBy: authenticatedUserId,
       updatedBy: authenticatedUserId
+    });
+
+    await auditService.record({
+      actorUserId: authenticatedUserId,
+      action: "USER_CREATED",
+      targetType: "USER",
+      targetId: user.id,
+      context: {
+        status: user.status,
+        roleId: user.roleId?.toString?.() ?? user.roleId
+      }
     });
 
     return toPublicUser(user);
@@ -243,16 +267,53 @@ class UserService {
     }
 
     const currentRoleId = currentUser.roleId?.toString?.() ?? currentUser.roleId;
+    const auditEvents = [];
 
     if (data.roleId && data.roleId !== currentRoleId) {
       updateData.lastRoleChangeAt = new Date();
       updateData.lastRoleChangeBy = authenticatedUserId;
+      auditEvents.push({
+        actorUserId: authenticatedUserId,
+        action: "USER_ROLE_CHANGED",
+        targetType: "USER",
+        targetId: currentUser.id,
+        context: {
+          fromRoleId: currentRoleId,
+          toRoleId: data.roleId
+        }
+      });
     }
 
     const user = await User.findByIdAndUpdate(userId, updateData, {
       new: true,
       runValidators: true
     }).populate("profile");
+
+    if (data.status === "INACTIVE") {
+      auditEvents.push({
+        actorUserId: authenticatedUserId,
+        action: "USER_DEACTIVATED",
+        targetType: "USER",
+        targetId: user.id,
+        context: {
+          status: user.status
+        }
+      });
+    } else {
+      auditEvents.push({
+        actorUserId: authenticatedUserId,
+        action: "USER_UPDATED",
+        targetType: "USER",
+        targetId: user.id,
+        context: {
+          fields: Object.keys(data).sort()
+        }
+      });
+    }
+
+    for (const event of auditEvents) {
+      await auditService.record(event);
+    }
 
     return toPublicUser(user);
   }
