@@ -19,14 +19,15 @@ export const roleCatalog = [
       "PERMISSION_READ",
       "LAUNCH_CREATE",
       "LAUNCH_READ",
-      "MARKET_RESEARCH_CREATE"
+      "MARKET_RESEARCH_CREATE",
+      "COMPETITOR_RESEARCH_CREATE"
     ]
   },
   {
     code: "DIGITAL_STRATEGIST",
     name: "Estrategista Digital",
     description: "Cargo de estrategia digital do Flow JL.",
-    permissionCodes: ["LAUNCH_CREATE", "LAUNCH_READ", "MARKET_RESEARCH_CREATE"]
+    permissionCodes: ["LAUNCH_CREATE", "LAUNCH_READ", "MARKET_RESEARCH_CREATE", "COMPETITOR_RESEARCH_CREATE"]
   },
   {
     code: "EXPERT",
