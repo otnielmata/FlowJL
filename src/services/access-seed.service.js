@@ -104,6 +104,24 @@ const corePermissions = [
     name: "Registrar pesquisa de concorrentes",
     description: "Permite registrar evidencias de concorrentes vinculadas a um lancamento.",
     module: "strategy"
+  },
+  {
+    code: "AVATAR_CREATE",
+    name: "Cadastrar avatar",
+    description: "Permite cadastrar o avatar principal de um lancamento.",
+    module: "strategy"
+  },
+  {
+    code: "AVATAR_UPDATE",
+    name: "Atualizar avatar",
+    description: "Permite evoluir o avatar de um lancamento preservando o historico.",
+    module: "strategy"
+  },
+  {
+    code: "AVATAR_SUGGEST",
+    name: "Gerar sugestoes de avatar",
+    description: "Permite solicitar apoio de IA para complementar o avatar do publico.",
+    module: "strategy"
   }
 ];
 
