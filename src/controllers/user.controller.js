@@ -40,6 +40,26 @@ class UserController {
     response.status(201).json(user);
   }
 
+  async getAuthenticatedUser(request, response) {
+    const user = await userService.getAuthenticatedUser(request.auth.sub);
+
+    response.status(200).json(user);
+  }
+
+  async getById(request, response) {
+    const user = await userService.getById(request.params.id);
+
+    response.status(200).json(user);
+  }
+
+  async list(_request, response) {
+    const users = await userService.list();
+
+    response.status(200).json({
+      items: users
+    });
+  }
+
   async update(request, response) {
     const payload = updateUserSchema.parse(request.body);
     const user = await userService.update(request.params.id, payload);
