@@ -21,6 +21,7 @@ describe("app", () => {
 
     expect(response.status).toBe(200);
     expect(response.body.modules).toContain("auth");
+    expect(response.body.modules).toContain("roles");
     expect(response.body.modules).toContain("profiles");
   });
 });
