@@ -66,6 +66,8 @@ src
 - `PUT /api/v1/launches/:launchId/editorial-lines`
 - `POST /api/v1/launches/:launchId/content-plans`
 - `PUT /api/v1/launches/:launchId/content-plans`
+- `POST /api/v1/launches/:launchId/smart-schedules`
+- `PUT /api/v1/launches/:launchId/smart-schedules`
 - `GET /api/v1/roles`
 - `GET /api/v1/roles/:id`
 - `POST /api/v1/roles`
@@ -168,6 +170,7 @@ A documentação fica disponível em:
 - O posicionamento do lançamento pode ser registrado e atualizado via `POST` e `PUT /api/v1/launches/:launchId/positionings`, mantém uma versão vigente com autor e data da última alteração, relaciona a versão atual da oferta quando disponível e preserva o histórico por exclusão lógica.
 - A linha editorial do lançamento pode ser registrada e atualizada via `POST` e `PUT /api/v1/launches/:launchId/editorial-lines`, exige avatar, oferta e posicionamento vigentes, mantém pilares com prioridade e ativação por versão e preserva o histórico para consultas futuras.
 - O plano de conteúdo do lançamento pode ser registrado e atualizado via `POST` e `PUT /api/v1/launches/:launchId/content-plans`, exige linha editorial vigente, mantém itens agrupáveis por etapa, período e objetivo e preserva histórico para evolução operacional posterior.
+- O cronograma inteligente do lançamento pode ser gerado e ajustado via `POST` e `PUT /api/v1/launches/:launchId/smart-schedules`, exige plano de conteúdo vigente, retorna atividades com prazo em UTC, área, responsável sugerido e status, e preserva histórico dos ajustes.
 - A autorização da API é resolvida pelas permissões vinculadas ao cargo do usuário autenticado.
 - Os endpoints protegidos exigem token JWT no header `Authorization: Bearer <token>`.
 - O fluxo de autenticação usa `accessToken` para acesso aos endpoints protegidos e `refreshToken` para renovação e logout da sessão.
