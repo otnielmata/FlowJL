@@ -224,6 +224,18 @@ const corePermissions = [
     name: "Atualizar reels",
     description: "Permite atualizar roteiro, legenda, aprovacao e status operacional de reels.",
     module: "content"
+  },
+  {
+    code: "CAROUSEL_CREATE",
+    name: "Cadastrar carrosseis",
+    description: "Permite cadastrar carrosseis com contexto valido, cards e status operacional.",
+    module: "content"
+  },
+  {
+    code: "CAROUSEL_UPDATE",
+    name: "Atualizar carrosseis",
+    description: "Permite atualizar sequencia de mensagens, status e responsavel de carrosseis.",
+    module: "content"
   }
 ];
 
