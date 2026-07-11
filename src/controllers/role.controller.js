@@ -28,6 +28,12 @@ class RoleController {
     });
   }
 
+  async getById(request, response) {
+    const role = await roleService.getById(request.params.id);
+
+    response.status(200).json(role);
+  }
+
   async create(request, response) {
     const payload = createRoleSchema.parse(request.body);
     const role = await roleService.create(payload);

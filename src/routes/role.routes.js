@@ -10,6 +10,12 @@ export const roleRoutes = Router();
 
 roleRoutes.get("/", authMiddleware, asyncHandler(requirePermission("ROLE_READ")), asyncHandler(roleController.list.bind(roleController)));
 roleRoutes.get(
+  "/:id",
+  authMiddleware,
+  asyncHandler(requirePermission("ROLE_READ")),
+  asyncHandler(roleController.getById.bind(roleController))
+);
+roleRoutes.get(
   "/:code/permissions",
   authMiddleware,
   asyncHandler(requirePermission("ROLE_READ")),
