@@ -126,4 +126,41 @@ describe("requireUserUpdatePermission", () => {
     });
     expect(next).toHaveBeenCalledWith();
   });
+
+  it("requires USER_DEACTIVATE permission to deactivate an active collaborator", async () => {
+    const next = vi.fn();
+    userModel.findById.mockResolvedValue({
+      id: "manager-id",
+      roleId: "role-id",
+      status: "ACTIVE"
+    });
+    roleModel.findOne.mockResolvedValue({
+      _id: "role-id",
+      permissionIds: ["perm-2"],
+      active: true
+    });
+    permissionModel.findOne.mockResolvedValue({
+      _id: "perm-2",
+      code: "USER_DEACTIVATE",
+      active: true
+    });
+
+    await requireUserUpdatePermission(
+      {
+        auth: { sub: "manager-id" },
+        body: { status: "INACTIVE" }
+      },
+      {},
+      next
+    );
+
+    expect(permissionModel.findOne).toHaveBeenCalledWith({
+      _id: {
+        $in: ["perm-2"]
+      },
+      code: "USER_DEACTIVATE",
+      active: true
+    });
+    expect(next).toHaveBeenCalledWith();
+  });
 });

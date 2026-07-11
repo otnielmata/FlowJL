@@ -432,6 +432,47 @@ describe("userService.update", () => {
     });
   });
 
+  it("fills deactivatedAt when deactivating an active collaborator", async () => {
+    userModel.findById.mockResolvedValue({
+      id: "active-user-id",
+      roleId: "role-user-id",
+      status: "ACTIVE"
+    });
+    roleModel.findOne.mockResolvedValue(null);
+    userModel.findByIdAndUpdate.mockReturnValue({
+      populate: vi.fn().mockResolvedValue({
+        id: "active-user-id",
+        name: "User",
+        email: "user@flowjl.com",
+        status: "INACTIVE",
+        roleId: "role-user-id",
+        createdAt: "2026-07-11T00:00:00.000Z",
+        updatedAt: "2026-07-11T01:00:00.000Z",
+        createdBy: "creator-id",
+        updatedBy: "admin-user-id",
+        lastLoginAt: null,
+        deactivatedAt: "2026-07-11T01:00:00.000Z"
+      })
+    });
+
+    await userService.update("admin-user-id", "active-user-id", {
+      status: "INACTIVE"
+    });
+
+    expect(userModel.findByIdAndUpdate).toHaveBeenCalledWith(
+      "active-user-id",
+      expect.objectContaining({
+        status: "INACTIVE",
+        updatedBy: "admin-user-id",
+        deactivatedAt: expect.any(Date)
+      }),
+      {
+        new: true,
+        runValidators: true
+      }
+    );
+  });
+
   it("clears deactivatedAt when reactivating an inactive collaborator", async () => {
     userModel.findById.mockResolvedValue({
       id: "inactive-user-id",
