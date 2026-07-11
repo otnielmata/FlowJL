@@ -236,6 +236,18 @@ const corePermissions = [
     name: "Atualizar carrosseis",
     description: "Permite atualizar sequencia de mensagens, status e responsavel de carrosseis.",
     module: "content"
+  },
+  {
+    code: "STORY_SEQUENCE_CREATE",
+    name: "Cadastrar sequencias de stories",
+    description: "Permite cadastrar sequencias de stories com contexto, blocos e CTA.",
+    module: "content"
+  },
+  {
+    code: "STORY_SEQUENCE_UPDATE",
+    name: "Atualizar sequencias de stories",
+    description: "Permite atualizar blocos, status, responsavel e horario de publicacao de stories.",
+    module: "content"
   }
 ];
 
