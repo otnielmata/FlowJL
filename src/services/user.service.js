@@ -106,6 +106,29 @@ class UserService {
     return toPublicUser(user);
   }
 
+  async getById(userId) {
+    const user = await User.findById(userId);
+
+    if (!user) {
+      throw {
+        statusCode: 404,
+        message: "User not found"
+      };
+    }
+
+    return toPublicUser(user);
+  }
+
+  async list() {
+    const users = await User.find().sort({ createdAt: -1 });
+
+    return users.map((user) => toPublicUser(user));
+  }
+
+  async getAuthenticatedUser(userId) {
+    return this.getById(userId);
+  }
+
   async update(userId, data) {
     if (data.profile) {
       const profile = await Profile.findById(data.profile);
