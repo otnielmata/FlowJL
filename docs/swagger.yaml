@@ -289,6 +289,59 @@ paths:
           description: Acesso negado
         '404':
           description: Reel nao encontrado
+  /api/v1/stories:
+    post:
+      tags: [Stories]
+      summary: Cadastra uma sequencia de stories com contexto valido
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateStorySequenceRequest'
+      responses:
+        '201':
+          description: Sequencia de stories cadastrada com sucesso
+        '400':
+          description: Dados invalidos ou contexto ausente
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento ou cronograma nao encontrados
+  /api/v1/stories/{sequenceId}:
+    put:
+      tags: [Stories]
+      summary: Atualiza blocos, status e prazo de uma sequencia de stories
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: sequenceId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateStorySequenceRequest'
+      responses:
+        '200':
+          description: Sequencia de stories atualizada com sucesso
+        '400':
+          description: Dados invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Sequencia de stories nao encontrada
   /api/v1/launches:
     post:
       tags: [Launches]
@@ -1410,6 +1463,65 @@ components:
           enum: [PENDING, APPROVED, REJECTED]
         ownerRole:
           type: string
+    CreateStorySequenceRequest:
+      type: object
+      required: [theme, objective, cta, blocksCount, operationalStatus]
+      properties:
+        launchId:
+          type: string
+          format: uuid
+        smartScheduleId:
+          type: string
+          format: uuid
+        theme:
+          type: string
+        objective:
+          type: string
+        cta:
+          type: string
+        blocksCount:
+          type: integer
+        blocks:
+          type: array
+          items:
+            type: object
+            properties:
+              order:
+                type: integer
+              text:
+                type: string
+        operationalStatus:
+          type: string
+          enum: [DRAFT, IN_REVIEW, APPROVED, SCHEDULED, PUBLISHED]
+        ownerRole:
+          type: string
+        publishAt:
+          type: string
+          format: date-time
+    UpdateStorySequenceRequest:
+      type: object
+      required: [blocksCount, blocks, operationalStatus]
+      properties:
+        blocksCount:
+          type: integer
+        blocks:
+          type: array
+          items:
+            type: object
+            required: [text]
+            properties:
+              order:
+                type: integer
+              text:
+                type: string
+        operationalStatus:
+          type: string
+          enum: [DRAFT, IN_REVIEW, APPROVED, SCHEDULED, PUBLISHED]
+        ownerRole:
+          type: string
+        publishAt:
+          type: string
+          format: date-time
     CreateReelRequest:
       type: object
       required: [sourceType, theme, objective, hook, cta, operationalStatus]
