@@ -80,6 +80,12 @@ const corePermissions = [
     name: "Consultar permissoes",
     description: "Permite consultar permissoes disponiveis no core.",
     module: "permission"
+  },
+  {
+    code: "LAUNCH_CREATE",
+    name: "Cadastrar lancamentos",
+    description: "Permite cadastrar novos lancamentos da operacao.",
+    module: "launch"
   }
 ];
 
