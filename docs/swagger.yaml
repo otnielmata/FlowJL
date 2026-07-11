@@ -183,6 +183,59 @@ paths:
           description: Ideia nao encontrada
         '409':
           description: Ideia ja esta inativa
+  /api/v1/carousels:
+    post:
+      tags: [Carousels]
+      summary: Cadastra um carrossel com estrutura basica
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCarouselRequest'
+      responses:
+        '201':
+          description: Carrossel cadastrado com sucesso
+        '400':
+          description: Dados invalidos ou contexto ausente
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento ou plano de conteudo nao encontrados
+  /api/v1/carousels/{carouselId}:
+    put:
+      tags: [Carousels]
+      summary: Atualiza conteudo, status e responsavel do carrossel
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: carouselId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCarouselRequest'
+      responses:
+        '200':
+          description: Carrossel atualizado com sucesso
+        '400':
+          description: Dados invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Carrossel nao encontrado
   /api/v1/reels:
     post:
       tags: [Reels]
@@ -1297,6 +1350,65 @@ components:
         suggestedFormat:
           type: string
         observations:
+          type: string
+    CreateCarouselRequest:
+      type: object
+      required: [theme, objective, cta, cardsCount, operationalStatus]
+      properties:
+        launchId:
+          type: string
+          format: uuid
+        contentPlanId:
+          type: string
+          format: uuid
+        theme:
+          type: string
+        objective:
+          type: string
+        cta:
+          type: string
+        cardsCount:
+          type: integer
+        cards:
+          type: array
+          items:
+            type: object
+            properties:
+              order:
+                type: integer
+              message:
+                type: string
+        operationalStatus:
+          type: string
+          enum: [DRAFT, IN_REVIEW, APPROVED, SCHEDULED, PUBLISHED]
+        reviewStatus:
+          type: string
+          enum: [PENDING, APPROVED, REJECTED]
+        ownerRole:
+          type: string
+    UpdateCarouselRequest:
+      type: object
+      required: [cardsCount, cards, operationalStatus]
+      properties:
+        cardsCount:
+          type: integer
+        cards:
+          type: array
+          items:
+            type: object
+            required: [message]
+            properties:
+              order:
+                type: integer
+              message:
+                type: string
+        operationalStatus:
+          type: string
+          enum: [DRAFT, IN_REVIEW, APPROVED, SCHEDULED, PUBLISHED]
+        reviewStatus:
+          type: string
+          enum: [PENDING, APPROVED, REJECTED]
+        ownerRole:
           type: string
     CreateReelRequest:
       type: object
