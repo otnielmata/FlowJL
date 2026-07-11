@@ -17,8 +17,8 @@ const createCollaboratorSchema = z.object({
 
 const updateUserSchema = z
   .object({
-    name: z.string().min(3).optional(),
-    email: z.string().email().optional(),
+    name: z.string().trim().min(3).max(120).optional(),
+    email: z.string().trim().email().optional(),
     password: z.string().min(8).optional(),
     roleId: z.string().uuid().optional(),
     profile: z.string().min(1).optional(),
@@ -63,7 +63,7 @@ class UserController {
 
   async update(request, response) {
     const payload = updateUserSchema.parse(request.body);
-    const user = await userService.update(request.params.id, payload);
+    const user = await userService.update(request.auth.sub, request.params.id, payload);
 
     response.status(200).json(user);
   }
