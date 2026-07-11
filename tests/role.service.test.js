@@ -26,7 +26,7 @@ describe("roleService", () => {
     vi.clearAllMocks();
   });
 
-  it("lists predefined roles with allowed fields", async () => {
+  it("lists active predefined roles with allowed fields", async () => {
     roleModel.find.mockReturnValue({
       sort: vi.fn().mockResolvedValue([
         {
@@ -42,6 +42,7 @@ describe("roleService", () => {
     const result = await roleService.list();
 
     expect(roleModel.find).toHaveBeenCalledWith({
+      active: true,
       code: {
         $in: expect.any(Array)
       }
