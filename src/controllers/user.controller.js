@@ -20,6 +20,7 @@ const updateUserSchema = z
     name: z.string().min(3).optional(),
     email: z.string().email().optional(),
     password: z.string().min(8).optional(),
+    roleId: z.string().uuid().optional(),
     profile: z.string().min(1).optional(),
     status: z.enum(["ACTIVE", "INACTIVE", "PENDING"]).optional()
   })
