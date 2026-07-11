@@ -22,6 +22,10 @@ const bcryptMock = {
   hash: vi.fn()
 };
 
+const auditServiceMock = {
+  record: vi.fn()
+};
+
 vi.mock("../src/models/user.model.js", () => ({
   User: userModel
 }));
@@ -38,11 +42,16 @@ vi.mock("bcryptjs", () => ({
   default: bcryptMock
 }));
 
+vi.mock("../src/services/audit.service.js", () => ({
+  auditService: auditServiceMock
+}));
+
 const { toPublicUser, userService } = await import("../src/services/user.service.js");
 
 describe("userService.createBootstrapAdmin", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    auditServiceMock.record.mockResolvedValue(undefined);
   });
 
   it("creates the first admin with normalized email and admin role", async () => {
@@ -80,6 +89,17 @@ describe("userService.createBootstrapAdmin", () => {
       passwordHash: "hashed-password",
       roleId: "role-admin-id",
       status: "ACTIVE"
+    });
+    expect(auditServiceMock.record).toHaveBeenCalledWith({
+      actorUserId: null,
+      action: "USER_CREATED",
+      targetType: "USER",
+      targetId: "user-id",
+      context: {
+        source: "bootstrap-admin",
+        status: "ACTIVE",
+        roleId: "role-admin-id"
+      }
     });
     expect(result).toEqual({
       id: "user-id",
@@ -131,6 +151,7 @@ describe("userService.createBootstrapAdmin", () => {
 describe("userService.createCollaborator", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    auditServiceMock.record.mockResolvedValue(undefined);
   });
 
   it("creates a collaborator with normalized email, active role and createdBy", async () => {
@@ -171,6 +192,16 @@ describe("userService.createCollaborator", () => {
       status: "ACTIVE",
       createdBy: "admin-user-id",
       updatedBy: "admin-user-id"
+    });
+    expect(auditServiceMock.record).toHaveBeenCalledWith({
+      actorUserId: "admin-user-id",
+      action: "USER_CREATED",
+      targetType: "USER",
+      targetId: "user-id",
+      context: {
+        status: "ACTIVE",
+        roleId: "role-digital-strategist"
+      }
     });
     expect(result).toEqual({
       id: "user-id",
@@ -335,6 +366,7 @@ describe("userService queries", () => {
 describe("userService.update", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    auditServiceMock.record.mockResolvedValue(undefined);
   });
 
   it("updates collaborator data, normalizes email and records audit metadata", async () => {
@@ -382,6 +414,25 @@ describe("userService.update", () => {
         runValidators: true
       }
     );
+    expect(auditServiceMock.record).toHaveBeenNthCalledWith(1, {
+      actorUserId: "admin-user-id",
+      action: "USER_ROLE_CHANGED",
+      targetType: "USER",
+      targetId: "target-user-id",
+      context: {
+        fromRoleId: "role-current-id",
+        toRoleId: "role-new-id"
+      }
+    });
+    expect(auditServiceMock.record).toHaveBeenNthCalledWith(2, {
+      actorUserId: "admin-user-id",
+      action: "USER_UPDATED",
+      targetType: "USER",
+      targetId: "target-user-id",
+      context: {
+        fields: ["email", "name", "roleId"]
+      }
+    });
     expect(result).toEqual({
       id: "target-user-id",
       name: "Novo Nome",
@@ -490,6 +541,15 @@ describe("userService.update", () => {
         runValidators: true
       }
     );
+    expect(auditServiceMock.record).toHaveBeenCalledWith({
+      actorUserId: "admin-user-id",
+      action: "USER_DEACTIVATED",
+      targetType: "USER",
+      targetId: "active-user-id",
+      context: {
+        status: "INACTIVE"
+      }
+    });
   });
 
   it("clears deactivatedAt when reactivating an inactive collaborator", async () => {
