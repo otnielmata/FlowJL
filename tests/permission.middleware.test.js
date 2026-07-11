@@ -84,4 +84,45 @@ describe("requirePermission", () => {
       message: "Access denied"
     });
   });
+
+  it("evaluates authorization from the authenticated user role permissions", async () => {
+    const middleware = requirePermission("ROLE_READ");
+    const request = {
+      auth: {
+        sub: "user-id"
+      }
+    };
+    const next = vi.fn();
+
+    userModel.findById.mockResolvedValue({
+      id: "user-id",
+      roleId: "role-id",
+      status: "ACTIVE"
+    });
+    roleModel.findOne.mockResolvedValue({
+      _id: "role-id",
+      permissionIds: ["perm-role-read"],
+      active: true
+    });
+    permissionModel.findOne.mockResolvedValue({
+      _id: "perm-role-read",
+      code: "ROLE_READ",
+      active: true
+    });
+
+    await middleware(request, {}, next);
+
+    expect(roleModel.findOne).toHaveBeenCalledWith({
+      _id: "role-id",
+      active: true
+    });
+    expect(permissionModel.findOne).toHaveBeenCalledWith({
+      _id: {
+        $in: ["perm-role-read"]
+      },
+      code: "ROLE_READ",
+      active: true
+    });
+    expect(next).toHaveBeenCalledWith();
+  });
 });
