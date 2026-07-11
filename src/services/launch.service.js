@@ -1,5 +1,6 @@
 import { Avatar } from "../models/avatar.model.js";
 import { CompetitorResearch } from "../models/competitor-research.model.js";
+import { EditorialLine } from "../models/editorial-line.model.js";
 import { Launch } from "../models/launch.model.js";
 import { MarketResearch } from "../models/market-research.model.js";
 import { Offer } from "../models/offer.model.js";
@@ -7,6 +8,7 @@ import { Positioning } from "../models/positioning.model.js";
 import { auditService } from "./audit.service.js";
 import { toPublicAvatar } from "./avatar.service.js";
 import { groupByChannelAndDate, toPublicCompetitorResearch } from "./competitor-research.service.js";
+import { toPublicEditorialLine } from "./editorial-line.service.js";
 import { toPublicOffer } from "./offer.service.js";
 import { toPublicPositioning } from "./positioning.service.js";
 
@@ -113,6 +115,7 @@ class LaunchService {
     const avatarHistory = await Avatar.find({ launchId }).sort({ version: -1, createdAt: -1 });
     const offerHistory = await Offer.find({ launchId }).sort({ version: -1, createdAt: -1 });
     const positioningHistory = await Positioning.find({ launchId }).sort({ version: -1, createdAt: -1 });
+    const editorialLineHistory = await EditorialLine.find({ launchId }).sort({ version: -1, createdAt: -1 });
 
     return {
       ...toPublicLaunch(launch),
@@ -160,6 +163,10 @@ class LaunchService {
       positioning: {
         current: positioningHistory.find((positioning) => positioning.isCurrent) ? toPublicPositioning(positioningHistory.find((positioning) => positioning.isCurrent)) : null,
         history: positioningHistory.map((positioning) => toPublicPositioning(positioning))
+      },
+      editorialLine: {
+        current: editorialLineHistory.find((editorialLine) => editorialLine.isCurrent) ? toPublicEditorialLine(editorialLineHistory.find((editorialLine) => editorialLine.isCurrent)) : null,
+        history: editorialLineHistory.map((editorialLine) => toPublicEditorialLine(editorialLine))
       }
     };
   }
