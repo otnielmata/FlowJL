@@ -53,6 +53,8 @@ src
 - `GET /api/v1/roles`
 - `POST /api/v1/roles`
 - `PUT /api/v1/roles/:code`
+- `GET /api/v1/roles/:code/permissions`
+- `PUT /api/v1/roles/:code/permissions`
 - `POST /api/v1/users/bootstrap-admin`
 - `POST /api/v1/users`
 - `GET /api/v1/users`
@@ -130,6 +132,7 @@ A documentação fica disponível em:
 - O cadastro de colaboradores via `POST /api/v1/users` exige autenticação com JWT válido e perfil administrativo.
 - A consulta de colaboradores usa permissões de papel: `USER_LIST` para listagem e `USER_READ` para consulta individual.
 - A estrutura de cargos do Flow JL é fixa nesta etapa e a manutenção aceita apenas códigos do catálogo inicial.
+- A autorização da API é resolvida pelas permissões vinculadas ao cargo do usuário autenticado.
 - Os endpoints protegidos exigem token JWT no header `Authorization: Bearer <token>`.
 - O fluxo de autenticação usa `accessToken` para acesso aos endpoints protegidos e `refreshToken` para renovação e logout da sessão.
 - O projeto `Mentoria 2.0 Desafios` não faz parte desta entrega e não foi alterado.
