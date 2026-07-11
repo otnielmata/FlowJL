@@ -135,6 +135,7 @@ A documentação fica disponível em:
 - A manutenção de colaboradores via `PUT /api/v1/users/:id` exige as permissões adequadas por ação: `USER_UPDATE`, `USER_CHANGE_ROLE`, `USER_ACTIVATE` e `USER_DEACTIVATE`.
 - A API rejeita auto-inativação e também impede a inativação do último administrador ativo.
 - A reativação de colaborador reaproveita `PUT /api/v1/users/:id` com `status = ACTIVE`, limpa `deactivatedAt` e retorna regra clara quando o usuário já está ativo.
+- A inativação de colaborador reaproveita `PUT /api/v1/users/:id` com `status = INACTIVE`, preenche `deactivatedAt` e bloqueia a ação para a própria conta e para o último administrador ativo.
 - A estrutura de cargos do Flow JL é fixa nesta etapa e a manutenção aceita apenas códigos do catálogo inicial.
 - A consulta individual de cargo via `GET /api/v1/roles/:id` retorna somente os campos públicos e os códigos de permissões associadas, quando existirem.
 - A autorização da API é resolvida pelas permissões vinculadas ao cargo do usuário autenticado.
