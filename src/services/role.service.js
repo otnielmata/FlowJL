@@ -22,8 +22,42 @@ function toRolePermissionResponse(role, permissionCodes) {
 
 class RoleService {
   async list() {
-    const roles = await Role.find().sort({ code: 1 });
+    const roles = await Role.find({
+      code: {
+        $in: [...allowedRoleCodes]
+      }
+    }).sort({ code: 1 });
     return roles.map((role) => toPublicRole(role));
+  }
+
+  async getById(roleId) {
+    const role = await Role.findOne({
+      _id: roleId,
+      code: {
+        $in: [...allowedRoleCodes]
+      }
+    });
+
+    if (!role) {
+      throw {
+        statusCode: 404,
+        message: "Role not found"
+      };
+    }
+
+    const permissions = await Permission.find(
+      {
+        _id: {
+          $in: role.permissionIds
+        }
+      },
+      { code: 1 }
+    ).sort({ code: 1 });
+
+    return {
+      ...toPublicRole(role),
+      permissions: permissions.map((permission) => permission.code)
+    };
   }
 
   async create(data) {
@@ -92,7 +126,9 @@ class RoleService {
 
   async getPermissions(code) {
     const normalizedCode = code.trim().toUpperCase();
-    const role = await Role.findOne({ code: normalizedCode });
+    const role = await Role.findOne({
+      code: normalizedCode
+    });
 
     if (!role) {
       throw {
