@@ -373,7 +373,7 @@ paths:
         '200':
           description: Usuario atualizado
         '400':
-          description: Dados invalidos, cargo invalido ou perfil invalido
+          description: Dados invalidos, cargo invalido ou inativo, ou perfil invalido
         '401':
           description: JWT ausente ou invalido
         '403':
