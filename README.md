@@ -140,6 +140,7 @@ A documentação fica disponível em:
 - A estrutura de cargos do Flow JL é fixa nesta etapa e a manutenção aceita apenas códigos do catálogo inicial.
 - A listagem de cargos via `GET /api/v1/roles` retorna apenas os cargos ativos do catálogo inicial.
 - A consulta individual de cargo via `GET /api/v1/roles/:id` retorna somente os campos públicos e os códigos de permissões associadas, quando existirem.
+- O mapeamento de permissões por cargo via `PUT /api/v1/roles/:code/permissions` rejeita códigos inexistentes e passa a influenciar diretamente a autorização dos endpoints protegidos.
 - A autorização da API é resolvida pelas permissões vinculadas ao cargo do usuário autenticado.
 - Os endpoints protegidos exigem token JWT no header `Authorization: Bearer <token>`.
 - O fluxo de autenticação usa `accessToken` para acesso aos endpoints protegidos e `refreshToken` para renovação e logout da sessão.
