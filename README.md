@@ -58,6 +58,8 @@ src
 - `POST /api/v1/launches/:launchId/avatars`
 - `PUT /api/v1/launches/:launchId/avatars`
 - `POST /api/v1/launches/:launchId/avatar-suggestions`
+- `POST /api/v1/launches/:launchId/offers`
+- `PUT /api/v1/launches/:launchId/offers`
 - `GET /api/v1/roles`
 - `GET /api/v1/roles/:id`
 - `POST /api/v1/roles`
@@ -156,6 +158,7 @@ A documentação fica disponível em:
 - O registro de pesquisa de concorrentes via `POST /api/v1/launches/:launchId/competitor-researches` exige `COMPETITOR_RESEARCH_CREATE`, agrupa múltiplas evidências por concorrente e a consulta do lançamento devolve esse material organizado por canal e data.
 - O avatar do público pode ser cadastrado e evoluído via `POST` e `PUT /api/v1/launches/:launchId/avatars`, preserva histórico versionado e registra auditoria de alteração.
 - As sugestões de avatar via `POST /api/v1/launches/:launchId/avatar-suggestions` exigem `AVATAR_SUGGEST`, retornam estrutura complementar revisável por humano e não expõem detalhes internos do mecanismo de IA.
+- A oferta do lançamento pode ser registrada e atualizada via `POST` e `PUT /api/v1/launches/:launchId/offers`, mantém uma versão vigente por lançamento, relaciona a versão atual do avatar quando disponível e preserva o histórico anterior.
 - A autorização da API é resolvida pelas permissões vinculadas ao cargo do usuário autenticado.
 - Os endpoints protegidos exigem token JWT no header `Authorization: Bearer <token>`.
 - O fluxo de autenticação usa `accessToken` para acesso aos endpoints protegidos e `refreshToken` para renovação e logout da sessão.
