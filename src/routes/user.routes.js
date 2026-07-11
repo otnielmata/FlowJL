@@ -4,6 +4,7 @@ import { userController } from "../controllers/user.controller.js";
 import { adminMiddleware } from "../middleware/admin.middleware.js";
 import { authMiddleware } from "../middleware/auth.middleware.js";
 import { requirePermission } from "../middleware/permission.middleware.js";
+import { requireUserUpdatePermission } from "../middleware/user-update-permission.middleware.js";
 import { asyncHandler } from "../utils/async-handler.js";
 
 export const userRoutes = Router();
@@ -23,4 +24,9 @@ userRoutes.post(
   asyncHandler(adminMiddleware),
   asyncHandler(userController.createCollaborator.bind(userController))
 );
-userRoutes.put("/:id", authMiddleware, asyncHandler(userController.update.bind(userController)));
+userRoutes.put(
+  "/:id",
+  authMiddleware,
+  asyncHandler(requireUserUpdatePermission),
+  asyncHandler(userController.update.bind(userController))
+);
