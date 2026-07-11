@@ -239,4 +239,24 @@ describe("roleService", () => {
       permissions: ["ROLE_READ", "USER_LIST"]
     });
   });
+
+  it("rejects permission mapping when any permission code is invalid", async () => {
+    const save = vi.fn().mockResolvedValue(undefined);
+    roleModel.findOne.mockResolvedValue({
+      id: "role-1",
+      code: "ADMIN",
+      permissionIds: [],
+      save
+    });
+    permissionModel.find.mockReturnValue({
+      sort: vi.fn().mockResolvedValue([{ _id: "perm-1", code: "ROLE_READ" }])
+    });
+
+    await expect(roleService.updatePermissions("admin", ["role_read", "unknown_permission"])).rejects.toMatchObject({
+      statusCode: 400,
+      message: "Permission set is invalid"
+    });
+
+    expect(save).not.toHaveBeenCalled();
+  });
 });
