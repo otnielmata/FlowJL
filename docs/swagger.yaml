@@ -9,6 +9,7 @@ tags:
   - name: Health
   - name: Audit
   - name: Auth
+  - name: Launches
   - name: Profiles
   - name: Users
   - name: Roles
@@ -100,6 +101,29 @@ paths:
           description: JWT ausente ou invalido
         '403':
           description: Acesso negado
+  /api/v1/launches:
+    post:
+      tags: [Launches]
+      summary: Cadastra um novo lancamento
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateLaunchRequest'
+      responses:
+        '201':
+          description: Lancamento criado
+        '400':
+          description: Dados invalidos ou obrigatorios ausentes
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '409':
+          description: Lancamento ativo duplicado para o mesmo produto e periodo
   /api/v1/roles:
     get:
       tags: [Roles]
@@ -419,6 +443,32 @@ components:
       properties:
         refreshToken:
           type: string
+    CreateLaunchRequest:
+      type: object
+      required: [name, expert, product, baseDate, milestones]
+      properties:
+        name:
+          type: string
+        expert:
+          type: string
+        product:
+          type: string
+        baseDate:
+          type: string
+          format: date-time
+        milestones:
+          type: array
+          items:
+            $ref: '#/components/schemas/LaunchMilestoneRequest'
+    LaunchMilestoneRequest:
+      type: object
+      required: [name, scheduledAt]
+      properties:
+        name:
+          type: string
+        scheduledAt:
+          type: string
+          format: date-time
     CreateRoleRequest:
       type: object
       required: [code, name, description]
