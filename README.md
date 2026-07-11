@@ -54,6 +54,8 @@ src
 - `POST /api/v1/content-ideas`
 - `GET /api/v1/content-ideas`
 - `DELETE /api/v1/content-ideas/:ideaId`
+- `POST /api/v1/reels`
+- `PUT /api/v1/reels/:reelId`
 - `POST /api/v1/launches`
 - `GET /api/v1/launches/:launchId`
 - `POST /api/v1/launches/:launchId/market-researches`
@@ -166,6 +168,7 @@ A documentação fica disponível em:
 - O mapeamento de permissões por cargo via `PUT /api/v1/roles/:code/permissions` rejeita códigos inexistentes e passa a influenciar diretamente a autorização dos endpoints protegidos.
 - A trilha de auditoria inicial pode ser consultada em `GET /api/v1/audits` por usuários com `AUDIT_READ` e registra criação, atualização, inativação, mudança de cargo e autenticação bem-sucedida.
 - O banco de ideias pode ser gerenciado via `POST`, `GET` e `DELETE /api/v1/content-ideas`, aceita vínculo opcional com lançamento, filtra por `launchId`, `objective`, `status` e `active`, preserva autoria e histórico por exclusão lógica, e audita criação e inativação.
+- Os reels podem ser produzidos via `POST` e `PUT /api/v1/reels`, exigem contexto mínimo de lançamento ou plano de conteúdo, mantêm status operacional, trilha de aprovação compatível com o módulo, datas em UTC quando houver agendamento, e auditoria nas alterações de roteiro, legenda e status.
 - O cadastro de lançamentos via `POST /api/v1/launches` exige `LAUNCH_CREATE`, persiste marcos operacionais em UTC e rejeita duplicidade ativa com a mesma combinação de nome, produto e período.
 - A consulta de lançamentos via `GET /api/v1/launches/:launchId` exige `LAUNCH_READ` e retorna o histórico versionado das pesquisas de mercado já associadas.
 - A geração de pesquisa de mercado via `POST /api/v1/launches/:launchId/market-researches` exige `MARKET_RESEARCH_CREATE`, depende de um lançamento existente, marca o resultado para revisão humana e não expõe detalhes internos do mecanismo de geração.
