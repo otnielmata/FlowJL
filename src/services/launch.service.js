@@ -3,10 +3,12 @@ import { CompetitorResearch } from "../models/competitor-research.model.js";
 import { Launch } from "../models/launch.model.js";
 import { MarketResearch } from "../models/market-research.model.js";
 import { Offer } from "../models/offer.model.js";
+import { Positioning } from "../models/positioning.model.js";
 import { auditService } from "./audit.service.js";
 import { toPublicAvatar } from "./avatar.service.js";
 import { groupByChannelAndDate, toPublicCompetitorResearch } from "./competitor-research.service.js";
 import { toPublicOffer } from "./offer.service.js";
+import { toPublicPositioning } from "./positioning.service.js";
 
 function normalizeDate(value) {
   return new Date(value);
@@ -110,6 +112,7 @@ class LaunchService {
     const competitorResearchEntries = await CompetitorResearch.find({ launchId, active: true }).sort({ competitorName: 1, updatedAt: -1 });
     const avatarHistory = await Avatar.find({ launchId }).sort({ version: -1, createdAt: -1 });
     const offerHistory = await Offer.find({ launchId }).sort({ version: -1, createdAt: -1 });
+    const positioningHistory = await Positioning.find({ launchId }).sort({ version: -1, createdAt: -1 });
 
     return {
       ...toPublicLaunch(launch),
@@ -153,6 +156,10 @@ class LaunchService {
       offer: {
         current: offerHistory.find((offer) => offer.isCurrent) ? toPublicOffer(offerHistory.find((offer) => offer.isCurrent)) : null,
         history: offerHistory.map((offer) => toPublicOffer(offer))
+      },
+      positioning: {
+        current: positioningHistory.find((positioning) => positioning.isCurrent) ? toPublicPositioning(positioningHistory.find((positioning) => positioning.isCurrent)) : null,
+        history: positioningHistory.map((positioning) => toPublicPositioning(positioning))
       }
     };
   }

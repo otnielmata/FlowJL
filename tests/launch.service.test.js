@@ -22,6 +22,10 @@ const offerModel = {
   find: vi.fn()
 };
 
+const positioningModel = {
+  find: vi.fn()
+};
+
 const auditServiceMock = {
   record: vi.fn()
 };
@@ -46,6 +50,10 @@ vi.mock("../src/models/offer.model.js", () => ({
   Offer: offerModel
 }));
 
+vi.mock("../src/models/positioning.model.js", () => ({
+  Positioning: positioningModel
+}));
+
 vi.mock("../src/services/audit.service.js", () => ({
   auditService: auditServiceMock
 }));
@@ -63,6 +71,9 @@ describe("launchService.create", () => {
       sort: vi.fn().mockResolvedValue([])
     });
     offerModel.find.mockReturnValue({
+      sort: vi.fn().mockResolvedValue([])
+    });
+    positioningModel.find.mockReturnValue({
       sort: vi.fn().mockResolvedValue([])
     });
   });
@@ -284,6 +295,26 @@ describe("launchService.create", () => {
         }
       ])
     });
+    positioningModel.find.mockReturnValue({
+      sort: vi.fn().mockResolvedValue([
+        {
+          id: "positioning-v2",
+          launchId: "launch-id",
+          version: 2,
+          thesis: "Tese forte de mercado",
+          centralPromise: "Promessa principal",
+          differentiators: ["Diferencial 1"],
+          references: ["Referencia 1"],
+          offerVersion: 2,
+          isCurrent: true,
+          active: true,
+          createdAt: new Date("2026-07-11T12:55:00.000Z"),
+          updatedAt: new Date("2026-07-11T12:55:00.000Z"),
+          createdBy: "strategist-id",
+          updatedBy: "strategist-id"
+        }
+      ])
+    });
 
     const result = await launchService.getById("launch-id");
 
@@ -292,6 +323,7 @@ describe("launchService.create", () => {
     expect(competitorResearchModel.find).toHaveBeenCalledWith({ launchId: "launch-id", active: true });
     expect(avatarModel.find).toHaveBeenCalledWith({ launchId: "launch-id" });
     expect(offerModel.find).toHaveBeenCalledWith({ launchId: "launch-id" });
+    expect(positioningModel.find).toHaveBeenCalledWith({ launchId: "launch-id" });
     expect(result.marketResearchHistory).toEqual([
       {
         id: "research-id",
@@ -449,6 +481,42 @@ describe("launchService.create", () => {
           active: true,
           createdAt: new Date("2026-07-11T12:50:00.000Z"),
           updatedAt: new Date("2026-07-11T12:50:00.000Z"),
+          createdBy: "strategist-id",
+          updatedBy: "strategist-id"
+        }
+      ]
+    });
+    expect(result.positioning).toEqual({
+      current: {
+        id: "positioning-v2",
+        launchId: "launch-id",
+        version: 2,
+        thesis: "Tese forte de mercado",
+        centralPromise: "Promessa principal",
+        differentiators: ["Diferencial 1"],
+        references: ["Referencia 1"],
+        offerVersion: 2,
+        isCurrent: true,
+        active: true,
+        createdAt: new Date("2026-07-11T12:55:00.000Z"),
+        updatedAt: new Date("2026-07-11T12:55:00.000Z"),
+        createdBy: "strategist-id",
+        updatedBy: "strategist-id"
+      },
+      history: [
+        {
+          id: "positioning-v2",
+          launchId: "launch-id",
+          version: 2,
+          thesis: "Tese forte de mercado",
+          centralPromise: "Promessa principal",
+          differentiators: ["Diferencial 1"],
+          references: ["Referencia 1"],
+          offerVersion: 2,
+          isCurrent: true,
+          active: true,
+          createdAt: new Date("2026-07-11T12:55:00.000Z"),
+          updatedAt: new Date("2026-07-11T12:55:00.000Z"),
           createdBy: "strategist-id",
           updatedBy: "strategist-id"
         }

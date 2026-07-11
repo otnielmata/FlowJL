@@ -5,6 +5,7 @@ import { competitorResearchController } from "../controllers/competitor-research
 import { launchController } from "../controllers/launch.controller.js";
 import { marketResearchController } from "../controllers/market-research.controller.js";
 import { offerController } from "../controllers/offer.controller.js";
+import { positioningController } from "../controllers/positioning.controller.js";
 import { authMiddleware } from "../middleware/auth.middleware.js";
 import { requirePermission } from "../middleware/permission.middleware.js";
 import { asyncHandler } from "../utils/async-handler.js";
@@ -35,3 +36,15 @@ launchRoutes.post(
 );
 launchRoutes.post("/:launchId/offers", authMiddleware, asyncHandler(requirePermission("OFFER_CREATE")), asyncHandler(offerController.create.bind(offerController)));
 launchRoutes.put("/:launchId/offers", authMiddleware, asyncHandler(requirePermission("OFFER_UPDATE")), asyncHandler(offerController.update.bind(offerController)));
+launchRoutes.post(
+  "/:launchId/positionings",
+  authMiddleware,
+  asyncHandler(requirePermission("POSITIONING_CREATE")),
+  asyncHandler(positioningController.create.bind(positioningController))
+);
+launchRoutes.put(
+  "/:launchId/positionings",
+  authMiddleware,
+  asyncHandler(requirePermission("POSITIONING_UPDATE")),
+  asyncHandler(positioningController.update.bind(positioningController))
+);
