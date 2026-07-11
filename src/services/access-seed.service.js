@@ -182,6 +182,18 @@ const corePermissions = [
     name: "Atualizar cronograma inteligente",
     description: "Permite ajustar o cronograma inteligente de um lancamento preservando o historico.",
     module: "strategy"
+  },
+  {
+    code: "EXPERT_APPROVAL_SUBMIT",
+    name: "Submeter planejamento para aprovacao",
+    description: "Permite enviar o planejamento estrategico de um lancamento para revisao do expert.",
+    module: "strategy"
+  },
+  {
+    code: "EXPERT_APPROVAL_DECIDE",
+    name: "Decidir aprovacao do planejamento",
+    description: "Permite ao expert aprovar ou reprovar o planejamento submetido.",
+    module: "strategy"
   }
 ];
 
