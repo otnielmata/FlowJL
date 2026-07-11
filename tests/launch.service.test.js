@@ -30,6 +30,10 @@ const editorialLineModel = {
   find: vi.fn()
 };
 
+const contentPlanModel = {
+  find: vi.fn()
+};
+
 const auditServiceMock = {
   record: vi.fn()
 };
@@ -62,6 +66,10 @@ vi.mock("../src/models/editorial-line.model.js", () => ({
   EditorialLine: editorialLineModel
 }));
 
+vi.mock("../src/models/content-plan.model.js", () => ({
+  ContentPlan: contentPlanModel
+}));
+
 vi.mock("../src/services/audit.service.js", () => ({
   auditService: auditServiceMock
 }));
@@ -85,6 +93,9 @@ describe("launchService.create", () => {
       sort: vi.fn().mockResolvedValue([])
     });
     editorialLineModel.find.mockReturnValue({
+      sort: vi.fn().mockResolvedValue([])
+    });
+    contentPlanModel.find.mockReturnValue({
       sort: vi.fn().mockResolvedValue([])
     });
   });
@@ -347,6 +358,34 @@ describe("launchService.create", () => {
         }
       ])
     });
+    contentPlanModel.find.mockReturnValue({
+      sort: vi.fn().mockResolvedValue([
+        {
+          id: "content-plan-v2",
+          launchId: "launch-id",
+          version: 2,
+          items: [
+            {
+              id: "item-1",
+              theme: "Tema 1",
+              format: "Reel",
+              objective: "Autoridade",
+              cta: "Comentar",
+              stage: "Aquecimento",
+              periodLabel: "Semana 1",
+              active: true
+            }
+          ],
+          editorialLineVersion: 2,
+          isCurrent: true,
+          active: true,
+          createdAt: new Date("2026-07-11T13:05:00.000Z"),
+          updatedAt: new Date("2026-07-11T13:05:00.000Z"),
+          createdBy: "strategist-id",
+          updatedBy: "strategist-id"
+        }
+      ])
+    });
 
     const result = await launchService.getById("launch-id");
 
@@ -357,6 +396,7 @@ describe("launchService.create", () => {
     expect(offerModel.find).toHaveBeenCalledWith({ launchId: "launch-id" });
     expect(positioningModel.find).toHaveBeenCalledWith({ launchId: "launch-id" });
     expect(editorialLineModel.find).toHaveBeenCalledWith({ launchId: "launch-id" });
+    expect(contentPlanModel.find).toHaveBeenCalledWith({ launchId: "launch-id" });
     expect(result.marketResearchHistory).toEqual([
       {
         id: "research-id",
@@ -588,6 +628,164 @@ describe("launchService.create", () => {
           active: true,
           createdAt: new Date("2026-07-11T13:00:00.000Z"),
           updatedAt: new Date("2026-07-11T13:00:00.000Z"),
+          createdBy: "strategist-id",
+          updatedBy: "strategist-id"
+        }
+      ]
+    });
+    expect(result.contentPlan).toEqual({
+      current: {
+        id: "content-plan-v2",
+        launchId: "launch-id",
+        version: 2,
+        items: [
+          {
+            id: "item-1",
+            theme: "Tema 1",
+            format: "Reel",
+            objective: "Autoridade",
+            cta: "Comentar",
+            stage: "Aquecimento",
+            periodLabel: "Semana 1",
+            active: true
+          }
+        ],
+        editorialLineVersion: 2,
+        grouped: {
+          byStage: [
+            {
+              stage: "Aquecimento",
+              items: [
+                {
+                  id: "item-1",
+                  theme: "Tema 1",
+                  format: "Reel",
+                  objective: "Autoridade",
+                  cta: "Comentar",
+                  stage: "Aquecimento",
+                  periodLabel: "Semana 1",
+                  active: true
+                }
+              ]
+            }
+          ],
+          byPeriod: [
+            {
+              periodLabel: "Semana 1",
+              items: [
+                {
+                  id: "item-1",
+                  theme: "Tema 1",
+                  format: "Reel",
+                  objective: "Autoridade",
+                  cta: "Comentar",
+                  stage: "Aquecimento",
+                  periodLabel: "Semana 1",
+                  active: true
+                }
+              ]
+            }
+          ],
+          byObjective: [
+            {
+              objective: "Autoridade",
+              items: [
+                {
+                  id: "item-1",
+                  theme: "Tema 1",
+                  format: "Reel",
+                  objective: "Autoridade",
+                  cta: "Comentar",
+                  stage: "Aquecimento",
+                  periodLabel: "Semana 1",
+                  active: true
+                }
+              ]
+            }
+          ]
+        },
+        isCurrent: true,
+        active: true,
+        createdAt: new Date("2026-07-11T13:05:00.000Z"),
+        updatedAt: new Date("2026-07-11T13:05:00.000Z"),
+        createdBy: "strategist-id",
+        updatedBy: "strategist-id"
+      },
+      history: [
+        {
+          id: "content-plan-v2",
+          launchId: "launch-id",
+          version: 2,
+          items: [
+            {
+              id: "item-1",
+              theme: "Tema 1",
+              format: "Reel",
+              objective: "Autoridade",
+              cta: "Comentar",
+              stage: "Aquecimento",
+              periodLabel: "Semana 1",
+              active: true
+            }
+          ],
+          editorialLineVersion: 2,
+          grouped: {
+            byStage: [
+              {
+                stage: "Aquecimento",
+                items: [
+                  {
+                    id: "item-1",
+                    theme: "Tema 1",
+                    format: "Reel",
+                    objective: "Autoridade",
+                    cta: "Comentar",
+                    stage: "Aquecimento",
+                    periodLabel: "Semana 1",
+                    active: true
+                  }
+                ]
+              }
+            ],
+            byPeriod: [
+              {
+                periodLabel: "Semana 1",
+                items: [
+                  {
+                    id: "item-1",
+                    theme: "Tema 1",
+                    format: "Reel",
+                    objective: "Autoridade",
+                    cta: "Comentar",
+                    stage: "Aquecimento",
+                    periodLabel: "Semana 1",
+                    active: true
+                  }
+                ]
+              }
+            ],
+            byObjective: [
+              {
+                objective: "Autoridade",
+                items: [
+                  {
+                    id: "item-1",
+                    theme: "Tema 1",
+                    format: "Reel",
+                    objective: "Autoridade",
+                    cta: "Comentar",
+                    stage: "Aquecimento",
+                    periodLabel: "Semana 1",
+                    active: true
+                  }
+                ]
+              }
+            ]
+          },
+          isCurrent: true,
+          active: true,
+          createdAt: new Date("2026-07-11T13:05:00.000Z"),
+          updatedAt: new Date("2026-07-11T13:05:00.000Z"),
           createdBy: "strategist-id",
           updatedBy: "strategist-id"
         }
