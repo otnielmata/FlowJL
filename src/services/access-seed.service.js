@@ -1,5 +1,6 @@
 import { Permission } from "../models/permission.model.js";
 import { Role } from "../models/role.model.js";
+import { roleCatalog } from "./role-catalog.js";
 
 const corePermissions = [
   {
@@ -52,45 +53,6 @@ const corePermissions = [
   }
 ];
 
-const coreRoles = [
-  {
-    code: "ADMIN",
-    name: "Administrador",
-    description: "Cargo inicial com acesso amplo ao core da plataforma.",
-    permissionCodes: corePermissions.map((permission) => permission.code)
-  },
-  {
-    code: "DIGITAL_STRATEGIST",
-    name: "Estrategista Digital",
-    description: "Cargo de estrategia digital do Flow JL.",
-    permissionCodes: []
-  },
-  {
-    code: "EXPERT",
-    name: "Expert",
-    description: "Cargo de especialista de conteudo do Flow JL.",
-    permissionCodes: []
-  },
-  {
-    code: "TRAFFIC_MANAGER",
-    name: "Gestor de Trafego",
-    description: "Cargo de gestao de trafego pago do Flow JL.",
-    permissionCodes: []
-  },
-  {
-    code: "OPERATIONS",
-    name: "Operacoes Administrativas",
-    description: "Cargo operacional administrativo do Flow JL.",
-    permissionCodes: []
-  },
-  {
-    code: "SOCIAL_MEDIA",
-    name: "Social Media",
-    description: "Cargo responsavel por redes sociais do Flow JL.",
-    permissionCodes: []
-  }
-];
-
 class AccessSeedService {
   async ensureCoreAccessSeed() {
     for (const permission of corePermissions) {
@@ -118,7 +80,7 @@ class AccessSeedService {
       { _id: 1 }
     ).sort({ code: 1 });
 
-    for (const role of coreRoles) {
+    for (const role of roleCatalog) {
       const permissionIds = permissions
         .filter((permission) => role.permissionCodes.includes(permission.code))
         .map((permission) => permission._id);
