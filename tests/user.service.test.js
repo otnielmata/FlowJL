@@ -471,4 +471,21 @@ describe("userService.update", () => {
       }
     );
   });
+
+  it("rejects activation when the collaborator is already active", async () => {
+    userModel.findById.mockResolvedValue({
+      id: "active-user-id",
+      roleId: "role-user-id",
+      status: "ACTIVE"
+    });
+
+    await expect(
+      userService.update("admin-user-id", "active-user-id", {
+        status: "ACTIVE"
+      })
+    ).rejects.toMatchObject({
+      statusCode: 409,
+      message: "User is already active"
+    });
+  });
 });
