@@ -38,6 +38,10 @@ const smartScheduleModel = {
   find: vi.fn()
 };
 
+const expertApprovalModel = {
+  find: vi.fn()
+};
+
 const auditServiceMock = {
   record: vi.fn()
 };
@@ -78,6 +82,10 @@ vi.mock("../src/models/smart-schedule.model.js", () => ({
   SmartSchedule: smartScheduleModel
 }));
 
+vi.mock("../src/models/expert-approval.model.js", () => ({
+  ExpertApproval: expertApprovalModel
+}));
+
 vi.mock("../src/services/audit.service.js", () => ({
   auditService: auditServiceMock
 }));
@@ -107,6 +115,9 @@ describe("launchService.create", () => {
       sort: vi.fn().mockResolvedValue([])
     });
     smartScheduleModel.find.mockReturnValue({
+      sort: vi.fn().mockResolvedValue([])
+    });
+    expertApprovalModel.find.mockReturnValue({
       sort: vi.fn().mockResolvedValue([])
     });
   });
@@ -430,6 +441,35 @@ describe("launchService.create", () => {
         }
       ])
     });
+    expertApprovalModel.find.mockReturnValue({
+      sort: vi.fn().mockResolvedValue([
+        {
+          id: "approval-v2",
+          launchId: "launch-id",
+          version: 2,
+          status: "APPROVED",
+          submittedAt: new Date("2026-07-11T13:15:00.000Z"),
+          submittedBy: "strategist-id",
+          decisionAt: new Date("2026-07-11T13:20:00.000Z"),
+          decidedBy: "expert-id",
+          observations: "Aprovado para execucao",
+          marketResearchVersion: 2,
+          competitorResearchCount: 1,
+          avatarVersion: 2,
+          offerVersion: 2,
+          positioningVersion: 2,
+          editorialLineVersion: 2,
+          contentPlanVersion: 2,
+          smartScheduleVersion: 2,
+          isCurrent: true,
+          active: true,
+          createdAt: new Date("2026-07-11T13:20:00.000Z"),
+          updatedAt: new Date("2026-07-11T13:20:00.000Z"),
+          createdBy: "strategist-id",
+          updatedBy: "expert-id"
+        }
+      ])
+    });
 
     const result = await launchService.getById("launch-id");
 
@@ -442,6 +482,7 @@ describe("launchService.create", () => {
     expect(editorialLineModel.find).toHaveBeenCalledWith({ launchId: "launch-id" });
     expect(contentPlanModel.find).toHaveBeenCalledWith({ launchId: "launch-id" });
     expect(smartScheduleModel.find).toHaveBeenCalledWith({ launchId: "launch-id" });
+    expect(expertApprovalModel.find).toHaveBeenCalledWith({ launchId: "launch-id" });
     expect(result.marketResearchHistory).toEqual([
       {
         id: "research-id",
@@ -971,6 +1012,60 @@ describe("launchService.create", () => {
           updatedAt: new Date("2026-07-11T13:10:00.000Z"),
           createdBy: "strategist-id",
           updatedBy: "strategist-id"
+        }
+      ]
+    });
+    expect(result.expertApproval).toEqual({
+      current: {
+        id: "approval-v2",
+        launchId: "launch-id",
+        version: 2,
+        status: "APPROVED",
+        submittedAt: new Date("2026-07-11T13:15:00.000Z"),
+        submittedBy: "strategist-id",
+        decisionAt: new Date("2026-07-11T13:20:00.000Z"),
+        decidedBy: "expert-id",
+        observations: "Aprovado para execucao",
+        marketResearchVersion: 2,
+        competitorResearchCount: 1,
+        avatarVersion: 2,
+        offerVersion: 2,
+        positioningVersion: 2,
+        editorialLineVersion: 2,
+        contentPlanVersion: 2,
+        smartScheduleVersion: 2,
+        isCurrent: true,
+        active: true,
+        createdAt: new Date("2026-07-11T13:20:00.000Z"),
+        updatedAt: new Date("2026-07-11T13:20:00.000Z"),
+        createdBy: "strategist-id",
+        updatedBy: "expert-id"
+      },
+      history: [
+        {
+          id: "approval-v2",
+          launchId: "launch-id",
+          version: 2,
+          status: "APPROVED",
+          submittedAt: new Date("2026-07-11T13:15:00.000Z"),
+          submittedBy: "strategist-id",
+          decisionAt: new Date("2026-07-11T13:20:00.000Z"),
+          decidedBy: "expert-id",
+          observations: "Aprovado para execucao",
+          marketResearchVersion: 2,
+          competitorResearchCount: 1,
+          avatarVersion: 2,
+          offerVersion: 2,
+          positioningVersion: 2,
+          editorialLineVersion: 2,
+          contentPlanVersion: 2,
+          smartScheduleVersion: 2,
+          isCurrent: true,
+          active: true,
+          createdAt: new Date("2026-07-11T13:20:00.000Z"),
+          updatedAt: new Date("2026-07-11T13:20:00.000Z"),
+          createdBy: "strategist-id",
+          updatedBy: "expert-id"
         }
       ]
     });

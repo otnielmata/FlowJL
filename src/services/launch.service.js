@@ -2,6 +2,7 @@ import { Avatar } from "../models/avatar.model.js";
 import { CompetitorResearch } from "../models/competitor-research.model.js";
 import { ContentPlan } from "../models/content-plan.model.js";
 import { EditorialLine } from "../models/editorial-line.model.js";
+import { ExpertApproval } from "../models/expert-approval.model.js";
 import { Launch } from "../models/launch.model.js";
 import { MarketResearch } from "../models/market-research.model.js";
 import { Offer } from "../models/offer.model.js";
@@ -12,6 +13,7 @@ import { toPublicAvatar } from "./avatar.service.js";
 import { groupByChannelAndDate, toPublicCompetitorResearch } from "./competitor-research.service.js";
 import { toPublicContentPlan } from "./content-plan.service.js";
 import { toPublicEditorialLine } from "./editorial-line.service.js";
+import { toPublicExpertApproval } from "./expert-approval.service.js";
 import { toPublicOffer } from "./offer.service.js";
 import { toPublicPositioning } from "./positioning.service.js";
 import { toPublicSmartSchedule } from "./smart-schedule.service.js";
@@ -122,6 +124,7 @@ class LaunchService {
     const editorialLineHistory = await EditorialLine.find({ launchId }).sort({ version: -1, createdAt: -1 });
     const contentPlanHistory = await ContentPlan.find({ launchId }).sort({ version: -1, createdAt: -1 });
     const smartScheduleHistory = await SmartSchedule.find({ launchId }).sort({ version: -1, createdAt: -1 });
+    const expertApprovalHistory = await ExpertApproval.find({ launchId }).sort({ version: -1, createdAt: -1 });
 
     return {
       ...toPublicLaunch(launch),
@@ -181,6 +184,10 @@ class LaunchService {
       smartSchedule: {
         current: smartScheduleHistory.find((schedule) => schedule.isCurrent) ? toPublicSmartSchedule(smartScheduleHistory.find((schedule) => schedule.isCurrent)) : null,
         history: smartScheduleHistory.map((schedule) => toPublicSmartSchedule(schedule))
+      },
+      expertApproval: {
+        current: expertApprovalHistory.find((approval) => approval.isCurrent) ? toPublicExpertApproval(expertApprovalHistory.find((approval) => approval.isCurrent)) : null,
+        history: expertApprovalHistory.map((approval) => toPublicExpertApproval(approval))
       }
     };
   }

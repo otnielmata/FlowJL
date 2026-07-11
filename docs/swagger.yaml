@@ -594,6 +594,70 @@ paths:
           description: Acesso negado
         '404':
           description: Lancamento ou cronograma inteligente nao encontrado
+  /api/v1/launches/{launchId}/expert-approvals:
+    post:
+      tags: [Launches]
+      summary: Submete o planejamento do lancamento para aprovacao do expert
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: launchId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubmitExpertApprovalRequest'
+      responses:
+        '201':
+          description: Planejamento submetido para revisao
+        '400':
+          description: Planejamento incompleto ou dados invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento nao encontrado
+        '409':
+          description: Fluxo de aprovacao ja em revisao ou finalizado
+  /api/v1/launches/{launchId}/expert-approvals/decision:
+    post:
+      tags: [Launches]
+      summary: Registra a decisao do expert sobre o planejamento submetido
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: launchId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DecideExpertApprovalRequest'
+      responses:
+        '200':
+          description: Decisao do expert registrada
+        '400':
+          description: Dados invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento ou submissao de aprovacao nao encontrados
+        '409':
+          description: Aprovacao fora do fluxo de revisao
   /api/v1/roles:
     get:
       tags: [Roles]
@@ -1134,6 +1198,24 @@ components:
                 format: date-time
               status:
                 type: string
+    SubmitExpertApprovalRequest:
+      type: object
+      properties:
+        observations:
+          type: string
+          minLength: 3
+          maxLength: 1000
+    DecideExpertApprovalRequest:
+      type: object
+      required: [status, observations]
+      properties:
+        status:
+          type: string
+          enum: [APPROVED, REJECTED]
+        observations:
+          type: string
+          minLength: 3
+          maxLength: 1000
     CreateRoleRequest:
       type: object
       required: [code, name, description]
