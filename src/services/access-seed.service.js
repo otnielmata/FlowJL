@@ -27,6 +27,18 @@ const corePermissions = [
     module: "user"
   },
   {
+    code: "USER_READ",
+    name: "Consultar colaborador",
+    description: "Permite consultar um colaborador especifico no modulo core.",
+    module: "user"
+  },
+  {
+    code: "USER_LIST",
+    name: "Listar colaboradores",
+    description: "Permite listar colaboradores do modulo core.",
+    module: "user"
+  },
+  {
     code: "ROLE_READ",
     name: "Consultar cargos",
     description: "Permite consultar cargos disponiveis no core.",
