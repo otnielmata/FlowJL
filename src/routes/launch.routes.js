@@ -1,5 +1,6 @@
 import { Router } from "express";
 
+import { competitorResearchController } from "../controllers/competitor-research.controller.js";
 import { launchController } from "../controllers/launch.controller.js";
 import { marketResearchController } from "../controllers/market-research.controller.js";
 import { authMiddleware } from "../middleware/auth.middleware.js";
@@ -15,4 +16,10 @@ launchRoutes.post(
   authMiddleware,
   asyncHandler(requirePermission("MARKET_RESEARCH_CREATE")),
   asyncHandler(marketResearchController.create.bind(marketResearchController))
+);
+launchRoutes.post(
+  "/:launchId/competitor-researches",
+  authMiddleware,
+  asyncHandler(requirePermission("COMPETITOR_RESEARCH_CREATE")),
+  asyncHandler(competitorResearchController.create.bind(competitorResearchController))
 );

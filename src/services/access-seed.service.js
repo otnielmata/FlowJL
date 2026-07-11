@@ -98,6 +98,12 @@ const corePermissions = [
     name: "Gerar pesquisa de mercado",
     description: "Permite gerar pesquisas de mercado com apoio de IA para um lancamento.",
     module: "strategy"
+  },
+  {
+    code: "COMPETITOR_RESEARCH_CREATE",
+    name: "Registrar pesquisa de concorrentes",
+    description: "Permite registrar evidencias de concorrentes vinculadas a um lancamento.",
+    module: "strategy"
   }
 ];
 
