@@ -638,6 +638,30 @@ const corePermissions = [
     name: "Inativar eventos ao vivo",
     description: "Permite realizar exclusao logica de eventos ao vivo preservando historico.",
     module: "operations"
+  },
+  {
+    code: "DISCORD_OPERATION_CREATE",
+    name: "Cadastrar operacoes de Discord",
+    description: "Permite cadastrar tarefas operacionais do Discord vinculadas a um lancamento.",
+    module: "operations"
+  },
+  {
+    code: "DISCORD_OPERATION_READ",
+    name: "Consultar operacoes de Discord",
+    description: "Permite consultar tarefas do Discord por lancamento, tipo, responsavel, prazo e status.",
+    module: "operations"
+  },
+  {
+    code: "DISCORD_OPERATION_UPDATE",
+    name: "Atualizar operacoes de Discord",
+    description: "Permite atualizar status, observacoes, responsavel e prazo de tarefas do Discord.",
+    module: "operations"
+  },
+  {
+    code: "DISCORD_OPERATION_DEACTIVATE",
+    name: "Inativar operacoes de Discord",
+    description: "Permite realizar exclusao logica de tarefas do Discord preservando historico.",
+    module: "operations"
   }
 ];
 

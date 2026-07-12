@@ -12,6 +12,7 @@ import "../models/content-idea.model.js";
 import "../models/content-plan.model.js";
 import "../models/content-status-history.model.js";
 import "../models/copywriting.model.js";
+import "../models/discord-operation.model.js";
 import "../models/editorial-line.model.js";
 import "../models/email-campaign.model.js";
 import "../models/expert-approval.model.js";
