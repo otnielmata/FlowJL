@@ -470,6 +470,30 @@ const corePermissions = [
     name: "Inativar campanhas de trafego",
     description: "Permite realizar exclusao logica de campanhas pagas preservando historico.",
     module: "traffic"
+  },
+  {
+    code: "TRAFFIC_CREATIVE_CREATE",
+    name: "Cadastrar criativos de trafego",
+    description: "Permite cadastrar criativos vinculados a campanhas de trafego.",
+    module: "traffic"
+  },
+  {
+    code: "TRAFFIC_CREATIVE_READ",
+    name: "Consultar criativos de trafego",
+    description: "Permite consultar criativos por campanha, lancamento, formato, status e classificacao.",
+    module: "traffic"
+  },
+  {
+    code: "TRAFFIC_CREATIVE_UPDATE",
+    name: "Atualizar criativos de trafego",
+    description: "Permite atualizar situacao, classificacao e desempenho de criativos de trafego.",
+    module: "traffic"
+  },
+  {
+    code: "TRAFFIC_CREATIVE_DEACTIVATE",
+    name: "Inativar criativos de trafego",
+    description: "Permite realizar exclusao logica de criativos preservando historico.",
+    module: "traffic"
   }
 ];
 

@@ -35,5 +35,6 @@ describe("app", () => {
     expect(response.body.modules).toContain("production-checklists");
     expect(response.body.modules).toContain("external-publication");
     expect(response.body.modules).toContain("traffic-campaigns");
+    expect(response.body.modules).toContain("traffic-creatives");
   });
 });
