@@ -6,7 +6,7 @@ const contentPlanItemSchema = new mongoose.Schema(
   {
     id: {
       type: String,
-      default: randomUUID
+      default: () => randomUUID()
     },
     theme: {
       type: String,
@@ -52,7 +52,7 @@ const contentPlanSchema = new mongoose.Schema(
   {
     _id: {
       type: String,
-      default: randomUUID
+      default: () => randomUUID()
     },
     launchId: {
       type: String,

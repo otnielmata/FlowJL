@@ -29,6 +29,7 @@ describe("app", () => {
     expect(response.body.modules).toContain("copywritings");
     expect(response.body.modules).toContain("content-approvals");
     expect(response.body.modules).toContain("assets");
+    expect(response.body.modules).toContain("publications");
     expect(response.body.modules).toContain("editorial-calendar");
   });
 });

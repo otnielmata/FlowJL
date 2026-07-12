@@ -6,7 +6,7 @@ const competitorEvidenceSchema = new mongoose.Schema(
   {
     id: {
       type: String,
-      default: randomUUID
+      default: () => randomUUID()
     },
     channel: {
       type: String,
@@ -55,7 +55,7 @@ const competitorResearchSchema = new mongoose.Schema(
   {
     _id: {
       type: String,
-      default: randomUUID
+      default: () => randomUUID()
     },
     launchId: {
       type: String,

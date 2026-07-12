@@ -346,6 +346,24 @@ const corePermissions = [
     module: "strategy"
   },
   {
+    code: "PUBLICATION_CREATE",
+    name: "Cadastrar publicacoes",
+    description: "Permite registrar publicacoes planejadas para conteudos aprovados.",
+    module: "content"
+  },
+  {
+    code: "PUBLICATION_READ",
+    name: "Consultar publicacoes",
+    description: "Permite consultar publicacoes por periodo, canal, lancamento e status.",
+    module: "content"
+  },
+  {
+    code: "PUBLICATION_UPDATE",
+    name: "Atualizar publicacoes",
+    description: "Permite atualizar agenda, responsavel e situacao operacional de publicacoes.",
+    module: "content"
+  },
+  {
     code: "EDITORIAL_CALENDAR_CREATE",
     name: "Cadastrar itens no calendario editorial",
     description: "Permite inserir itens agendados no calendario editorial com vinculo a conteudo base.",
@@ -371,7 +389,9 @@ class AccessSeedService {
       await Permission.updateOne(
         { code: permission.code },
         {
-          $setOnInsert: permission,
+          $setOnInsert: {
+            code: permission.code
+          },
           $set: {
             name: permission.name,
             description: permission.description,

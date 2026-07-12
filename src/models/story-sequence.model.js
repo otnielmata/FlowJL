@@ -6,7 +6,7 @@ const storyBlockSchema = new mongoose.Schema(
   {
     id: {
       type: String,
-      default: randomUUID
+      default: () => randomUUID()
     },
     order: {
       type: Number,
@@ -28,7 +28,7 @@ const storySequenceSchema = new mongoose.Schema(
   {
     _id: {
       type: String,
-      default: randomUUID
+      default: () => randomUUID()
     },
     launchId: {
       type: String,

@@ -14,6 +14,7 @@ tags:
   - name: Editorial Calendar
   - name: Content Approvals
   - name: Copywritings
+  - name: Publications
   - name: YouTube Contents
   - name: Launches
   - name: Profiles
@@ -475,6 +476,138 @@ paths:
           description: Acesso negado
         '404':
           description: Lancamento nao encontrado
+  /api/v1/publications:
+    post:
+      tags: [Publications]
+      summary: Registra uma publicacao planejada ou operacional para conteudo aprovado
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [contentType, contentId, channel, publishAt, responsible]
+              properties:
+                contentType:
+                  type: string
+                  enum: [REEL, CAROUSEL, STORY_SEQUENCE, EMAIL_CAMPAIGN, YOUTUBE_CONTENT]
+                contentId:
+                  type: string
+                  format: uuid
+                channel:
+                  type: string
+                publishAt:
+                  type: string
+                  format: date-time
+                responsible:
+                  type: string
+                status:
+                  type: string
+                  enum: [PLANNED, SCHEDULED, PUBLISHED, ISSUE]
+                issueReason:
+                  type: string
+      responses:
+        '201':
+          description: Publicacao registrada com sucesso
+        '400':
+          description: Dados invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Conteudo nao encontrado
+        '409':
+          description: Conteudo sem aprovacao previa ou publicacao duplicada
+    get:
+      tags: [Publications]
+      summary: Lista publicacoes por lancamento, periodo, canal ou status
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: launchId
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: status
+          required: false
+          schema:
+            type: string
+            enum: [PLANNED, SCHEDULED, PUBLISHED, ISSUE]
+        - in: query
+          name: channel
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: startAt
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: endAt
+          required: false
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: Publicacoes retornadas com sucesso
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+  /api/v1/publications/{publicationId}:
+    put:
+      tags: [Publications]
+      summary: Atualiza situacao, agenda ou responsavel de uma publicacao
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: publicationId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                channel:
+                  type: string
+                publishAt:
+                  type: string
+                  format: date-time
+                responsible:
+                  type: string
+                status:
+                  type: string
+                  enum: [PLANNED, SCHEDULED, PUBLISHED, ISSUE]
+                issueReason:
+                  type: string
+      responses:
+        '200':
+          description: Publicacao atualizada com sucesso
+        '400':
+          description: Dados invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Publicacao nao encontrada
+        '409':
+          description: Conteudo sem aprovacao previa para publicar
   /api/v1/emails:
     post:
       tags: [Emails]

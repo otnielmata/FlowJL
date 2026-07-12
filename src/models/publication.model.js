@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 
 import mongoose from "mongoose";
 
-const youtubeContentSchema = new mongoose.Schema(
+const publicationSchema = new mongoose.Schema(
   {
     _id: {
       type: String,
@@ -13,63 +13,50 @@ const youtubeContentSchema = new mongoose.Schema(
       required: true,
       index: true
     },
-    editorialLineVersion: {
-      type: Number,
-      required: true,
-      min: 1
-    },
-    theme: {
-      type: String,
-      required: true,
-      trim: true
-    },
-    objective: {
-      type: String,
-      required: true,
-      trim: true
-    },
-    format: {
-      type: String,
-      required: true,
-      trim: true
-    },
-    cta: {
-      type: String,
-      required: true,
-      trim: true
-    },
-    script: {
-      type: String,
-      default: null,
-      trim: true
-    },
-    ownerRole: {
-      type: String,
-      default: null,
-      trim: true
-    },
-    operationalStatus: {
+    contentType: {
       type: String,
       required: true,
       trim: true,
-      enum: ["PLANNED", "SCRIPTING", "RECORDING", "EDITING", "SCHEDULED", "PUBLISHED"],
-      default: "PLANNED"
+      enum: ["REEL", "CAROUSEL", "STORY_SEQUENCE", "EMAIL_CAMPAIGN", "YOUTUBE_CONTENT"]
     },
-    recordingAt: {
-      type: Date,
-      default: null
+    contentId: {
+      type: String,
+      required: true,
+      index: true
+    },
+    channel: {
+      type: String,
+      required: true,
+      trim: true
     },
     publishAt: {
+      type: Date,
+      required: true
+    },
+    responsible: {
+      type: String,
+      required: true,
+      trim: true
+    },
+    status: {
+      type: String,
+      required: true,
+      trim: true,
+      enum: ["PLANNED", "SCHEDULED", "PUBLISHED", "ISSUE"],
+      default: "PLANNED"
+    },
+    issueReason: {
+      type: String,
+      default: null,
+      trim: true
+    },
+    publishedAt: {
       type: Date,
       default: null
     },
     active: {
       type: Boolean,
       default: true
-    },
-    deactivatedAt: {
-      type: Date,
-      default: null
     },
     createdBy: {
       type: String,
@@ -86,6 +73,7 @@ const youtubeContentSchema = new mongoose.Schema(
   }
 );
 
-youtubeContentSchema.index({ launchId: 1, operationalStatus: 1, active: 1 });
+publicationSchema.index({ contentType: 1, contentId: 1 }, { unique: true });
+publicationSchema.index({ launchId: 1, status: 1, publishAt: 1, active: 1 });
 
-export const YouTubeContent = mongoose.model("YouTubeContent", youtubeContentSchema);
+export const Publication = mongoose.model("Publication", publicationSchema);
