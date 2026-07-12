@@ -77,7 +77,11 @@ export const roleCatalog = [
       "EXTERNAL_INTEGRATION_READ",
       "EXTERNAL_INTEGRATION_UPDATE",
       "EXTERNAL_PUBLICATION_LINK_CREATE",
-      "EXTERNAL_PUBLICATION_LINK_READ"
+      "EXTERNAL_PUBLICATION_LINK_READ",
+      "TRAFFIC_CAMPAIGN_CREATE",
+      "TRAFFIC_CAMPAIGN_READ",
+      "TRAFFIC_CAMPAIGN_UPDATE",
+      "TRAFFIC_CAMPAIGN_DEACTIVATE"
     ]
   },
   {
@@ -96,7 +100,7 @@ export const roleCatalog = [
     code: "TRAFFIC_MANAGER",
     name: "Gestor de Trafego",
     description: "Cargo de gestao de trafego pago do Flow JL.",
-    permissionCodes: []
+    permissionCodes: ["TRAFFIC_CAMPAIGN_CREATE", "TRAFFIC_CAMPAIGN_READ", "TRAFFIC_CAMPAIGN_UPDATE", "TRAFFIC_CAMPAIGN_DEACTIVATE"]
   },
   {
     code: "OPERATIONS",

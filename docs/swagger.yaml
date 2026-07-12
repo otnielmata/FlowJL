@@ -23,6 +23,7 @@ tags:
   - name: Profiles
   - name: Users
   - name: Roles
+  - name: Traffic Campaigns
 paths:
   /health:
     get:
@@ -1074,6 +1075,165 @@ paths:
           description: JWT ausente ou invalido
         '403':
           description: Acesso negado
+  /api/v1/traffic-campaigns:
+    post:
+      tags: [Traffic Campaigns]
+      summary: Cadastra campanha paga vinculada a um lancamento
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [launchId, name, objective, channel, periodStart, periodEnd, status]
+              properties:
+                launchId:
+                  type: string
+                  format: uuid
+                name:
+                  type: string
+                objective:
+                  type: string
+                channel:
+                  type: string
+                  enum: [META, GOOGLE, YOUTUBE, TIKTOK, LINKEDIN, OTHER]
+                periodStart:
+                  type: string
+                  format: date-time
+                periodEnd:
+                  type: string
+                  format: date-time
+                status:
+                  type: string
+                  enum: [DRAFT, PLANNED, ACTIVE, PAUSED, FINISHED, CANCELED]
+                budget:
+                  type: number
+                  minimum: 0
+                externalCampaignId:
+                  type: string
+      responses:
+        '201':
+          description: Campanha cadastrada com sucesso
+        '400':
+          description: Dados invalidos ou periodo inconsistente
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento nao encontrado
+        '409':
+          description: Campanha duplicada no lancamento
+    get:
+      tags: [Traffic Campaigns]
+      summary: Lista campanhas por lancamento, canal, status ou ativacao
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: launchId
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: status
+          required: false
+          schema:
+            type: string
+            enum: [DRAFT, PLANNED, ACTIVE, PAUSED, FINISHED, CANCELED]
+        - in: query
+          name: channel
+          required: false
+          schema:
+            type: string
+            enum: [META, GOOGLE, YOUTUBE, TIKTOK, LINKEDIN, OTHER]
+        - in: query
+          name: active
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Campanhas retornadas com sucesso
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+  /api/v1/traffic-campaigns/{campaignId}:
+    put:
+      tags: [Traffic Campaigns]
+      summary: Atualiza objetivo, periodo, status ou metadados de campanha
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: campaignId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                objective:
+                  type: string
+                periodStart:
+                  type: string
+                  format: date-time
+                periodEnd:
+                  type: string
+                  format: date-time
+                status:
+                  type: string
+                  enum: [DRAFT, PLANNED, ACTIVE, PAUSED, FINISHED, CANCELED]
+                budget:
+                  type: number
+                  minimum: 0
+                externalCampaignId:
+                  type: string
+                reason:
+                  type: string
+      responses:
+        '200':
+          description: Campanha atualizada com historico auditavel
+        '400':
+          description: Dados invalidos ou periodo inconsistente
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Campanha nao encontrada
+    delete:
+      tags: [Traffic Campaigns]
+      summary: Realiza exclusao logica de campanha de trafego
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: campaignId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Campanha inativada com sucesso
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Campanha nao encontrada
+        '409':
+          description: Campanha ja esta inativa
   /api/v1/emails:
     post:
       tags: [Emails]
