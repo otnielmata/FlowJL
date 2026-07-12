@@ -12,6 +12,7 @@ Ela já deixa o projeto pronto para:
 - persistência com MongoDB
 - documentação com Swagger
 - arquitetura em camadas
+- bootstrap controlado do primeiro administrador
 - futura integração com GitHub Actions
 - futuro deploy em Vercel
 
@@ -46,6 +47,62 @@ src
 - `GET /docs`
 - `GET /api/v1`
 - `POST /api/v1/auth/login`
+- `POST /api/v1/auth/refresh`
+- `POST /api/v1/auth/logout`
+- `GET /api/v1/auth/me`
+- `GET /api/v1/audits`
+- `POST /api/v1/assets`
+- `GET /api/v1/assets`
+- `DELETE /api/v1/assets/:assetId`
+- `POST /api/v1/content-ideas`
+- `GET /api/v1/content-ideas`
+- `DELETE /api/v1/content-ideas/:ideaId`
+- `POST /api/v1/content-approvals/:contentType/:contentId/status`
+- `POST /api/v1/carousels`
+- `PUT /api/v1/carousels/:carouselId`
+- `POST /api/v1/reels`
+- `PUT /api/v1/reels/:reelId`
+- `POST /api/v1/stories`
+- `PUT /api/v1/stories/:sequenceId`
+- `POST /api/v1/emails`
+- `GET /api/v1/emails`
+- `DELETE /api/v1/emails/:emailId`
+- `POST /api/v1/copywritings`
+- `POST /api/v1/youtube-contents`
+- `PUT /api/v1/youtube-contents/:contentId`
+- `DELETE /api/v1/youtube-contents/:contentId`
+- `GET /api/v1/dashboards/strategist`
+- `POST /api/v1/launches`
+- `GET /api/v1/launches/:launchId`
+- `POST /api/v1/launches/:launchId/market-researches`
+- `POST /api/v1/launches/:launchId/copywritings/generate`
+- `POST /api/v1/launches/:launchId/competitor-researches`
+- `POST /api/v1/launches/:launchId/avatars`
+- `PUT /api/v1/launches/:launchId/avatars`
+- `POST /api/v1/launches/:launchId/avatar-suggestions`
+- `POST /api/v1/launches/:launchId/offers`
+- `PUT /api/v1/launches/:launchId/offers`
+- `POST /api/v1/launches/:launchId/positionings`
+- `PUT /api/v1/launches/:launchId/positionings`
+- `POST /api/v1/launches/:launchId/editorial-lines`
+- `PUT /api/v1/launches/:launchId/editorial-lines`
+- `POST /api/v1/launches/:launchId/content-plans`
+- `PUT /api/v1/launches/:launchId/content-plans`
+- `POST /api/v1/launches/:launchId/smart-schedules`
+- `PUT /api/v1/launches/:launchId/smart-schedules`
+- `POST /api/v1/launches/:launchId/expert-approvals`
+- `POST /api/v1/launches/:launchId/expert-approvals/decision`
+- `GET /api/v1/roles`
+- `GET /api/v1/roles/:id`
+- `POST /api/v1/roles`
+- `PUT /api/v1/roles/:code`
+- `GET /api/v1/roles/:code/permissions`
+- `PUT /api/v1/roles/:code/permissions`
+- `POST /api/v1/users/bootstrap-admin`
+- `POST /api/v1/users`
+- `GET /api/v1/users`
+- `GET /api/v1/users/:id`
+- `GET /api/v1/users/me`
 - `POST /api/v1/profiles`
 - `PUT /api/v1/profiles/:id`
 - `GET /api/v1/profiles`
@@ -63,9 +120,8 @@ Variáveis disponíveis:
 - `MONGODB_URI`
 - `JWT_SECRET`
 - `JWT_EXPIRES_IN`
-- `DEFAULT_ADMIN_NAME`
-- `DEFAULT_ADMIN_EMAIL`
-- `DEFAULT_ADMIN_PASSWORD`
+- `JWT_REFRESH_SECRET`
+- `JWT_REFRESH_EXPIRES_IN`
 
 ## Scripts
 
@@ -114,6 +170,43 @@ A documentação fica disponível em:
 
 ## Observações importantes
 
-- Na primeira subida da API, um usuário administrador padrão é criado automaticamente, usando as variáveis `DEFAULT_ADMIN_*`.
+- Na primeira subida da API, o catálogo base de cargos e permissões do Core é semeado de forma idempotente.
+- O primeiro administrador deve ser criado explicitamente via `POST /api/v1/users/bootstrap-admin`.
+- O cadastro de colaboradores via `POST /api/v1/users` exige autenticação com JWT válido e perfil administrativo.
+- A consulta de colaboradores usa permissões de papel: `USER_LIST` para listagem e `USER_READ` para consulta individual.
+- A manutenção de colaboradores via `PUT /api/v1/users/:id` exige as permissões adequadas por ação: `USER_UPDATE`, `USER_CHANGE_ROLE`, `USER_ACTIVATE` e `USER_DEACTIVATE`.
+- A API rejeita auto-inativação e também impede a inativação do último administrador ativo.
+- A reativação de colaborador reaproveita `PUT /api/v1/users/:id` com `status = ACTIVE`, limpa `deactivatedAt` e retorna regra clara quando o usuário já está ativo.
+- A inativação de colaborador reaproveita `PUT /api/v1/users/:id` com `status = INACTIVE`, preenche `deactivatedAt` e bloqueia a ação para a própria conta e para o último administrador ativo.
+- A troca de cargo do colaborador reaproveita `PUT /api/v1/users/:id` com `roleId`, exige um cargo existente e ativo e registra a mudança com autor e data.
+- A estrutura de cargos do Flow JL é fixa nesta etapa e a manutenção aceita apenas códigos do catálogo inicial.
+- A listagem de cargos via `GET /api/v1/roles` retorna apenas os cargos ativos do catálogo inicial.
+- A consulta individual de cargo via `GET /api/v1/roles/:id` retorna somente os campos públicos e os códigos de permissões associadas, quando existirem.
+- O mapeamento de permissões por cargo via `PUT /api/v1/roles/:code/permissions` rejeita códigos inexistentes e passa a influenciar diretamente a autorização dos endpoints protegidos.
+- A trilha de auditoria inicial pode ser consultada em `GET /api/v1/audits` por usuários com `AUDIT_READ` e registra criação, atualização, inativação, mudança de cargo e autenticação bem-sucedida.
+- O banco de ideias pode ser gerenciado via `POST`, `GET` e `DELETE /api/v1/content-ideas`, aceita vínculo opcional com lançamento, filtra por `launchId`, `objective`, `status` e `active`, preserva autoria e histórico por exclusão lógica, e audita criação e inativação.
+- Os carrosséis podem ser produzidos via `POST` e `PUT /api/v1/carousels`, exigem vínculo com lançamento ou plano de conteúdo, mantêm UUID, cards estruturados, status operacional, revisão auditável e responsável pela peça, e permitem evolução do conteúdo sem perder trilha de auditoria.
+- Os reels podem ser produzidos via `POST` e `PUT /api/v1/reels`, exigem contexto mínimo de lançamento ou plano de conteúdo, mantêm status operacional, trilha de aprovação compatível com o módulo, datas em UTC quando houver agendamento, e auditoria nas alterações de roteiro, legenda e status.
+- As sequências de stories podem ser produzidas via `POST` e `PUT /api/v1/stories`, aceitam vínculo com lançamento ou cronograma inteligente, mantêm blocos ordenados, status de produção, responsável e prazo de publicação em UTC, e registram auditoria nas alterações.
+- Os e-mails podem ser gerenciados via `POST`, `GET` e `DELETE /api/v1/emails`, exigem lançamento válido, tipo, assunto, objetivo e status inicial, permitem filtros por tipo, lançamento e status, respeitam trilha de revisão/aprovação, retornam horário planejado em UTC e usam exclusão lógica.
+- O copywriting com IA pode ser gerado via `POST /api/v1/launches/:launchId/copywritings/generate` e persistido via `POST /api/v1/copywritings`, exige briefing mínimo e contexto estratégico suficiente do lançamento, retorna uma sugestão estruturada revisável por humano, não expõe prompts internos e registra auditoria na geração e no salvamento.
+- As aprovações de conteúdo podem ser gerenciadas via `POST /api/v1/content-approvals/:contentType/:contentId/status`, respeitam a ordem `CREATED -> REVIEW -> EXPERT -> APPROVED -> PUBLISHED`, exigem permissões por etapa, registram observações de aprovação ou reprovação no histórico e impedem publicação antes da aprovação.
+- A biblioteca de ativos pode ser gerenciada via `POST`, `GET` e `DELETE /api/v1/assets`, permite ativos globais ou vinculados a lançamentos, suporta busca por tipo, tag, lançamento e status, retorna UUID e datas em UTC e preserva histórico por exclusão lógica.
+- Os conteúdos de YouTube podem ser gerenciados via `POST`, `PUT` e `DELETE /api/v1/youtube-contents`, exigem lançamento e linha editorial vigente, mantêm pauta, roteiro, responsável e status rastreável, retornam horários de gravação/publicação em UTC e preservam histórico por exclusão lógica.
+- O dashboard da estrategista pode ser consultado em `GET /api/v1/dashboards/strategist`, aceita filtro opcional por `launchId`, consolida progresso, pendências, atrasos e status por etapa a partir do estado atual dos módulos estratégicos, e exige a permissão `STRATEGIST_DASHBOARD_READ`.
+- O cadastro de lançamentos via `POST /api/v1/launches` exige `LAUNCH_CREATE`, persiste marcos operacionais em UTC e rejeita duplicidade ativa com a mesma combinação de nome, produto e período.
+- A consulta de lançamentos via `GET /api/v1/launches/:launchId` exige `LAUNCH_READ` e retorna o histórico versionado das pesquisas de mercado já associadas.
+- A geração de pesquisa de mercado via `POST /api/v1/launches/:launchId/market-researches` exige `MARKET_RESEARCH_CREATE`, depende de um lançamento existente, marca o resultado para revisão humana e não expõe detalhes internos do mecanismo de geração.
+- O registro de pesquisa de concorrentes via `POST /api/v1/launches/:launchId/competitor-researches` exige `COMPETITOR_RESEARCH_CREATE`, agrupa múltiplas evidências por concorrente e a consulta do lançamento devolve esse material organizado por canal e data.
+- O avatar do público pode ser cadastrado e evoluído via `POST` e `PUT /api/v1/launches/:launchId/avatars`, preserva histórico versionado e registra auditoria de alteração.
+- As sugestões de avatar via `POST /api/v1/launches/:launchId/avatar-suggestions` exigem `AVATAR_SUGGEST`, retornam estrutura complementar revisável por humano e não expõem detalhes internos do mecanismo de IA.
+- A oferta do lançamento pode ser registrada e atualizada via `POST` e `PUT /api/v1/launches/:launchId/offers`, mantém uma versão vigente por lançamento, relaciona a versão atual do avatar quando disponível e preserva o histórico anterior.
+- O posicionamento do lançamento pode ser registrado e atualizado via `POST` e `PUT /api/v1/launches/:launchId/positionings`, mantém uma versão vigente com autor e data da última alteração, relaciona a versão atual da oferta quando disponível e preserva o histórico por exclusão lógica.
+- A linha editorial do lançamento pode ser registrada e atualizada via `POST` e `PUT /api/v1/launches/:launchId/editorial-lines`, exige avatar, oferta e posicionamento vigentes, mantém pilares com prioridade e ativação por versão e preserva o histórico para consultas futuras.
+- O plano de conteúdo do lançamento pode ser registrado e atualizado via `POST` e `PUT /api/v1/launches/:launchId/content-plans`, exige linha editorial vigente, mantém itens agrupáveis por etapa, período e objetivo e preserva histórico para evolução operacional posterior.
+- O cronograma inteligente do lançamento pode ser gerado e ajustado via `POST` e `PUT /api/v1/launches/:launchId/smart-schedules`, exige plano de conteúdo vigente, retorna atividades com prazo em UTC, área, responsável sugerido e status, e preserva histórico dos ajustes.
+- A aprovação do planejamento pelo expert pode ser submetida via `POST /api/v1/launches/:launchId/expert-approvals` e decidida via `POST /api/v1/launches/:launchId/expert-approvals/decision`, exige pacote estratégico completo com cronograma vigente, preserva histórico versionado, audita submissão e parecer, e permite reenvio após ajustes quando houver reprovação.
+- A autorização da API é resolvida pelas permissões vinculadas ao cargo do usuário autenticado.
 - Os endpoints protegidos exigem token JWT no header `Authorization: Bearer <token>`.
+- O fluxo de autenticação usa `accessToken` para acesso aos endpoints protegidos e `refreshToken` para renovação e logout da sessão.
 - O projeto `Mentoria 2.0 Desafios` não faz parte desta entrega e não foi alterado.

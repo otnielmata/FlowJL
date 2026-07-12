@@ -1,6 +1,4 @@
-import jwt from "jsonwebtoken";
-
-import { env } from "../config/env.js";
+import { tokenService } from "../services/token.service.js";
 
 export function authMiddleware(request, _response, next) {
   const authorization = request.headers.authorization;
@@ -16,7 +14,12 @@ export function authMiddleware(request, _response, next) {
   const token = authorization.replace("Bearer ", "");
 
   try {
-    const payload = jwt.verify(token, env.JWT_SECRET);
+    const payload = tokenService.verifyAccessToken(token);
+
+    if (payload.type !== "access") {
+      throw new Error("Invalid token type");
+    }
+
     request.auth = payload;
     next();
   } catch (_error) {

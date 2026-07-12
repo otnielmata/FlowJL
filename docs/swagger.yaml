@@ -7,9 +7,17 @@ servers:
   - url: http://localhost:3000
 tags:
   - name: Health
+  - name: Assets
+  - name: Audit
   - name: Auth
+  - name: Dashboards
+  - name: Content Approvals
+  - name: Copywritings
+  - name: YouTube Contents
+  - name: Launches
   - name: Profiles
   - name: Users
+  - name: Roles
 paths:
   /health:
     get:
@@ -28,7 +36,7 @@ paths:
   /api/v1/auth/login:
     post:
       tags: [Auth]
-      summary: Autentica um usuario e retorna um JWT
+      summary: Autentica um usuario e retorna os tokens da sessao
       requestBody:
         required: true
         content:
@@ -40,6 +48,1420 @@ paths:
           description: Usuario autenticado
         '401':
           description: Credenciais invalidas
+        '403':
+          description: Acesso nao permitido
+  /api/v1/auth/refresh:
+    post:
+      tags: [Auth]
+      summary: Renova os tokens de uma sessao ativa
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshTokenRequest'
+      responses:
+        '200':
+          description: Sessao renovada
+        '401':
+          description: Refresh token invalido ou expirado
+        '403':
+          description: Acesso nao permitido
+  /api/v1/auth/logout:
+    post:
+      tags: [Auth]
+      summary: Encerra uma sessao autenticada
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshTokenRequest'
+      responses:
+        '200':
+          description: Sessao encerrada
+        '401':
+          description: Refresh token invalido ou expirado
+  /api/v1/auth/me:
+    get:
+      tags: [Auth]
+      summary: Retorna os dados do usuario autenticado
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Usuario autenticado consultado
+        '401':
+          description: Access token invalido ou ausente
+  /api/v1/audits:
+    get:
+      tags: [Audit]
+      summary: Consulta a trilha basica de auditoria
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Eventos de auditoria consultados
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+  /api/v1/assets:
+    post:
+      tags: [Assets]
+      summary: Cadastra um ativo reutilizavel na biblioteca
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssetLibraryItemRequest'
+      responses:
+        '201':
+          description: Ativo cadastrado com sucesso
+        '400':
+          description: Dados invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento nao encontrado
+    get:
+      tags: [Assets]
+      summary: Lista ativos por tipo, tag, lancamento ou status
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: launchId
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: type
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: tag
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: status
+          required: false
+          schema:
+            type: string
+            enum: [AVAILABLE, ARCHIVED]
+        - in: query
+          name: active
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Itens compativeis retornados
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+  /api/v1/assets/{assetId}:
+    delete:
+      tags: [Assets]
+      summary: Realiza a exclusao logica de um ativo
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: assetId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Ativo inativado com sucesso
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Ativo nao encontrado
+        '409':
+          description: Ativo ja esta inativo
+  /api/v1/dashboards/strategist:
+    get:
+      tags: [Dashboards]
+      summary: Consulta o dashboard consolidado da estrategista
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: launchId
+          required: false
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Dashboard consolidado retornado com sucesso
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento nao encontrado
+  /api/v1/content-ideas:
+    post:
+      tags: [Content Ideas]
+      summary: Cadastra uma nova ideia no banco de conteudo
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContentIdeaRequest'
+      responses:
+        '201':
+          description: Ideia cadastrada com sucesso
+        '400':
+          description: Dados invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento nao encontrado
+    get:
+      tags: [Content Ideas]
+      summary: Lista ideias do banco de conteudo com filtros opcionais
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: launchId
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: objective
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: status
+          required: false
+          schema:
+            type: string
+            enum: [BACKLOG, SELECTED, PRODUCED, DISCARDED]
+        - in: query
+          name: active
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Colecao filtrada de ideias
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+  /api/v1/content-ideas/{ideaId}:
+    delete:
+      tags: [Content Ideas]
+      summary: Realiza a exclusao logica de uma ideia de conteudo
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: ideaId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Ideia inativada com sucesso
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Ideia nao encontrada
+        '409':
+          description: Ideia ja esta inativa
+  /api/v1/content-approvals/{contentType}/{contentId}/status:
+    post:
+      tags: [Content Approvals]
+      summary: Avanca ou devolve uma peca no fluxo de aprovacao
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: contentType
+          required: true
+          schema:
+            type: string
+            enum: [REEL, CAROUSEL, STORY_SEQUENCE, EMAIL_CAMPAIGN, YOUTUBE_CONTENT]
+        - in: path
+          name: contentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangeContentApprovalStatusRequest'
+      responses:
+        '200':
+          description: Fluxo de aprovacao atualizado com sucesso
+        '400':
+          description: Dados invalidos ou feedback insuficiente para reprovar
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Conteudo nao encontrado
+        '409':
+          description: Ordem de aprovacao invalida para a peca
+  /api/v1/copywritings:
+    post:
+      tags: [Copywritings]
+      summary: Persiste uma copy gerada para edicao posterior
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCopywritingRequest'
+      responses:
+        '201':
+          description: Copy salva com sucesso
+        '400':
+          description: Dados invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento nao encontrado
+  /api/v1/emails:
+    post:
+      tags: [Emails]
+      summary: Cadastra um e-mail de lancamento com tipo e objetivo
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEmailCampaignRequest'
+      responses:
+        '201':
+          description: E-mail cadastrado com sucesso
+        '400':
+          description: Dados invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento nao encontrado
+    get:
+      tags: [Emails]
+      summary: Lista e-mails por tipo, lancamento ou status
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: launchId
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: type
+          required: false
+          schema:
+            type: string
+            enum: [NURTURE, SALES, EVENT, WEBINAR]
+        - in: query
+          name: status
+          required: false
+          schema:
+            type: string
+            enum: [DRAFT, IN_REVIEW, APPROVED, SCHEDULED, SENT]
+        - in: query
+          name: active
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Itens compativeis retornados
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+  /api/v1/emails/{emailId}:
+    delete:
+      tags: [Emails]
+      summary: Realiza exclusao logica de um e-mail
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: emailId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: E-mail inativado com sucesso
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: E-mail nao encontrado
+        '409':
+          description: E-mail ja esta inativo
+  /api/v1/carousels:
+    post:
+      tags: [Carousels]
+      summary: Cadastra um carrossel com estrutura basica
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCarouselRequest'
+      responses:
+        '201':
+          description: Carrossel cadastrado com sucesso
+        '400':
+          description: Dados invalidos ou contexto ausente
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento ou plano de conteudo nao encontrados
+  /api/v1/carousels/{carouselId}:
+    put:
+      tags: [Carousels]
+      summary: Atualiza conteudo, status e responsavel do carrossel
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: carouselId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCarouselRequest'
+      responses:
+        '200':
+          description: Carrossel atualizado com sucesso
+        '400':
+          description: Dados invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Carrossel nao encontrado
+  /api/v1/reels:
+    post:
+      tags: [Reels]
+      summary: Cadastra um reel com contexto minimo e metadados essenciais
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateReelRequest'
+      responses:
+        '201':
+          description: Reel cadastrado com sucesso
+        '400':
+          description: Dados invalidos ou contexto minimo ausente
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento, plano ou ideia nao encontrados
+  /api/v1/reels/{reelId}:
+    put:
+      tags: [Reels]
+      summary: Atualiza roteiro, legenda e status de um reel
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: reelId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateReelRequest'
+      responses:
+        '200':
+          description: Reel atualizado com sucesso
+        '400':
+          description: Dados invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Reel nao encontrado
+  /api/v1/stories:
+    post:
+      tags: [Stories]
+      summary: Cadastra uma sequencia de stories com contexto valido
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateStorySequenceRequest'
+      responses:
+        '201':
+          description: Sequencia de stories cadastrada com sucesso
+        '400':
+          description: Dados invalidos ou contexto ausente
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento ou cronograma nao encontrados
+  /api/v1/stories/{sequenceId}:
+    put:
+      tags: [Stories]
+      summary: Atualiza blocos, status e prazo de uma sequencia de stories
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: sequenceId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateStorySequenceRequest'
+      responses:
+        '200':
+          description: Sequencia de stories atualizada com sucesso
+        '400':
+          description: Dados invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Sequencia de stories nao encontrada
+  /api/v1/youtube-contents:
+    post:
+      tags: [YouTube Contents]
+      summary: Cadastra uma pauta de YouTube com contexto editorial vigente
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateYouTubeContentRequest'
+      responses:
+        '201':
+          description: Pauta de YouTube cadastrada com sucesso
+        '400':
+          description: Dados invalidos ou ausencia de linha editorial vigente
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento nao encontrado
+  /api/v1/youtube-contents/{contentId}:
+    put:
+      tags: [YouTube Contents]
+      summary: Atualiza roteiro, responsavel e status do conteudo de YouTube
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: contentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateYouTubeContentRequest'
+      responses:
+        '200':
+          description: Conteudo de YouTube atualizado com sucesso
+        '400':
+          description: Dados invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Conteudo de YouTube nao encontrado
+    delete:
+      tags: [YouTube Contents]
+      summary: Realiza exclusao logica de uma pauta de YouTube
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: contentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Conteudo de YouTube inativado com sucesso
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Conteudo de YouTube nao encontrado
+        '409':
+          description: Conteudo de YouTube ja esta inativo
+  /api/v1/launches:
+    post:
+      tags: [Launches]
+      summary: Cadastra um novo lancamento
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateLaunchRequest'
+      responses:
+        '201':
+          description: Lancamento criado
+        '400':
+          description: Dados invalidos ou obrigatorios ausentes
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '409':
+          description: Lancamento ativo duplicado para o mesmo produto e periodo
+  /api/v1/launches/{launchId}:
+    get:
+      tags: [Launches]
+      summary: Consulta um lancamento com seu historico estrategico
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: launchId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Lancamento consultado
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento nao encontrado
+  /api/v1/launches/{launchId}/market-researches:
+    post:
+      tags: [Launches]
+      summary: Gera uma pesquisa de mercado versionada para um lancamento
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: launchId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMarketResearchRequest'
+      responses:
+        '201':
+          description: Pesquisa de mercado criada
+        '400':
+          description: Briefing, objetivo ou contexto insuficientes
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento nao encontrado
+  /api/v1/launches/{launchId}/copywritings/generate:
+    post:
+      tags: [Copywritings]
+      summary: Gera uma sugestao estruturada de copywriting com IA
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: launchId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenerateCopywritingRequest'
+      responses:
+        '200':
+          description: Sugestao de copy retornada com sucesso
+        '400':
+          description: Briefing invalido ou contexto estrategico insuficiente
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento nao encontrado
+  /api/v1/launches/{launchId}/competitor-researches:
+    post:
+      tags: [Launches]
+      summary: Registra evidencias de pesquisa de concorrentes para um lancamento
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: launchId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCompetitorResearchRequest'
+      responses:
+        '201':
+          description: Evidencia de concorrente registrada
+        '400':
+          description: Concorrente, canal ou demais campos obrigatorios invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento nao encontrado
+  /api/v1/launches/{launchId}/avatars:
+    post:
+      tags: [Launches]
+      summary: Cadastra o avatar principal do publico de um lancamento
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: launchId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AvatarRequest'
+      responses:
+        '201':
+          description: Avatar criado
+        '400':
+          description: Dados invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento nao encontrado
+        '409':
+          description: Ja existe um avatar atual para o lancamento
+    put:
+      tags: [Launches]
+      summary: Atualiza o avatar atual preservando historico
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: launchId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AvatarRequest'
+      responses:
+        '200':
+          description: Avatar atualizado
+        '400':
+          description: Dados invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento ou avatar nao encontrado
+  /api/v1/launches/{launchId}/avatar-suggestions:
+    post:
+      tags: [Launches]
+      summary: Gera sugestoes estruturadas para complementar o avatar
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: launchId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Sugestoes retornadas
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento nao encontrado
+  /api/v1/launches/{launchId}/offers:
+    post:
+      tags: [Launches]
+      summary: Cadastra a oferta vigente do lancamento
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: launchId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OfferRequest'
+      responses:
+        '201':
+          description: Oferta criada
+        '400':
+          description: Dados invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento nao encontrado
+        '409':
+          description: Ja existe uma oferta vigente para o lancamento
+    put:
+      tags: [Launches]
+      summary: Atualiza a oferta vigente preservando historico
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: launchId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OfferRequest'
+      responses:
+        '200':
+          description: Oferta atualizada
+        '400':
+          description: Dados invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento ou oferta nao encontrado
+  /api/v1/launches/{launchId}/positionings:
+    post:
+      tags: [Launches]
+      summary: Cadastra o posicionamento vigente do lancamento
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: launchId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PositioningRequest'
+      responses:
+        '201':
+          description: Posicionamento criado
+        '400':
+          description: Dados invalidos ou insuficientes
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento nao encontrado
+        '409':
+          description: Ja existe um posicionamento vigente para o lancamento
+    put:
+      tags: [Launches]
+      summary: Atualiza o posicionamento vigente preservando historico
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: launchId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PositioningRequest'
+      responses:
+        '200':
+          description: Posicionamento atualizado
+        '400':
+          description: Dados invalidos ou insuficientes
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento ou posicionamento nao encontrado
+  /api/v1/launches/{launchId}/editorial-lines:
+    post:
+      tags: [Launches]
+      summary: Cadastra a linha editorial vigente do lancamento
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: launchId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EditorialLineRequest'
+      responses:
+        '201':
+          description: Linha editorial criada
+        '400':
+          description: Dados invalidos ou contexto estrategico insuficiente
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento nao encontrado
+        '409':
+          description: Ja existe uma linha editorial vigente para o lancamento
+    put:
+      tags: [Launches]
+      summary: Atualiza a linha editorial vigente preservando historico
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: launchId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EditorialLineRequest'
+      responses:
+        '200':
+          description: Linha editorial atualizada
+        '400':
+          description: Dados invalidos ou contexto estrategico insuficiente
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento ou linha editorial nao encontrada
+  /api/v1/launches/{launchId}/content-plans:
+    post:
+      tags: [Launches]
+      summary: Cadastra o plano de conteudo vigente do lancamento
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: launchId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContentPlanRequest'
+      responses:
+        '201':
+          description: Plano de conteudo criado
+        '400':
+          description: Dados invalidos ou ausencia de linha editorial vigente
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento nao encontrado
+        '409':
+          description: Ja existe um plano de conteudo vigente para o lancamento
+    put:
+      tags: [Launches]
+      summary: Atualiza o plano de conteudo vigente preservando historico
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: launchId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContentPlanRequest'
+      responses:
+        '200':
+          description: Plano de conteudo atualizado
+        '400':
+          description: Dados invalidos ou ausencia de linha editorial vigente
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento ou plano de conteudo nao encontrado
+  /api/v1/launches/{launchId}/smart-schedules:
+    post:
+      tags: [Launches]
+      summary: Gera o cronograma inteligente vigente do lancamento
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: launchId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSmartScheduleRequest'
+      responses:
+        '201':
+          description: Cronograma inteligente criado
+        '400':
+          description: Dados invalidos ou ausencia de plano de conteudo vigente
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento nao encontrado
+        '409':
+          description: Ja existe um cronograma inteligente vigente para o lancamento
+    put:
+      tags: [Launches]
+      summary: Atualiza o cronograma inteligente vigente preservando historico
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: launchId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSmartScheduleRequest'
+      responses:
+        '200':
+          description: Cronograma inteligente atualizado
+        '400':
+          description: Dados invalidos ou ausencia de plano de conteudo vigente
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento ou cronograma inteligente nao encontrado
+  /api/v1/launches/{launchId}/expert-approvals:
+    post:
+      tags: [Launches]
+      summary: Submete o planejamento do lancamento para aprovacao do expert
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: launchId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubmitExpertApprovalRequest'
+      responses:
+        '201':
+          description: Planejamento submetido para revisao
+        '400':
+          description: Planejamento incompleto ou dados invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento nao encontrado
+        '409':
+          description: Fluxo de aprovacao ja em revisao ou finalizado
+  /api/v1/launches/{launchId}/expert-approvals/decision:
+    post:
+      tags: [Launches]
+      summary: Registra a decisao do expert sobre o planejamento submetido
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: launchId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DecideExpertApprovalRequest'
+      responses:
+        '200':
+          description: Decisao do expert registrada
+        '400':
+          description: Dados invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento ou submissao de aprovacao nao encontrados
+        '409':
+          description: Aprovacao fora do fluxo de revisao
+  /api/v1/roles:
+    get:
+      tags: [Roles]
+      summary: Lista os cargos ativos predefinidos do Flow JL
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Cargos listados
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+    post:
+      tags: [Roles]
+      summary: Cadastra um cargo previsto no catalogo inicial
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateRoleRequest'
+      responses:
+        '201':
+          description: Cargo criado
+        '400':
+          description: Codigo fora do catalogo ou dados invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '409':
+          description: Cargo duplicado
+  /api/v1/roles/{id}:
+    get:
+      tags: [Roles]
+      summary: Consulta um cargo por identificador
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Cargo consultado
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Cargo nao encontrado
+  /api/v1/roles/{code}/permissions:
+    get:
+      tags: [Roles]
+      summary: Consulta as permissoes de um cargo
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: code
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Permissoes do cargo consultadas
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Cargo nao encontrado
+    put:
+      tags: [Roles]
+      summary: Atualiza as permissoes de um cargo
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: code
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateRolePermissionsRequest'
+      responses:
+        '200':
+          description: Permissoes do cargo atualizadas
+        '400':
+          description: Conjunto de permissoes invalido
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Cargo nao encontrado
+  /api/v1/roles/{code}:
+    put:
+      tags: [Roles]
+      summary: Atualiza os metadados de um cargo predefinido
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: code
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateRoleRequest'
+      responses:
+        '200':
+          description: Cargo atualizado
+        '400':
+          description: Codigo fora do catalogo ou dados invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Cargo nao encontrado
+  /api/v1/users/bootstrap-admin:
+    post:
+      tags: [Users]
+      summary: Cadastra o primeiro administrador da plataforma
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BootstrapAdminRequest'
+      responses:
+        '201':
+          description: Primeiro administrador criado
+        '400':
+          description: Campos invalidos ou ausentes
+        '409':
+          description: Bootstrap ja concluido ou e-mail em uso
+        '503':
+          description: Catalogo base de acesso nao inicializado
+  /api/v1/users:
+    get:
+      tags: [Users]
+      summary: Lista colaboradores cadastrados
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Colaboradores listados
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+    post:
+      tags: [Users]
+      summary: Cadastra um colaborador com cargo valido
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCollaboratorRequest'
+      responses:
+        '201':
+          description: Colaborador criado
+        '400':
+          description: Cargo invalido ou dados invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '409':
+          description: E-mail ja existente
+  /api/v1/users/me:
+    get:
+      tags: [Users]
+      summary: Retorna os dados do proprio usuario autenticado
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Usuario autenticado consultado
+        '401':
+          description: JWT ausente ou invalido
   /api/v1/profiles:
     get:
       tags: [Profiles]
@@ -87,9 +1509,29 @@ paths:
         '404':
           description: Perfil nao encontrado
   /api/v1/users/{id}:
+    get:
+      tags: [Users]
+      summary: Consulta um colaborador por identificador
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Colaborador encontrado
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Usuario nao encontrado
     put:
       tags: [Users]
-      summary: Edita um usuario e vincula um perfil valido
+      summary: Mantem os dados, cargo e status de um colaborador
       security:
         - bearerAuth: []
       parameters:
@@ -107,6 +1549,14 @@ paths:
       responses:
         '200':
           description: Usuario atualizado
+        '400':
+          description: Dados invalidos, cargo invalido ou inativo, ou perfil invalido
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '409':
+          description: Transicao invalida, e-mail duplicado, usuario ja ativo, auto-inativacao ou regra de negocio violada
         '404':
           description: Usuario nao encontrado
 components:
@@ -126,6 +1576,645 @@ components:
         password:
           type: string
           example: Admin@123
+    RefreshTokenRequest:
+      type: object
+      required: [refreshToken]
+      properties:
+        refreshToken:
+          type: string
+    CreateLaunchRequest:
+      type: object
+      required: [name, expert, product, baseDate, milestones]
+      properties:
+        name:
+          type: string
+        expert:
+          type: string
+        product:
+          type: string
+        baseDate:
+          type: string
+          format: date-time
+        milestones:
+          type: array
+          items:
+            $ref: '#/components/schemas/LaunchMilestoneRequest'
+    LaunchMilestoneRequest:
+      type: object
+      required: [name, scheduledAt]
+      properties:
+        name:
+          type: string
+        scheduledAt:
+          type: string
+          format: date-time
+    CreateMarketResearchRequest:
+      type: object
+      required: [briefing, objective, productContext]
+      properties:
+        briefing:
+          type: string
+          minLength: 20
+        objective:
+          type: string
+          minLength: 8
+        productContext:
+          type: string
+          minLength: 20
+    CreateCompetitorResearchRequest:
+      type: object
+      required: [competitorName, channel, headline, promise, trigger, observations]
+      properties:
+        competitorName:
+          type: string
+          minLength: 3
+        channel:
+          type: string
+          minLength: 2
+        headline:
+          type: string
+          minLength: 3
+        promise:
+          type: string
+          minLength: 3
+        trigger:
+          type: string
+          minLength: 3
+        observations:
+          type: string
+          minLength: 3
+        capturedAt:
+          type: string
+          format: date-time
+    AvatarRequest:
+      type: object
+      required: [profile, pains, dreams, objections, language]
+      properties:
+        profile:
+          type: string
+          minLength: 10
+        pains:
+          type: array
+          items:
+            type: string
+        dreams:
+          type: array
+          items:
+            type: string
+        objections:
+          type: array
+          items:
+            type: string
+        language:
+          type: array
+          items:
+            type: string
+    OfferRequest:
+      type: object
+      required: [product, transformation, promise, benefits, differentials]
+      properties:
+        product:
+          type: string
+          minLength: 3
+        transformation:
+          type: string
+          minLength: 10
+        promise:
+          type: string
+          minLength: 10
+        benefits:
+          type: array
+          items:
+            type: string
+        differentials:
+          type: array
+          items:
+            type: string
+        positioningContext:
+          type: string
+    PositioningRequest:
+      type: object
+      required: [thesis, centralPromise, differentiators, references]
+      properties:
+        thesis:
+          type: string
+          minLength: 10
+        centralPromise:
+          type: string
+          minLength: 10
+        differentiators:
+          type: array
+          items:
+            type: string
+        references:
+          type: array
+          items:
+            type: string
+    EditorialLineRequest:
+      type: object
+      required: [pillars]
+      properties:
+        pillars:
+          type: array
+          items:
+            type: object
+            required: [name, objective, priority]
+            properties:
+              name:
+                type: string
+              objective:
+                type: string
+              priority:
+                type: integer
+              active:
+                type: boolean
+    ContentPlanRequest:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            type: object
+            required: [theme, format, objective, cta, stage, periodLabel]
+            properties:
+              theme:
+                type: string
+              format:
+                type: string
+              objective:
+                type: string
+              cta:
+                type: string
+              stage:
+                type: string
+              periodLabel:
+                type: string
+              active:
+                type: boolean
+    AssetLibraryItemRequest:
+      type: object
+      required: [name, type, origin, tags]
+      properties:
+        launchId:
+          type: string
+          format: uuid
+          nullable: true
+        name:
+          type: string
+        type:
+          type: string
+        origin:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+    ContentIdeaRequest:
+      type: object
+      required: [theme, objective, suggestedFormat, observations]
+      properties:
+        launchId:
+          type: string
+          format: uuid
+          nullable: true
+        theme:
+          type: string
+        objective:
+          type: string
+        suggestedFormat:
+          type: string
+        observations:
+          type: string
+    ChangeContentApprovalStatusRequest:
+      type: object
+      required: [targetStatus]
+      properties:
+        targetStatus:
+          type: string
+          enum: [CREATED, REVIEW, EXPERT, APPROVED, PUBLISHED]
+        observations:
+          type: string
+    GenerateCopywritingRequest:
+      type: object
+      required: [format, objective, briefing]
+      properties:
+        format:
+          type: string
+          enum: [REEL, CAROUSEL, STORIES, EMAIL, YOUTUBE, ADS, LANDING_PAGE]
+        objective:
+          type: string
+        briefing:
+          type: string
+    CreateCopywritingRequest:
+      type: object
+      required: [launchId, format, objective, briefing, headline, hook, bodySections, cta, sourceContext]
+      properties:
+        launchId:
+          type: string
+          format: uuid
+        format:
+          type: string
+          enum: [REEL, CAROUSEL, STORIES, EMAIL, YOUTUBE, ADS, LANDING_PAGE]
+        objective:
+          type: string
+        briefing:
+          type: string
+        headline:
+          type: string
+        hook:
+          type: string
+        bodySections:
+          type: array
+          items:
+            type: object
+            required: [label, content]
+            properties:
+              label:
+                type: string
+              content:
+                type: string
+        cta:
+          type: string
+        reviewNotes:
+          type: array
+          items:
+            type: string
+        sourceContext:
+          type: object
+          required: [launchId, launchName, product, expert, editorialPillars, languageCues]
+          properties:
+            launchId:
+              type: string
+              format: uuid
+            launchName:
+              type: string
+            product:
+              type: string
+            expert:
+              type: string
+            offerVersion:
+              type: integer
+              nullable: true
+            positioningVersion:
+              type: integer
+              nullable: true
+            editorialLineVersion:
+              type: integer
+              nullable: true
+            avatarVersion:
+              type: integer
+              nullable: true
+            editorialPillars:
+              type: array
+              items:
+                type: string
+            languageCues:
+              type: array
+              items:
+                type: string
+    CreateEmailCampaignRequest:
+      type: object
+      required: [launchId, type, subject, objective, cta, status]
+      properties:
+        launchId:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum: [NURTURE, SALES, EVENT, WEBINAR]
+        subject:
+          type: string
+        objective:
+          type: string
+        cta:
+          type: string
+        body:
+          type: string
+        status:
+          type: string
+          enum: [DRAFT, IN_REVIEW, APPROVED, SCHEDULED, SENT]
+        reviewStatus:
+          type: string
+          enum: [PENDING, APPROVED, REJECTED]
+        plannedSendAt:
+          type: string
+          format: date-time
+    CreateCarouselRequest:
+      type: object
+      required: [theme, objective, cta, cardsCount, operationalStatus]
+      properties:
+        launchId:
+          type: string
+          format: uuid
+        contentPlanId:
+          type: string
+          format: uuid
+        theme:
+          type: string
+        objective:
+          type: string
+        cta:
+          type: string
+        cardsCount:
+          type: integer
+        cards:
+          type: array
+          items:
+            type: object
+            properties:
+              order:
+                type: integer
+              message:
+                type: string
+        operationalStatus:
+          type: string
+          enum: [DRAFT, IN_REVIEW, APPROVED, SCHEDULED, PUBLISHED]
+        reviewStatus:
+          type: string
+          enum: [PENDING, APPROVED, REJECTED]
+        ownerRole:
+          type: string
+    UpdateCarouselRequest:
+      type: object
+      required: [cardsCount, cards, operationalStatus]
+      properties:
+        cardsCount:
+          type: integer
+        cards:
+          type: array
+          items:
+            type: object
+            required: [message]
+            properties:
+              order:
+                type: integer
+              message:
+                type: string
+        operationalStatus:
+          type: string
+          enum: [DRAFT, IN_REVIEW, APPROVED, SCHEDULED, PUBLISHED]
+        reviewStatus:
+          type: string
+          enum: [PENDING, APPROVED, REJECTED]
+        ownerRole:
+          type: string
+    CreateStorySequenceRequest:
+      type: object
+      required: [theme, objective, cta, blocksCount, operationalStatus]
+      properties:
+        launchId:
+          type: string
+          format: uuid
+        smartScheduleId:
+          type: string
+          format: uuid
+        theme:
+          type: string
+        objective:
+          type: string
+        cta:
+          type: string
+        blocksCount:
+          type: integer
+        blocks:
+          type: array
+          items:
+            type: object
+            properties:
+              order:
+                type: integer
+              text:
+                type: string
+        operationalStatus:
+          type: string
+          enum: [DRAFT, IN_REVIEW, APPROVED, SCHEDULED, PUBLISHED]
+        ownerRole:
+          type: string
+        publishAt:
+          type: string
+          format: date-time
+    UpdateStorySequenceRequest:
+      type: object
+      required: [blocksCount, blocks, operationalStatus]
+      properties:
+        blocksCount:
+          type: integer
+        blocks:
+          type: array
+          items:
+            type: object
+            required: [text]
+            properties:
+              order:
+                type: integer
+              text:
+                type: string
+        operationalStatus:
+          type: string
+          enum: [DRAFT, IN_REVIEW, APPROVED, SCHEDULED, PUBLISHED]
+        ownerRole:
+          type: string
+        publishAt:
+          type: string
+          format: date-time
+    CreateYouTubeContentRequest:
+      type: object
+      required: [launchId, theme, objective, format, cta]
+      properties:
+        launchId:
+          type: string
+          format: uuid
+        theme:
+          type: string
+        objective:
+          type: string
+        format:
+          type: string
+        cta:
+          type: string
+        script:
+          type: string
+        ownerRole:
+          type: string
+        operationalStatus:
+          type: string
+          enum: [PLANNED, SCRIPTING, RECORDING, EDITING, SCHEDULED, PUBLISHED]
+        recordingAt:
+          type: string
+          format: date-time
+        publishAt:
+          type: string
+          format: date-time
+    UpdateYouTubeContentRequest:
+      type: object
+      properties:
+        script:
+          type: string
+        ownerRole:
+          type: string
+        operationalStatus:
+          type: string
+          enum: [PLANNED, SCRIPTING, RECORDING, EDITING, SCHEDULED, PUBLISHED]
+        recordingAt:
+          type: string
+          format: date-time
+        publishAt:
+          type: string
+          format: date-time
+    CreateReelRequest:
+      type: object
+      required: [sourceType, theme, objective, hook, cta, operationalStatus]
+      properties:
+        launchId:
+          type: string
+          format: uuid
+        contentPlanId:
+          type: string
+          format: uuid
+        contentIdeaId:
+          type: string
+          format: uuid
+        sourceType:
+          type: string
+          enum: [MANUAL, IDEA, CONTENT_PLAN, AI]
+        theme:
+          type: string
+        objective:
+          type: string
+        hook:
+          type: string
+        cta:
+          type: string
+        script:
+          type: string
+        caption:
+          type: string
+        operationalStatus:
+          type: string
+          enum: [DRAFT, IN_REVIEW, APPROVED, SCHEDULED, PUBLISHED]
+        approvalStatus:
+          type: string
+          enum: [PENDING, APPROVED, REJECTED]
+        scheduledAt:
+          type: string
+          format: date-time
+    UpdateReelRequest:
+      type: object
+      required: [script, operationalStatus]
+      properties:
+        script:
+          type: string
+        caption:
+          type: string
+        operationalStatus:
+          type: string
+          enum: [DRAFT, IN_REVIEW, APPROVED, SCHEDULED, PUBLISHED]
+        approvalStatus:
+          type: string
+          enum: [PENDING, APPROVED, REJECTED]
+        scheduledAt:
+          type: string
+          format: date-time
+    CreateSmartScheduleRequest:
+      type: object
+      required: [objective, periodStart, periodEnd]
+      properties:
+        objective:
+          type: string
+        periodStart:
+          type: string
+          format: date-time
+        periodEnd:
+          type: string
+          format: date-time
+        operationalCadenceDays:
+          type: integer
+    UpdateSmartScheduleRequest:
+      type: object
+      required: [objective, periodStart, periodEnd, operationalCadenceDays, activities]
+      properties:
+        objective:
+          type: string
+        periodStart:
+          type: string
+          format: date-time
+        periodEnd:
+          type: string
+          format: date-time
+        operationalCadenceDays:
+          type: integer
+        activities:
+          type: array
+          items:
+            type: object
+            required: [theme, objective, stage, deliveryType, area, suggestedResponsibleRole, dueAt, status]
+            properties:
+              theme:
+                type: string
+              objective:
+                type: string
+              stage:
+                type: string
+              deliveryType:
+                type: string
+              area:
+                type: string
+              suggestedResponsibleRole:
+                type: string
+              dueAt:
+                type: string
+                format: date-time
+              status:
+                type: string
+    SubmitExpertApprovalRequest:
+      type: object
+      properties:
+        observations:
+          type: string
+          minLength: 3
+          maxLength: 1000
+    DecideExpertApprovalRequest:
+      type: object
+      required: [status, observations]
+      properties:
+        status:
+          type: string
+          enum: [APPROVED, REJECTED]
+        observations:
+          type: string
+          minLength: 3
+          maxLength: 1000
+    CreateRoleRequest:
+      type: object
+      required: [code, name, description]
+      properties:
+        code:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        active:
+          type: boolean
+    UpdateRoleRequest:
+      type: object
+      required: [name, description, active]
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        active:
+          type: boolean
+    UpdateRolePermissionsRequest:
+      type: object
+      required: [permissions]
+      properties:
+        permissions:
+          type: array
+          items:
+            type: string
     ProfileRequest:
       type: object
       required: [name, code, description]
@@ -167,7 +2256,42 @@ components:
           format: email
         password:
           type: string
+        roleId:
+          type: string
+          format: uuid
         profile:
           type: string
-        active:
-          type: boolean
+        status:
+          type: string
+          enum: [ACTIVE, INACTIVE, PENDING]
+    BootstrapAdminRequest:
+      type: object
+      required: [name, email, password]
+      properties:
+        name:
+          type: string
+          minLength: 3
+          maxLength: 120
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 8
+    CreateCollaboratorRequest:
+      type: object
+      required: [name, email, password, roleId]
+      properties:
+        name:
+          type: string
+          minLength: 3
+          maxLength: 120
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 8
+        roleId:
+          type: string
+          format: uuid

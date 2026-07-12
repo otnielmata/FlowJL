@@ -20,7 +20,14 @@ describe("app", () => {
     const response = await request(app).get("/api/v1");
 
     expect(response.status).toBe(200);
+    expect(response.body.modules).toContain("audits");
     expect(response.body.modules).toContain("auth");
+    expect(response.body.modules).toContain("launches");
+    expect(response.body.modules).toContain("roles");
     expect(response.body.modules).toContain("profiles");
+    expect(response.body.modules).toContain("youtube-contents");
+    expect(response.body.modules).toContain("copywritings");
+    expect(response.body.modules).toContain("content-approvals");
+    expect(response.body.modules).toContain("assets");
   });
 });

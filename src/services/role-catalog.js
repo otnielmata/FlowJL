@@ -1,0 +1,102 @@
+export const roleCatalog = [
+  {
+    code: "ADMIN",
+    name: "Administrador",
+    description: "Cargo inicial com acesso amplo ao core da plataforma.",
+    permissionCodes: [
+      "AUTH_LOGIN",
+      "USER_BOOTSTRAP_ADMIN",
+      "USER_MANAGE",
+      "USER_CREATE",
+      "USER_READ",
+      "USER_LIST",
+      "USER_UPDATE",
+      "USER_ACTIVATE",
+      "USER_DEACTIVATE",
+      "USER_CHANGE_ROLE",
+      "ROLE_READ",
+      "AUDIT_READ",
+      "PERMISSION_READ",
+      "LAUNCH_CREATE",
+      "LAUNCH_READ",
+      "MARKET_RESEARCH_CREATE",
+      "COMPETITOR_RESEARCH_CREATE",
+      "AVATAR_CREATE",
+      "AVATAR_UPDATE",
+      "AVATAR_SUGGEST",
+      "OFFER_CREATE",
+      "OFFER_UPDATE",
+      "POSITIONING_CREATE",
+      "POSITIONING_UPDATE",
+      "EDITORIAL_LINE_CREATE",
+      "EDITORIAL_LINE_UPDATE",
+      "CONTENT_PLAN_CREATE",
+      "CONTENT_PLAN_UPDATE",
+      "SMART_SCHEDULE_CREATE",
+      "SMART_SCHEDULE_UPDATE",
+      "EXPERT_APPROVAL_SUBMIT",
+      "EXPERT_APPROVAL_DECIDE",
+      "STRATEGIST_DASHBOARD_READ",
+      "ASSET_LIBRARY_CREATE",
+      "ASSET_LIBRARY_READ",
+      "ASSET_LIBRARY_DEACTIVATE",
+      "CONTENT_IDEA_CREATE",
+      "CONTENT_IDEA_READ",
+      "CONTENT_IDEA_DEACTIVATE",
+      "REEL_CREATE",
+      "REEL_UPDATE",
+      "CAROUSEL_CREATE",
+      "CAROUSEL_UPDATE",
+      "STORY_SEQUENCE_CREATE",
+      "STORY_SEQUENCE_UPDATE",
+      "EMAIL_CAMPAIGN_CREATE",
+      "EMAIL_CAMPAIGN_READ",
+      "EMAIL_CAMPAIGN_DEACTIVATE",
+      "YOUTUBE_CONTENT_CREATE",
+      "YOUTUBE_CONTENT_UPDATE",
+      "YOUTUBE_CONTENT_DEACTIVATE",
+      "COPYWRITING_GENERATE",
+      "COPYWRITING_CREATE",
+      "CONTENT_APPROVAL_REVIEW",
+      "CONTENT_APPROVAL_EXPERT",
+      "CONTENT_APPROVAL_APPROVE",
+      "CONTENT_APPROVAL_PUBLISH"
+    ]
+  },
+  {
+    code: "DIGITAL_STRATEGIST",
+    name: "Estrategista Digital",
+    description: "Cargo de estrategia digital do Flow JL.",
+    permissionCodes: ["LAUNCH_CREATE", "LAUNCH_READ", "MARKET_RESEARCH_CREATE", "COMPETITOR_RESEARCH_CREATE", "AVATAR_CREATE", "AVATAR_UPDATE", "AVATAR_SUGGEST", "OFFER_CREATE", "OFFER_UPDATE", "POSITIONING_CREATE", "POSITIONING_UPDATE", "EDITORIAL_LINE_CREATE", "EDITORIAL_LINE_UPDATE", "CONTENT_PLAN_CREATE", "CONTENT_PLAN_UPDATE", "SMART_SCHEDULE_CREATE", "SMART_SCHEDULE_UPDATE", "EXPERT_APPROVAL_SUBMIT", "STRATEGIST_DASHBOARD_READ", "COPYWRITING_GENERATE", "COPYWRITING_CREATE", "CONTENT_APPROVAL_REVIEW", "CONTENT_APPROVAL_EXPERT", "ASSET_LIBRARY_CREATE", "ASSET_LIBRARY_READ"]
+  },
+  {
+    code: "EXPERT",
+    name: "Expert",
+    description: "Cargo de especialista de conteudo do Flow JL.",
+    permissionCodes: ["EXPERT_APPROVAL_DECIDE", "CONTENT_APPROVAL_APPROVE"]
+  },
+  {
+    code: "TRAFFIC_MANAGER",
+    name: "Gestor de Trafego",
+    description: "Cargo de gestao de trafego pago do Flow JL.",
+    permissionCodes: []
+  },
+  {
+    code: "OPERATIONS",
+    name: "Operacoes Administrativas",
+    description: "Cargo operacional administrativo do Flow JL.",
+    permissionCodes: ["EMAIL_CAMPAIGN_CREATE", "EMAIL_CAMPAIGN_READ", "EMAIL_CAMPAIGN_DEACTIVATE", "CONTENT_APPROVAL_PUBLISH", "ASSET_LIBRARY_READ"]
+  },
+  {
+    code: "SOCIAL_MEDIA",
+    name: "Social Media",
+    description: "Cargo responsavel por redes sociais do Flow JL.",
+    permissionCodes: ["ASSET_LIBRARY_CREATE", "ASSET_LIBRARY_READ", "ASSET_LIBRARY_DEACTIVATE", "CONTENT_IDEA_CREATE", "CONTENT_IDEA_READ", "CONTENT_IDEA_DEACTIVATE", "REEL_CREATE", "REEL_UPDATE", "CAROUSEL_CREATE", "CAROUSEL_UPDATE", "STORY_SEQUENCE_CREATE", "STORY_SEQUENCE_UPDATE", "EMAIL_CAMPAIGN_CREATE", "EMAIL_CAMPAIGN_READ", "YOUTUBE_CONTENT_CREATE", "YOUTUBE_CONTENT_UPDATE", "YOUTUBE_CONTENT_DEACTIVATE", "COPYWRITING_GENERATE", "COPYWRITING_CREATE", "CONTENT_APPROVAL_REVIEW", "CONTENT_APPROVAL_PUBLISH"]
+  }
+];
+
+export const allowedRoleCodes = new Set(roleCatalog.map((role) => role.code));
+
+export function findCatalogRole(code) {
+  return roleCatalog.find((role) => role.code === code.toUpperCase()) ?? null;
+}
