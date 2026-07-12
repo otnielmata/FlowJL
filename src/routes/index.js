@@ -4,6 +4,7 @@ import { auditRoutes } from "./audit.routes.js";
 import { assetLibraryRoutes } from "./asset-library.routes.js";
 import { authRoutes } from "./auth.routes.js";
 import { carouselRoutes } from "./carousel.routes.js";
+import { classScheduleRoutes } from "./class-schedule.routes.js";
 import { contentApprovalRoutes } from "./content-approval.routes.js";
 import { copywritingRoutes } from "./copywriting.routes.js";
 import { contentStatusRoutes } from "./content-status.routes.js";
@@ -35,7 +36,7 @@ apiRoutes.get("/", (_request, response) => {
   response.status(200).json({
     service: "flow-jl-api",
     version: "v1",
-    modules: ["assets", "audits", "auth", "carousels", "content-approvals", "content-ideas", "content-statuses", "copywritings", "dashboards", "editorial-calendar", "emails", "external-publication", "launches", "production-checklists", "profiles", "publications", "reels", "roles", "stories", "traffic-audiences", "traffic-campaigns", "traffic-conversion-events", "traffic-creatives", "traffic-pixels", "traffic-reports", "traffic-roi", "users", "youtube-contents", "swagger"]
+    modules: ["assets", "audits", "auth", "carousels", "class-schedules", "content-approvals", "content-ideas", "content-statuses", "copywritings", "dashboards", "editorial-calendar", "emails", "external-publication", "launches", "production-checklists", "profiles", "publications", "reels", "roles", "stories", "traffic-audiences", "traffic-campaigns", "traffic-conversion-events", "traffic-creatives", "traffic-pixels", "traffic-reports", "traffic-roi", "users", "youtube-contents", "swagger"]
   });
 });
 
@@ -43,6 +44,7 @@ apiRoutes.use("/assets", assetLibraryRoutes);
 apiRoutes.use("/audits", auditRoutes);
 apiRoutes.use("/auth", authRoutes);
 apiRoutes.use("/carousels", carouselRoutes);
+apiRoutes.use("/class-schedules", classScheduleRoutes);
 apiRoutes.use("/content-approvals", contentApprovalRoutes);
 apiRoutes.use("/copywritings", copywritingRoutes);
 apiRoutes.use("/content-ideas", contentIdeaRoutes);

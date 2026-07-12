@@ -5,6 +5,7 @@ import "../models/audit-event.model.js";
 import "../models/auth-session.model.js";
 import "../models/avatar.model.js";
 import "../models/carousel.model.js";
+import "../models/class-schedule.model.js";
 import "../models/competitor-research.model.js";
 import "../models/content-approval.model.js";
 import "../models/content-idea.model.js";

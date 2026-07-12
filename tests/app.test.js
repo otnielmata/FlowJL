@@ -25,6 +25,7 @@ describe("app", () => {
     expect(response.body.modules).toContain("launches");
     expect(response.body.modules).toContain("roles");
     expect(response.body.modules).toContain("profiles");
+    expect(response.body.modules).toContain("class-schedules");
     expect(response.body.modules).toContain("youtube-contents");
     expect(response.body.modules).toContain("copywritings");
     expect(response.body.modules).toContain("content-approvals");

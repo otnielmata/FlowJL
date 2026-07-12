@@ -10,6 +10,7 @@ tags:
   - name: Assets
   - name: Audit
   - name: Auth
+  - name: Class Schedules
   - name: Dashboards
   - name: Editorial Calendar
   - name: Content Approvals
@@ -205,6 +206,131 @@ paths:
           description: Ativo nao encontrado
         '409':
           description: Ativo ja esta inativo
+  /api/v1/class-schedules:
+    post:
+      tags: [Class Schedules]
+      summary: Cadastra uma aula na agenda operacional
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClassScheduleRequest'
+      responses:
+        '201':
+          description: Aula agendada com sucesso
+        '400':
+          description: Dados invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento nao encontrado
+    get:
+      tags: [Class Schedules]
+      summary: Lista aulas agendadas por contexto operacional
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: launchId
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: status
+          required: false
+          schema:
+            type: string
+            enum: [PLANNED, CONFIRMED, COMPLETED, CANCELED, RESCHEDULED]
+        - in: query
+          name: responsible
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: startAt
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: endAt
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: active
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Aulas retornadas com horarios em UTC
+        '400':
+          description: Filtros invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+  /api/v1/class-schedules/{classScheduleId}:
+    put:
+      tags: [Class Schedules]
+      summary: Atualiza data, responsavel, status ou dados de uma aula
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: classScheduleId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateClassScheduleRequest'
+      responses:
+        '200':
+          description: Aula atualizada com auditoria
+        '400':
+          description: Dados invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Aula nao encontrada
+    delete:
+      tags: [Class Schedules]
+      summary: Inativa uma aula agendada preservando historico
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: classScheduleId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Aula inativada por exclusao logica
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Aula nao encontrada
+        '409':
+          description: Aula ja inativa
   /api/v1/dashboards/strategist:
     get:
       tags: [Dashboards]
@@ -3346,6 +3472,46 @@ components:
       properties:
         refreshToken:
           type: string
+    ClassScheduleRequest:
+      type: object
+      required: [launchId, title, scheduledAt, responsible, status]
+      properties:
+        launchId:
+          type: string
+          format: uuid
+        title:
+          type: string
+          minLength: 3
+        scheduledAt:
+          type: string
+          format: date-time
+        responsible:
+          type: string
+          minLength: 2
+        status:
+          type: string
+          enum: [PLANNED, CONFIRMED, COMPLETED, CANCELED, RESCHEDULED]
+        notes:
+          type: string
+          maxLength: 500
+    UpdateClassScheduleRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 3
+        scheduledAt:
+          type: string
+          format: date-time
+        responsible:
+          type: string
+          minLength: 2
+        status:
+          type: string
+          enum: [PLANNED, CONFIRMED, COMPLETED, CANCELED, RESCHEDULED]
+        notes:
+          type: string
+          maxLength: 500
     CreateLaunchRequest:
       type: object
       required: [name, expert, product, baseDate, milestones]
