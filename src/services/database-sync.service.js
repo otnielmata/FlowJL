@@ -30,6 +30,7 @@ import "../models/smart-schedule.model.js";
 import "../models/story-sequence.model.js";
 import "../models/traffic-audience.model.js";
 import "../models/traffic-campaign.model.js";
+import "../models/traffic-conversion-event.model.js";
 import "../models/traffic-creative.model.js";
 import "../models/traffic-pixel.model.js";
 import "../models/user.model.js";
