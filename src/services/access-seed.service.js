@@ -344,6 +344,24 @@ const corePermissions = [
     name: "Consultar dashboard da estrategista",
     description: "Permite consultar indicadores consolidados do modulo estrategico por lancamento.",
     module: "strategy"
+  },
+  {
+    code: "EDITORIAL_CALENDAR_CREATE",
+    name: "Cadastrar itens no calendario editorial",
+    description: "Permite inserir itens agendados no calendario editorial com vinculo a conteudo base.",
+    module: "content"
+  },
+  {
+    code: "EDITORIAL_CALENDAR_READ",
+    name: "Consultar calendario editorial",
+    description: "Permite consultar o calendario editorial por periodo, canal e lancamento.",
+    module: "content"
+  },
+  {
+    code: "EDITORIAL_CALENDAR_UPDATE",
+    name: "Atualizar agenda editorial",
+    description: "Permite ajustar data, hora, canal e responsavel de itens do calendario editorial.",
+    module: "content"
   }
 ];
 

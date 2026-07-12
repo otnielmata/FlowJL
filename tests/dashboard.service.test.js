@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const launchModel = {
   find: vi.fn(),
@@ -92,6 +92,8 @@ function mockSortedFindOne(model, value) {
 describe("dashboardService.getStrategistDashboard", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-07-11T15:00:00.000Z"));
 
     mockSortedFindOne(marketResearchModel, {
       id: "research-v1",
@@ -171,6 +173,10 @@ describe("dashboardService.getStrategistDashboard", () => {
       updatedAt: new Date("2026-07-11T13:00:00.000Z"),
       createdAt: new Date("2026-07-11T13:00:00.000Z")
     });
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it("returns consolidated indicators for a specific launch", async () => {
