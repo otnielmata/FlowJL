@@ -44,6 +44,7 @@ describe("app", () => {
     expect(response.body.modules).toContain("traffic-reports");
     expect(response.body.modules).toContain("traffic-roi");
     expect(response.body.modules).toContain("live-events");
+    expect(response.body.modules).toContain("operational-checklists");
     expect(response.body.modules).toContain("operational-emails");
     expect(response.body.modules).toContain("students");
     expect(response.body.modules).toContain("support-tickets");
