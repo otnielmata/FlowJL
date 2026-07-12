@@ -584,6 +584,12 @@ const corePermissions = [
     name: "Consultar relatorios de trafego",
     description: "Permite consultar relatorios consolidados de trafego por lancamento, periodo e campanha.",
     module: "traffic"
+  },
+  {
+    code: "TRAFFIC_ROI_READ",
+    name: "Consultar ROI de trafego",
+    description: "Permite consultar ROI consolidado de trafego por lancamento, periodo e campanha.",
+    module: "traffic"
   }
 ];
 
