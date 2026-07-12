@@ -1,11 +1,19 @@
+import { randomUUID } from "node:crypto";
+
 import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema(
   {
+    _id: {
+      type: String,
+      default: randomUUID
+    },
     name: {
       type: String,
       required: true,
-      trim: true
+      trim: true,
+      minlength: 3,
+      maxlength: 120
     },
     email: {
       type: String,
@@ -14,9 +22,19 @@ const userSchema = new mongoose.Schema(
       lowercase: true,
       unique: true
     },
-    password: {
+    passwordHash: {
       type: String,
       required: true
+    },
+    roleId: {
+      type: String,
+      ref: "Role",
+      required: true
+    },
+    status: {
+      type: String,
+      enum: ["ACTIVE", "INACTIVE", "PENDING"],
+      default: "ACTIVE"
     },
     profile: {
       type: mongoose.Schema.Types.ObjectId,
@@ -24,11 +42,27 @@ const userSchema = new mongoose.Schema(
       required: false,
       default: null
     },
-    active: {
-      type: Boolean,
-      default: true
+    createdBy: {
+      type: String,
+      default: null
+    },
+    updatedBy: {
+      type: String,
+      default: null
+    },
+    lastRoleChangeAt: {
+      type: Date,
+      default: null
+    },
+    lastRoleChangeBy: {
+      type: String,
+      default: null
     },
     lastLoginAt: {
+      type: Date,
+      default: null
+    },
+    deactivatedAt: {
       type: Date,
       default: null
     }
