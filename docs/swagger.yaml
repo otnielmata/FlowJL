@@ -21,6 +21,7 @@ tags:
   - name: Production Checklists
   - name: YouTube Contents
   - name: Launches
+  - name: Live Events
   - name: Profiles
   - name: Users
   - name: Roles
@@ -3153,6 +3154,136 @@ paths:
           description: Lancamento ou submissao de aprovacao nao encontrados
         '409':
           description: Aprovacao fora do fluxo de revisao
+  /api/v1/live-events:
+    post:
+      tags: [Live Events]
+      summary: Cadastra um evento ao vivo operacional
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LiveEventRequest'
+      responses:
+        '201':
+          description: Evento ao vivo cadastrado com sucesso
+        '400':
+          description: Dados invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento nao encontrado
+    get:
+      tags: [Live Events]
+      summary: Lista eventos ao vivo por contexto operacional
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: launchId
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: status
+          required: false
+          schema:
+            type: string
+            enum: [PLANNED, CONFIRMED, LIVE, COMPLETED, CANCELED, RESCHEDULED]
+        - in: query
+          name: channel
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: responsible
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: startAt
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: endAt
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: active
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Eventos retornados com horarios em UTC
+        '400':
+          description: Filtros invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+  /api/v1/live-events/{liveEventId}:
+    put:
+      tags: [Live Events]
+      summary: Atualiza horario, canal, responsavel, status ou dados de evento ao vivo
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: liveEventId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateLiveEventRequest'
+      responses:
+        '200':
+          description: Evento atualizado com auditoria
+        '400':
+          description: Dados invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Evento nao encontrado
+    delete:
+      tags: [Live Events]
+      summary: Inativa um evento ao vivo preservando historico
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: liveEventId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Evento inativado por exclusao logica
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Evento nao encontrado
+        '409':
+          description: Evento ja inativo
   /api/v1/roles:
     get:
       tags: [Roles]
@@ -3512,6 +3643,60 @@ components:
         notes:
           type: string
           maxLength: 500
+    LiveEventRequest:
+      type: object
+      required: [launchId, name, scheduledAt, channel, responsible, status]
+      properties:
+        launchId:
+          type: string
+          format: uuid
+        name:
+          type: string
+          minLength: 3
+        scheduledAt:
+          type: string
+          format: date-time
+        channel:
+          type: string
+          minLength: 2
+        responsible:
+          type: string
+          minLength: 2
+        status:
+          type: string
+          enum: [PLANNED, CONFIRMED, LIVE, COMPLETED, CANCELED, RESCHEDULED]
+        accessUrl:
+          type: string
+          format: uri
+        notes:
+          type: string
+          maxLength: 500
+    UpdateLiveEventRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 3
+        scheduledAt:
+          type: string
+          format: date-time
+        channel:
+          type: string
+          minLength: 2
+        responsible:
+          type: string
+          minLength: 2
+        status:
+          type: string
+          enum: [PLANNED, CONFIRMED, LIVE, COMPLETED, CANCELED, RESCHEDULED]
+        accessUrl:
+          type: string
+          format: uri
+          nullable: true
+        notes:
+          type: string
+          maxLength: 500
+          nullable: true
     CreateLaunchRequest:
       type: object
       required: [name, expert, product, baseDate, milestones]

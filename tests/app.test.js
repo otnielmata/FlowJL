@@ -42,5 +42,6 @@ describe("app", () => {
     expect(response.body.modules).toContain("traffic-pixels");
     expect(response.body.modules).toContain("traffic-reports");
     expect(response.body.modules).toContain("traffic-roi");
+    expect(response.body.modules).toContain("live-events");
   });
 });
