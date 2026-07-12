@@ -23,6 +23,7 @@ tags:
   - name: Profiles
   - name: Users
   - name: Roles
+  - name: Traffic Audiences
   - name: Traffic Campaigns
   - name: Traffic Creatives
   - name: Traffic Pixels
@@ -1077,6 +1078,188 @@ paths:
           description: JWT ausente ou invalido
         '403':
           description: Acesso negado
+  /api/v1/traffic-audiences:
+    post:
+      tags: [Traffic Audiences]
+      summary: Cadastra publico segmentado vinculado a lancamento ou campanha
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, objective, strategy, segmentationCriteria]
+              properties:
+                launchId:
+                  type: string
+                  format: uuid
+                campaignIds:
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+                name:
+                  type: string
+                objective:
+                  type: string
+                strategy:
+                  type: string
+                segmentationCriteria:
+                  type: object
+                  description: Deve conter ao menos um criterio de segmentacao.
+                  properties:
+                    demographics:
+                      type: array
+                      items:
+                        type: string
+                    interests:
+                      type: array
+                      items:
+                        type: string
+                    behaviors:
+                      type: array
+                      items:
+                        type: string
+                    locations:
+                      type: array
+                      items:
+                        type: string
+                    exclusions:
+                      type: array
+                      items:
+                        type: string
+                    lookalikeSource:
+                      type: string
+                    customRules:
+                      type: array
+                      items:
+                        type: string
+                status:
+                  type: string
+                  enum: [DRAFT, ACTIVE, PAUSED, ARCHIVED]
+      responses:
+        '201':
+          description: Publico cadastrado com sucesso
+        '400':
+          description: Dados invalidos, contexto ausente ou criterios insuficientes
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento ou campanha nao encontrados
+        '409':
+          description: Campanha incompativel ou publico duplicado no lancamento
+    get:
+      tags: [Traffic Audiences]
+      summary: Lista publicos por lancamento, campanha, status ou ativacao
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: launchId
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: campaignId
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: status
+          required: false
+          schema:
+            type: string
+            enum: [DRAFT, ACTIVE, PAUSED, ARCHIVED]
+        - in: query
+          name: active
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Publicos retornados com sucesso
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+  /api/v1/traffic-audiences/{audienceId}:
+    put:
+      tags: [Traffic Audiences]
+      summary: Atualiza estrategia, status, campanhas ou criterios do publico
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: audienceId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                campaignIds:
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+                objective:
+                  type: string
+                strategy:
+                  type: string
+                segmentationCriteria:
+                  type: object
+                status:
+                  type: string
+                  enum: [DRAFT, ACTIVE, PAUSED, ARCHIVED]
+                reason:
+                  type: string
+      responses:
+        '200':
+          description: Publico atualizado com historico auditavel
+        '400':
+          description: Dados invalidos ou criterios insuficientes
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Publico ou campanha nao encontrados
+        '409':
+          description: Campanha incompativel com o lancamento do publico
+    delete:
+      tags: [Traffic Audiences]
+      summary: Realiza exclusao logica de publico de trafego
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: audienceId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Publico inativado com sucesso
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Publico nao encontrado
+        '409':
+          description: Publico ja esta inativo
   /api/v1/traffic-campaigns:
     post:
       tags: [Traffic Campaigns]

@@ -34,6 +34,7 @@ describe("app", () => {
     expect(response.body.modules).toContain("editorial-calendar");
     expect(response.body.modules).toContain("production-checklists");
     expect(response.body.modules).toContain("external-publication");
+    expect(response.body.modules).toContain("traffic-audiences");
     expect(response.body.modules).toContain("traffic-campaigns");
     expect(response.body.modules).toContain("traffic-creatives");
     expect(response.body.modules).toContain("traffic-pixels");

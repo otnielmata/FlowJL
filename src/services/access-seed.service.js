@@ -524,6 +524,30 @@ const corePermissions = [
     name: "Inativar pixels de trafego",
     description: "Permite realizar exclusao logica de pixels preservando historico.",
     module: "traffic"
+  },
+  {
+    code: "TRAFFIC_AUDIENCE_CREATE",
+    name: "Cadastrar publicos de trafego",
+    description: "Permite cadastrar publicos vinculados a lancamentos ou campanhas.",
+    module: "traffic"
+  },
+  {
+    code: "TRAFFIC_AUDIENCE_READ",
+    name: "Consultar publicos de trafego",
+    description: "Permite consultar publicos por lancamento, campanha, status e ativacao.",
+    module: "traffic"
+  },
+  {
+    code: "TRAFFIC_AUDIENCE_UPDATE",
+    name: "Atualizar publicos de trafego",
+    description: "Permite atualizar estrategia, status e segmentacao de publicos.",
+    module: "traffic"
+  },
+  {
+    code: "TRAFFIC_AUDIENCE_DEACTIVATE",
+    name: "Inativar publicos de trafego",
+    description: "Permite realizar exclusao logica de publicos preservando historico.",
+    module: "traffic"
   }
 ];
 
