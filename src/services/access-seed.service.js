@@ -578,6 +578,12 @@ const corePermissions = [
     name: "Inativar eventos de conversao",
     description: "Permite realizar exclusao logica de eventos preservando historico.",
     module: "traffic"
+  },
+  {
+    code: "TRAFFIC_REPORT_READ",
+    name: "Consultar relatorios de trafego",
+    description: "Permite consultar relatorios consolidados de trafego por lancamento, periodo e campanha.",
+    module: "traffic"
   }
 ];
 

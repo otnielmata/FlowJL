@@ -39,5 +39,6 @@ describe("app", () => {
     expect(response.body.modules).toContain("traffic-conversion-events");
     expect(response.body.modules).toContain("traffic-creatives");
     expect(response.body.modules).toContain("traffic-pixels");
+    expect(response.body.modules).toContain("traffic-reports");
   });
 });

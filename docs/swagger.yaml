@@ -28,6 +28,7 @@ tags:
   - name: Traffic Conversion Events
   - name: Traffic Creatives
   - name: Traffic Pixels
+  - name: Traffic Reports
 paths:
   /health:
     get:
@@ -1079,6 +1080,50 @@ paths:
           description: JWT ausente ou invalido
         '403':
           description: Acesso negado
+  /api/v1/traffic-reports:
+    get:
+      tags: [Traffic Reports]
+      summary: Consulta relatorio consolidado de trafego por lancamento, periodo e campanha
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: launchId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: periodStart
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: periodEnd
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: campaignId
+          required: false
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Relatorio consolidado retornado com dados disponiveis e datas em UTC
+        '400':
+          description: Periodo invalido ou parametros obrigatorios ausentes
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento ou campanha nao encontrados
+        '409':
+          description: Campanha nao pertence ao lancamento informado
   /api/v1/traffic-conversion-events:
     post:
       tags: [Traffic Conversion Events]
