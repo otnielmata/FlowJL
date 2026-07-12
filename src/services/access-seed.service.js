@@ -266,6 +266,24 @@ const corePermissions = [
     name: "Inativar e-mails",
     description: "Permite realizar exclusao logica de e-mails preservando historico.",
     module: "content"
+  },
+  {
+    code: "YOUTUBE_CONTENT_CREATE",
+    name: "Cadastrar pautas de YouTube",
+    description: "Permite cadastrar pautas de videos longos relacionadas ao lancamento e linha editorial.",
+    module: "content"
+  },
+  {
+    code: "YOUTUBE_CONTENT_UPDATE",
+    name: "Atualizar pautas de YouTube",
+    description: "Permite atualizar roteiro, responsavel e status operacional de conteudos de YouTube.",
+    module: "content"
+  },
+  {
+    code: "YOUTUBE_CONTENT_DEACTIVATE",
+    name: "Inativar pautas de YouTube",
+    description: "Permite realizar exclusao logica de pautas de YouTube preservando historico.",
+    module: "content"
   }
 ];
 

@@ -9,6 +9,7 @@ tags:
   - name: Health
   - name: Audit
   - name: Auth
+  - name: YouTube Contents
   - name: Launches
   - name: Profiles
   - name: Users
@@ -425,6 +426,82 @@ paths:
           description: Acesso negado
         '404':
           description: Sequencia de stories nao encontrada
+  /api/v1/youtube-contents:
+    post:
+      tags: [YouTube Contents]
+      summary: Cadastra uma pauta de YouTube com contexto editorial vigente
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateYouTubeContentRequest'
+      responses:
+        '201':
+          description: Pauta de YouTube cadastrada com sucesso
+        '400':
+          description: Dados invalidos ou ausencia de linha editorial vigente
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento nao encontrado
+  /api/v1/youtube-contents/{contentId}:
+    put:
+      tags: [YouTube Contents]
+      summary: Atualiza roteiro, responsavel e status do conteudo de YouTube
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: contentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateYouTubeContentRequest'
+      responses:
+        '200':
+          description: Conteudo de YouTube atualizado com sucesso
+        '400':
+          description: Dados invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Conteudo de YouTube nao encontrado
+    delete:
+      tags: [YouTube Contents]
+      summary: Realiza exclusao logica de uma pauta de YouTube
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: contentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Conteudo de YouTube inativado com sucesso
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Conteudo de YouTube nao encontrado
+        '409':
+          description: Conteudo de YouTube ja esta inativo
   /api/v1/launches:
     post:
       tags: [Launches]
@@ -1629,6 +1706,50 @@ components:
           enum: [DRAFT, IN_REVIEW, APPROVED, SCHEDULED, PUBLISHED]
         ownerRole:
           type: string
+        publishAt:
+          type: string
+          format: date-time
+    CreateYouTubeContentRequest:
+      type: object
+      required: [launchId, theme, objective, format, cta]
+      properties:
+        launchId:
+          type: string
+          format: uuid
+        theme:
+          type: string
+        objective:
+          type: string
+        format:
+          type: string
+        cta:
+          type: string
+        script:
+          type: string
+        ownerRole:
+          type: string
+        operationalStatus:
+          type: string
+          enum: [PLANNED, SCRIPTING, RECORDING, EDITING, SCHEDULED, PUBLISHED]
+        recordingAt:
+          type: string
+          format: date-time
+        publishAt:
+          type: string
+          format: date-time
+    UpdateYouTubeContentRequest:
+      type: object
+      properties:
+        script:
+          type: string
+        ownerRole:
+          type: string
+        operationalStatus:
+          type: string
+          enum: [PLANNED, SCRIPTING, RECORDING, EDITING, SCHEDULED, PUBLISHED]
+        recordingAt:
+          type: string
+          format: date-time
         publishAt:
           type: string
           format: date-time
