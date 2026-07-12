@@ -23,6 +23,7 @@ import { productionChecklistRoutes } from "./production-checklist.routes.js";
 import { reelRoutes } from "./reel.routes.js";
 import { roleRoutes } from "./role.routes.js";
 import { storySequenceRoutes } from "./story-sequence.routes.js";
+import { studentRoutes } from "./student.routes.js";
 import { trafficAudienceRoutes } from "./traffic-audience.routes.js";
 import { trafficCampaignRoutes } from "./traffic-campaign.routes.js";
 import { trafficConversionEventRoutes } from "./traffic-conversion-event.routes.js";
@@ -39,7 +40,7 @@ apiRoutes.get("/", (_request, response) => {
   response.status(200).json({
     service: "flow-jl-api",
     version: "v1",
-    modules: ["assets", "audits", "auth", "carousels", "class-schedules", "content-approvals", "content-ideas", "content-statuses", "copywritings", "dashboards", "discord-operations", "editorial-calendar", "emails", "external-publication", "launches", "live-events", "operational-emails", "production-checklists", "profiles", "publications", "reels", "roles", "stories", "traffic-audiences", "traffic-campaigns", "traffic-conversion-events", "traffic-creatives", "traffic-pixels", "traffic-reports", "traffic-roi", "users", "youtube-contents", "swagger"]
+    modules: ["assets", "audits", "auth", "carousels", "class-schedules", "content-approvals", "content-ideas", "content-statuses", "copywritings", "dashboards", "discord-operations", "editorial-calendar", "emails", "external-publication", "launches", "live-events", "operational-emails", "production-checklists", "profiles", "publications", "reels", "roles", "stories", "students", "traffic-audiences", "traffic-campaigns", "traffic-conversion-events", "traffic-creatives", "traffic-pixels", "traffic-reports", "traffic-roi", "users", "youtube-contents", "swagger"]
   });
 });
 
@@ -66,6 +67,7 @@ apiRoutes.use("/production-checklists", productionChecklistRoutes);
 apiRoutes.use("/reels", reelRoutes);
 apiRoutes.use("/roles", roleRoutes);
 apiRoutes.use("/stories", storySequenceRoutes);
+apiRoutes.use("/students", studentRoutes);
 apiRoutes.use("/traffic-audiences", trafficAudienceRoutes);
 apiRoutes.use("/traffic-campaigns", trafficCampaignRoutes);
 apiRoutes.use("/traffic-conversion-events", trafficConversionEventRoutes);
