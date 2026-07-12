@@ -9,6 +9,7 @@ tags:
   - name: Health
   - name: Audit
   - name: Auth
+  - name: Content Approvals
   - name: Copywritings
   - name: YouTube Contents
   - name: Launches
@@ -185,6 +186,44 @@ paths:
           description: Ideia nao encontrada
         '409':
           description: Ideia ja esta inativa
+  /api/v1/content-approvals/{contentType}/{contentId}/status:
+    post:
+      tags: [Content Approvals]
+      summary: Avanca ou devolve uma peca no fluxo de aprovacao
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: contentType
+          required: true
+          schema:
+            type: string
+            enum: [REEL, CAROUSEL, STORY_SEQUENCE, EMAIL_CAMPAIGN, YOUTUBE_CONTENT]
+        - in: path
+          name: contentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangeContentApprovalStatusRequest'
+      responses:
+        '200':
+          description: Fluxo de aprovacao atualizado com sucesso
+        '400':
+          description: Dados invalidos ou feedback insuficiente para reprovar
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Conteudo nao encontrado
+        '409':
+          description: Ordem de aprovacao invalida para a peca
   /api/v1/copywritings:
     post:
       tags: [Copywritings]
@@ -1616,6 +1655,15 @@ components:
           type: string
         suggestedFormat:
           type: string
+        observations:
+          type: string
+    ChangeContentApprovalStatusRequest:
+      type: object
+      required: [targetStatus]
+      properties:
+        targetStatus:
+          type: string
+          enum: [CREATED, REVIEW, EXPERT, APPROVED, PUBLISHED]
         observations:
           type: string
     GenerateCopywritingRequest:

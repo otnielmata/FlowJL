@@ -75,18 +75,22 @@ describe("accessSeedService.ensureCoreAccessSeed", () => {
         { _id: "perm-45", code: "YOUTUBE_CONTENT_DEACTIVATE" },
         { _id: "perm-46", code: "YOUTUBE_CONTENT_UPDATE" },
         { _id: "perm-47", code: "COPYWRITING_CREATE" },
-        { _id: "perm-48", code: "COPYWRITING_GENERATE" }
+        { _id: "perm-48", code: "COPYWRITING_GENERATE" },
+        { _id: "perm-49", code: "CONTENT_APPROVAL_APPROVE" },
+        { _id: "perm-50", code: "CONTENT_APPROVAL_EXPERT" },
+        { _id: "perm-51", code: "CONTENT_APPROVAL_PUBLISH" },
+        { _id: "perm-52", code: "CONTENT_APPROVAL_REVIEW" }
       ])
     });
 
     await accessSeedService.ensureCoreAccessSeed();
 
-    expect(permissionModel.updateOne).toHaveBeenCalledTimes(49);
+    expect(permissionModel.updateOne).toHaveBeenCalledTimes(53);
     expect(roleModel.updateOne).toHaveBeenCalledWith(
       { code: "ADMIN" },
       expect.objectContaining({
         $set: expect.objectContaining({
-          permissionIds: ["perm-0", "perm-1", "perm-2", "perm-3", "perm-4", "perm-5", "perm-6", "perm-7", "perm-8", "perm-9", "perm-10", "perm-11", "perm-12", "perm-13", "perm-14", "perm-15", "perm-16", "perm-17", "perm-18", "perm-19", "perm-20", "perm-21", "perm-22", "perm-23", "perm-24", "perm-25", "perm-26", "perm-27", "perm-28", "perm-29", "perm-30", "perm-31", "perm-32", "perm-33", "perm-34", "perm-35", "perm-36", "perm-37", "perm-38", "perm-39", "perm-40", "perm-41", "perm-42", "perm-43", "perm-44", "perm-45", "perm-46", "perm-47", "perm-48"],
+          permissionIds: ["perm-0", "perm-1", "perm-2", "perm-3", "perm-4", "perm-5", "perm-6", "perm-7", "perm-8", "perm-9", "perm-10", "perm-11", "perm-12", "perm-13", "perm-14", "perm-15", "perm-16", "perm-17", "perm-18", "perm-19", "perm-20", "perm-21", "perm-22", "perm-23", "perm-24", "perm-25", "perm-26", "perm-27", "perm-28", "perm-29", "perm-30", "perm-31", "perm-32", "perm-33", "perm-34", "perm-35", "perm-36", "perm-37", "perm-38", "perm-39", "perm-40", "perm-41", "perm-42", "perm-43", "perm-44", "perm-45", "perm-46", "perm-47", "perm-48", "perm-49", "perm-50", "perm-51", "perm-52"],
           active: true
         })
       }),

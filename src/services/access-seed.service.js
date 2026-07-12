@@ -296,6 +296,30 @@ const corePermissions = [
     name: "Salvar copywriting gerado",
     description: "Permite persistir a copy estruturada para edicao humana posterior.",
     module: "content"
+  },
+  {
+    code: "CONTENT_APPROVAL_REVIEW",
+    name: "Mover conteudo para revisao",
+    description: "Permite avancar ou devolver pecas na etapa de revisao editorial.",
+    module: "content"
+  },
+  {
+    code: "CONTENT_APPROVAL_EXPERT",
+    name: "Mover conteudo para expert",
+    description: "Permite avancar ou devolver pecas na etapa de analise do expert.",
+    module: "content"
+  },
+  {
+    code: "CONTENT_APPROVAL_APPROVE",
+    name: "Aprovar conteudo",
+    description: "Permite aprovar pecas apos a etapa de expert.",
+    module: "content"
+  },
+  {
+    code: "CONTENT_APPROVAL_PUBLISH",
+    name: "Publicar conteudo aprovado",
+    description: "Permite concluir o fluxo de pecas ja aprovadas e marca-las como publicadas.",
+    module: "content"
   }
 ];
 
