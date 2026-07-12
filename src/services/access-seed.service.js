@@ -248,6 +248,24 @@ const corePermissions = [
     name: "Atualizar sequencias de stories",
     description: "Permite atualizar blocos, status, responsavel e horario de publicacao de stories.",
     module: "content"
+  },
+  {
+    code: "EMAIL_CAMPAIGN_CREATE",
+    name: "Cadastrar e-mails",
+    description: "Permite cadastrar e-mails de lancamento com tipo, objetivo e CTA.",
+    module: "content"
+  },
+  {
+    code: "EMAIL_CAMPAIGN_READ",
+    name: "Consultar e-mails",
+    description: "Permite listar e filtrar e-mails do lancamento por tipo, status e contexto.",
+    module: "content"
+  },
+  {
+    code: "EMAIL_CAMPAIGN_DEACTIVATE",
+    name: "Inativar e-mails",
+    description: "Permite realizar exclusao logica de e-mails preservando historico.",
+    module: "content"
   }
 ];
 
