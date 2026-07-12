@@ -117,13 +117,18 @@ describe("accessSeedService.ensureCoreAccessSeed", () => {
         { _id: "perm-87", code: "TRAFFIC_AUDIENCE_CREATE" },
         { _id: "perm-88", code: "TRAFFIC_AUDIENCE_READ" },
         { _id: "perm-89", code: "TRAFFIC_AUDIENCE_UPDATE" },
-        { _id: "perm-90", code: "TRAFFIC_AUDIENCE_DEACTIVATE" }
+        { _id: "perm-90", code: "TRAFFIC_AUDIENCE_DEACTIVATE" },
+        { _id: "perm-91", code: "TRAFFIC_CONVERSION_EVENT_CREATE" },
+        { _id: "perm-92", code: "TRAFFIC_CONVERSION_EVENT_READ" },
+        { _id: "perm-93", code: "TRAFFIC_CONVERSION_EVENT_UPDATE" },
+        { _id: "perm-94", code: "TRAFFIC_CONVERSION_EVENT_LINK" },
+        { _id: "perm-95", code: "TRAFFIC_CONVERSION_EVENT_DEACTIVATE" }
       ])
     });
 
     await accessSeedService.ensureCoreAccessSeed();
 
-    expect(permissionModel.updateOne).toHaveBeenCalledTimes(91);
+    expect(permissionModel.updateOne).toHaveBeenCalledTimes(96);
     expect(permissionModel.updateOne).toHaveBeenCalledWith(
       { code: "AUTH_LOGIN" },
       expect.objectContaining({
@@ -142,7 +147,7 @@ describe("accessSeedService.ensureCoreAccessSeed", () => {
       { code: "ADMIN" },
       expect.objectContaining({
         $set: expect.objectContaining({
-          permissionIds: ["perm-0", "perm-1", "perm-2", "perm-3", "perm-4", "perm-5", "perm-6", "perm-7", "perm-8", "perm-9", "perm-10", "perm-11", "perm-12", "perm-13", "perm-14", "perm-15", "perm-16", "perm-17", "perm-18", "perm-19", "perm-20", "perm-21", "perm-22", "perm-23", "perm-24", "perm-25", "perm-26", "perm-27", "perm-28", "perm-29", "perm-30", "perm-31", "perm-32", "perm-33", "perm-34", "perm-35", "perm-36", "perm-37", "perm-38", "perm-39", "perm-40", "perm-41", "perm-42", "perm-43", "perm-44", "perm-45", "perm-46", "perm-47", "perm-48", "perm-49", "perm-50", "perm-51", "perm-52", "perm-53", "perm-54", "perm-55", "perm-56", "perm-57", "perm-58", "perm-59", "perm-60", "perm-61", "perm-62", "perm-63", "perm-64", "perm-65", "perm-66", "perm-67", "perm-68", "perm-69", "perm-70", "perm-71", "perm-72", "perm-73", "perm-74", "perm-75", "perm-76", "perm-77", "perm-78", "perm-79", "perm-80", "perm-81", "perm-82", "perm-83", "perm-84", "perm-85", "perm-86", "perm-87", "perm-88", "perm-89", "perm-90"],
+          permissionIds: ["perm-0", "perm-1", "perm-2", "perm-3", "perm-4", "perm-5", "perm-6", "perm-7", "perm-8", "perm-9", "perm-10", "perm-11", "perm-12", "perm-13", "perm-14", "perm-15", "perm-16", "perm-17", "perm-18", "perm-19", "perm-20", "perm-21", "perm-22", "perm-23", "perm-24", "perm-25", "perm-26", "perm-27", "perm-28", "perm-29", "perm-30", "perm-31", "perm-32", "perm-33", "perm-34", "perm-35", "perm-36", "perm-37", "perm-38", "perm-39", "perm-40", "perm-41", "perm-42", "perm-43", "perm-44", "perm-45", "perm-46", "perm-47", "perm-48", "perm-49", "perm-50", "perm-51", "perm-52", "perm-53", "perm-54", "perm-55", "perm-56", "perm-57", "perm-58", "perm-59", "perm-60", "perm-61", "perm-62", "perm-63", "perm-64", "perm-65", "perm-66", "perm-67", "perm-68", "perm-69", "perm-70", "perm-71", "perm-72", "perm-73", "perm-74", "perm-75", "perm-76", "perm-77", "perm-78", "perm-79", "perm-80", "perm-81", "perm-82", "perm-83", "perm-84", "perm-85", "perm-86", "perm-87", "perm-88", "perm-89", "perm-90", "perm-91", "perm-92", "perm-93", "perm-94", "perm-95"],
           active: true
         })
       }),

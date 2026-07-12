@@ -25,6 +25,7 @@ tags:
   - name: Roles
   - name: Traffic Audiences
   - name: Traffic Campaigns
+  - name: Traffic Conversion Events
   - name: Traffic Creatives
   - name: Traffic Pixels
 paths:
@@ -1078,6 +1079,220 @@ paths:
           description: JWT ausente ou invalido
         '403':
           description: Acesso negado
+  /api/v1/traffic-conversion-events:
+    post:
+      tags: [Traffic Conversion Events]
+      summary: Cadastra evento de conversao vinculado a lancamento ou campanha
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, objective, origin]
+              properties:
+                launchId:
+                  type: string
+                  format: uuid
+                campaignIds:
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+                pixelIds:
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+                name:
+                  type: string
+                objective:
+                  type: string
+                origin:
+                  type: string
+                  enum: [WEB, CHECKOUT, FORM, WHATSAPP, CRM, ADS_PLATFORM, MANUAL, OTHER]
+                status:
+                  type: string
+                  enum: [DRAFT, ACTIVE, PAUSED, ARCHIVED]
+                eventAt:
+                  type: string
+                  format: date-time
+      responses:
+        '201':
+          description: Evento de conversao cadastrado com sucesso
+        '400':
+          description: Dados invalidos ou ausencia de lancamento/campanha
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento, campanha ou pixel nao encontrados
+        '409':
+          description: Vinculo incompativel com o lancamento ou evento duplicado
+    get:
+      tags: [Traffic Conversion Events]
+      summary: Lista eventos por lancamento, campanha, pixel, origem, status ou ativacao
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: launchId
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: campaignId
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: pixelId
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: origin
+          required: false
+          schema:
+            type: string
+            enum: [WEB, CHECKOUT, FORM, WHATSAPP, CRM, ADS_PLATFORM, MANUAL, OTHER]
+        - in: query
+          name: status
+          required: false
+          schema:
+            type: string
+            enum: [DRAFT, ACTIVE, PAUSED, ARCHIVED]
+        - in: query
+          name: active
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Eventos retornados com datas em UTC
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+  /api/v1/traffic-conversion-events/{eventId}:
+    put:
+      tags: [Traffic Conversion Events]
+      summary: Atualiza objetivo, origem, status ou data associada do evento
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: eventId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                objective:
+                  type: string
+                origin:
+                  type: string
+                  enum: [WEB, CHECKOUT, FORM, WHATSAPP, CRM, ADS_PLATFORM, MANUAL, OTHER]
+                status:
+                  type: string
+                  enum: [DRAFT, ACTIVE, PAUSED, ARCHIVED]
+                eventAt:
+                  type: string
+                  format: date-time
+                  nullable: true
+                reason:
+                  type: string
+      responses:
+        '200':
+          description: Evento atualizado com historico auditavel
+        '400':
+          description: Dados invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Evento nao encontrado
+    delete:
+      tags: [Traffic Conversion Events]
+      summary: Realiza exclusao logica de evento de conversao
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: eventId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Evento inativado com sucesso
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Evento nao encontrado
+        '409':
+          description: Evento ja esta inativo
+  /api/v1/traffic-conversion-events/{eventId}/links:
+    put:
+      tags: [Traffic Conversion Events]
+      summary: Vincula evento de conversao a campanhas ou pixels
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: eventId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                campaignIds:
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+                pixelIds:
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+                reason:
+                  type: string
+      responses:
+        '200':
+          description: Vinculos atualizados com historico auditavel
+        '400':
+          description: Dados invalidos ou nenhum vinculo informado
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Evento, campanha ou pixel nao encontrados
+        '409':
+          description: Vinculo incompativel com o lancamento do evento
   /api/v1/traffic-audiences:
     post:
       tags: [Traffic Audiences]

@@ -548,6 +548,36 @@ const corePermissions = [
     name: "Inativar publicos de trafego",
     description: "Permite realizar exclusao logica de publicos preservando historico.",
     module: "traffic"
+  },
+  {
+    code: "TRAFFIC_CONVERSION_EVENT_CREATE",
+    name: "Cadastrar eventos de conversao",
+    description: "Permite cadastrar eventos de conversao vinculados a lancamentos ou campanhas.",
+    module: "traffic"
+  },
+  {
+    code: "TRAFFIC_CONVERSION_EVENT_READ",
+    name: "Consultar eventos de conversao",
+    description: "Permite consultar eventos por lancamento, campanha, pixel, origem, status e ativacao.",
+    module: "traffic"
+  },
+  {
+    code: "TRAFFIC_CONVERSION_EVENT_UPDATE",
+    name: "Atualizar eventos de conversao",
+    description: "Permite atualizar objetivo, origem, status e datas associadas de eventos.",
+    module: "traffic"
+  },
+  {
+    code: "TRAFFIC_CONVERSION_EVENT_LINK",
+    name: "Vincular eventos de conversao",
+    description: "Permite vincular eventos de conversao a campanhas e pixels.",
+    module: "traffic"
+  },
+  {
+    code: "TRAFFIC_CONVERSION_EVENT_DEACTIVATE",
+    name: "Inativar eventos de conversao",
+    description: "Permite realizar exclusao logica de eventos preservando historico.",
+    module: "traffic"
   }
 ];
 
