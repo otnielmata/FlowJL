@@ -67,18 +67,21 @@ describe("accessSeedService.ensureCoreAccessSeed", () => {
         { _id: "perm-37", code: "CAROUSEL_CREATE" },
         { _id: "perm-38", code: "CAROUSEL_UPDATE" },
         { _id: "perm-39", code: "STORY_SEQUENCE_CREATE" },
-        { _id: "perm-40", code: "STORY_SEQUENCE_UPDATE" }
+        { _id: "perm-40", code: "STORY_SEQUENCE_UPDATE" },
+        { _id: "perm-41", code: "EMAIL_CAMPAIGN_CREATE" },
+        { _id: "perm-42", code: "EMAIL_CAMPAIGN_DEACTIVATE" },
+        { _id: "perm-43", code: "EMAIL_CAMPAIGN_READ" }
       ])
     });
 
     await accessSeedService.ensureCoreAccessSeed();
 
-    expect(permissionModel.updateOne).toHaveBeenCalledTimes(41);
+    expect(permissionModel.updateOne).toHaveBeenCalledTimes(44);
     expect(roleModel.updateOne).toHaveBeenCalledWith(
       { code: "ADMIN" },
       expect.objectContaining({
         $set: expect.objectContaining({
-          permissionIds: ["perm-0", "perm-1", "perm-2", "perm-3", "perm-4", "perm-5", "perm-6", "perm-7", "perm-8", "perm-9", "perm-10", "perm-11", "perm-12", "perm-13", "perm-14", "perm-15", "perm-16", "perm-17", "perm-18", "perm-19", "perm-20", "perm-21", "perm-22", "perm-23", "perm-24", "perm-25", "perm-26", "perm-27", "perm-28", "perm-29", "perm-30", "perm-31", "perm-32", "perm-33", "perm-34", "perm-35", "perm-36", "perm-37", "perm-38", "perm-39", "perm-40"],
+          permissionIds: ["perm-0", "perm-1", "perm-2", "perm-3", "perm-4", "perm-5", "perm-6", "perm-7", "perm-8", "perm-9", "perm-10", "perm-11", "perm-12", "perm-13", "perm-14", "perm-15", "perm-16", "perm-17", "perm-18", "perm-19", "perm-20", "perm-21", "perm-22", "perm-23", "perm-24", "perm-25", "perm-26", "perm-27", "perm-28", "perm-29", "perm-30", "perm-31", "perm-32", "perm-33", "perm-34", "perm-35", "perm-36", "perm-37", "perm-38", "perm-39", "perm-40", "perm-41", "perm-42", "perm-43"],
           active: true
         })
       }),

@@ -183,6 +183,89 @@ paths:
           description: Ideia nao encontrada
         '409':
           description: Ideia ja esta inativa
+  /api/v1/emails:
+    post:
+      tags: [Emails]
+      summary: Cadastra um e-mail de lancamento com tipo e objetivo
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEmailCampaignRequest'
+      responses:
+        '201':
+          description: E-mail cadastrado com sucesso
+        '400':
+          description: Dados invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento nao encontrado
+    get:
+      tags: [Emails]
+      summary: Lista e-mails por tipo, lancamento ou status
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: launchId
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: type
+          required: false
+          schema:
+            type: string
+            enum: [NURTURE, SALES, EVENT, WEBINAR]
+        - in: query
+          name: status
+          required: false
+          schema:
+            type: string
+            enum: [DRAFT, IN_REVIEW, APPROVED, SCHEDULED, SENT]
+        - in: query
+          name: active
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Itens compativeis retornados
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+  /api/v1/emails/{emailId}:
+    delete:
+      tags: [Emails]
+      summary: Realiza exclusao logica de um e-mail
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: emailId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: E-mail inativado com sucesso
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: E-mail nao encontrado
+        '409':
+          description: E-mail ja esta inativo
   /api/v1/carousels:
     post:
       tags: [Carousels]
@@ -1404,6 +1487,33 @@ components:
           type: string
         observations:
           type: string
+    CreateEmailCampaignRequest:
+      type: object
+      required: [launchId, type, subject, objective, cta, status]
+      properties:
+        launchId:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum: [NURTURE, SALES, EVENT, WEBINAR]
+        subject:
+          type: string
+        objective:
+          type: string
+        cta:
+          type: string
+        body:
+          type: string
+        status:
+          type: string
+          enum: [DRAFT, IN_REVIEW, APPROVED, SCHEDULED, SENT]
+        reviewStatus:
+          type: string
+          enum: [PENDING, APPROVED, REJECTED]
+        plannedSendAt:
+          type: string
+          format: date-time
     CreateCarouselRequest:
       type: object
       required: [theme, objective, cta, cardsCount, operationalStatus]
