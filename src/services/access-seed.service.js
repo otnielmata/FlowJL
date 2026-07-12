@@ -344,6 +344,24 @@ const corePermissions = [
     name: "Consultar dashboard da estrategista",
     description: "Permite consultar indicadores consolidados do modulo estrategico por lancamento.",
     module: "strategy"
+  },
+  {
+    code: "PUBLICATION_CREATE",
+    name: "Cadastrar publicacoes",
+    description: "Permite registrar publicacoes planejadas para conteudos aprovados.",
+    module: "content"
+  },
+  {
+    code: "PUBLICATION_READ",
+    name: "Consultar publicacoes",
+    description: "Permite consultar publicacoes por periodo, canal, lancamento e status.",
+    module: "content"
+  },
+  {
+    code: "PUBLICATION_UPDATE",
+    name: "Atualizar publicacoes",
+    description: "Permite atualizar agenda, responsavel e situacao operacional de publicacoes.",
+    module: "content"
   }
 ];
 
