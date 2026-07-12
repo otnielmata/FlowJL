@@ -14,6 +14,8 @@ import "../models/copywriting.model.js";
 import "../models/editorial-line.model.js";
 import "../models/email-campaign.model.js";
 import "../models/expert-approval.model.js";
+import "../models/external-integration.model.js";
+import "../models/external-publication-link.model.js";
 import "../models/launch.model.js";
 import "../models/market-research.model.js";
 import "../models/offer.model.js";
