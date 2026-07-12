@@ -63,12 +63,14 @@ src
 - `POST /api/v1/emails`
 - `GET /api/v1/emails`
 - `DELETE /api/v1/emails/:emailId`
+- `POST /api/v1/copywritings`
 - `POST /api/v1/youtube-contents`
 - `PUT /api/v1/youtube-contents/:contentId`
 - `DELETE /api/v1/youtube-contents/:contentId`
 - `POST /api/v1/launches`
 - `GET /api/v1/launches/:launchId`
 - `POST /api/v1/launches/:launchId/market-researches`
+- `POST /api/v1/launches/:launchId/copywritings/generate`
 - `POST /api/v1/launches/:launchId/competitor-researches`
 - `POST /api/v1/launches/:launchId/avatars`
 - `PUT /api/v1/launches/:launchId/avatars`
@@ -182,6 +184,7 @@ A documentação fica disponível em:
 - Os reels podem ser produzidos via `POST` e `PUT /api/v1/reels`, exigem contexto mínimo de lançamento ou plano de conteúdo, mantêm status operacional, trilha de aprovação compatível com o módulo, datas em UTC quando houver agendamento, e auditoria nas alterações de roteiro, legenda e status.
 - As sequências de stories podem ser produzidas via `POST` e `PUT /api/v1/stories`, aceitam vínculo com lançamento ou cronograma inteligente, mantêm blocos ordenados, status de produção, responsável e prazo de publicação em UTC, e registram auditoria nas alterações.
 - Os e-mails podem ser gerenciados via `POST`, `GET` e `DELETE /api/v1/emails`, exigem lançamento válido, tipo, assunto, objetivo e status inicial, permitem filtros por tipo, lançamento e status, respeitam trilha de revisão/aprovação, retornam horário planejado em UTC e usam exclusão lógica.
+- O copywriting com IA pode ser gerado via `POST /api/v1/launches/:launchId/copywritings/generate` e persistido via `POST /api/v1/copywritings`, exige briefing mínimo e contexto estratégico suficiente do lançamento, retorna uma sugestão estruturada revisável por humano, não expõe prompts internos e registra auditoria na geração e no salvamento.
 - Os conteúdos de YouTube podem ser gerenciados via `POST`, `PUT` e `DELETE /api/v1/youtube-contents`, exigem lançamento e linha editorial vigente, mantêm pauta, roteiro, responsável e status rastreável, retornam horários de gravação/publicação em UTC e preservam histórico por exclusão lógica.
 - O cadastro de lançamentos via `POST /api/v1/launches` exige `LAUNCH_CREATE`, persiste marcos operacionais em UTC e rejeita duplicidade ativa com a mesma combinação de nome, produto e período.
 - A consulta de lançamentos via `GET /api/v1/launches/:launchId` exige `LAUNCH_READ` e retorna o histórico versionado das pesquisas de mercado já associadas.
