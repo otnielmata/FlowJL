@@ -44,7 +44,10 @@ export const roleCatalog = [
       "CAROUSEL_CREATE",
       "CAROUSEL_UPDATE",
       "STORY_SEQUENCE_CREATE",
-      "STORY_SEQUENCE_UPDATE"
+      "STORY_SEQUENCE_UPDATE",
+      "EMAIL_CAMPAIGN_CREATE",
+      "EMAIL_CAMPAIGN_READ",
+      "EMAIL_CAMPAIGN_DEACTIVATE"
     ]
   },
   {
@@ -69,13 +72,13 @@ export const roleCatalog = [
     code: "OPERATIONS",
     name: "Operacoes Administrativas",
     description: "Cargo operacional administrativo do Flow JL.",
-    permissionCodes: []
+    permissionCodes: ["EMAIL_CAMPAIGN_CREATE", "EMAIL_CAMPAIGN_READ", "EMAIL_CAMPAIGN_DEACTIVATE"]
   },
   {
     code: "SOCIAL_MEDIA",
     name: "Social Media",
     description: "Cargo responsavel por redes sociais do Flow JL.",
-    permissionCodes: ["CONTENT_IDEA_CREATE", "CONTENT_IDEA_READ", "CONTENT_IDEA_DEACTIVATE", "REEL_CREATE", "REEL_UPDATE", "CAROUSEL_CREATE", "CAROUSEL_UPDATE", "STORY_SEQUENCE_CREATE", "STORY_SEQUENCE_UPDATE"]
+    permissionCodes: ["CONTENT_IDEA_CREATE", "CONTENT_IDEA_READ", "CONTENT_IDEA_DEACTIVATE", "REEL_CREATE", "REEL_UPDATE", "CAROUSEL_CREATE", "CAROUSEL_UPDATE", "STORY_SEQUENCE_CREATE", "STORY_SEQUENCE_UPDATE", "EMAIL_CAMPAIGN_CREATE", "EMAIL_CAMPAIGN_READ"]
   }
 ];
 
