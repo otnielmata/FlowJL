@@ -446,6 +446,30 @@ const corePermissions = [
     name: "Consultar vinculos externos de publicacao",
     description: "Permite consultar vinculos externos e estados de sincronizacao de publicacoes.",
     module: "content"
+  },
+  {
+    code: "TRAFFIC_CAMPAIGN_CREATE",
+    name: "Cadastrar campanhas de trafego",
+    description: "Permite cadastrar campanhas pagas vinculadas a lancamentos.",
+    module: "traffic"
+  },
+  {
+    code: "TRAFFIC_CAMPAIGN_READ",
+    name: "Consultar campanhas de trafego",
+    description: "Permite consultar campanhas pagas por lancamento, canal, status e ativacao.",
+    module: "traffic"
+  },
+  {
+    code: "TRAFFIC_CAMPAIGN_UPDATE",
+    name: "Atualizar campanhas de trafego",
+    description: "Permite atualizar objetivo, periodo, status e metadados auditaveis de campanhas.",
+    module: "traffic"
+  },
+  {
+    code: "TRAFFIC_CAMPAIGN_DEACTIVATE",
+    name: "Inativar campanhas de trafego",
+    description: "Permite realizar exclusao logica de campanhas pagas preservando historico.",
+    module: "traffic"
   }
 ];
 
