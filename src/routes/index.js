@@ -10,6 +10,7 @@ import { copywritingRoutes } from "./copywriting.routes.js";
 import { contentStatusRoutes } from "./content-status.routes.js";
 import { contentIdeaRoutes } from "./content-idea.routes.js";
 import { dashboardRoutes } from "./dashboard.routes.js";
+import { discordOperationRoutes } from "./discord-operation.routes.js";
 import { editorialCalendarRoutes } from "./editorial-calendar.routes.js";
 import { emailCampaignRoutes } from "./email-campaign.routes.js";
 import { externalIntegrationRoutes } from "./external-integration.routes.js";
@@ -37,7 +38,7 @@ apiRoutes.get("/", (_request, response) => {
   response.status(200).json({
     service: "flow-jl-api",
     version: "v1",
-    modules: ["assets", "audits", "auth", "carousels", "class-schedules", "content-approvals", "content-ideas", "content-statuses", "copywritings", "dashboards", "editorial-calendar", "emails", "external-publication", "launches", "live-events", "production-checklists", "profiles", "publications", "reels", "roles", "stories", "traffic-audiences", "traffic-campaigns", "traffic-conversion-events", "traffic-creatives", "traffic-pixels", "traffic-reports", "traffic-roi", "users", "youtube-contents", "swagger"]
+    modules: ["assets", "audits", "auth", "carousels", "class-schedules", "content-approvals", "content-ideas", "content-statuses", "copywritings", "dashboards", "discord-operations", "editorial-calendar", "emails", "external-publication", "launches", "live-events", "production-checklists", "profiles", "publications", "reels", "roles", "stories", "traffic-audiences", "traffic-campaigns", "traffic-conversion-events", "traffic-creatives", "traffic-pixels", "traffic-reports", "traffic-roi", "users", "youtube-contents", "swagger"]
   });
 });
 
@@ -51,6 +52,7 @@ apiRoutes.use("/copywritings", copywritingRoutes);
 apiRoutes.use("/content-ideas", contentIdeaRoutes);
 apiRoutes.use("/content-statuses", contentStatusRoutes);
 apiRoutes.use("/dashboards", dashboardRoutes);
+apiRoutes.use("/discord-operations", discordOperationRoutes);
 apiRoutes.use("/editorial-calendar", editorialCalendarRoutes);
 apiRoutes.use("/emails", emailCampaignRoutes);
 apiRoutes.use("/external-publication", externalIntegrationRoutes);
