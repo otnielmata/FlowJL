@@ -662,6 +662,30 @@ const corePermissions = [
     name: "Inativar operacoes de Discord",
     description: "Permite realizar exclusao logica de tarefas do Discord preservando historico.",
     module: "operations"
+  },
+  {
+    code: "OPERATIONAL_EMAIL_CREATE",
+    name: "Cadastrar e-mails operacionais",
+    description: "Permite cadastrar acoes operacionais de e-mail marketing vinculadas a um lancamento.",
+    module: "operations"
+  },
+  {
+    code: "OPERATIONAL_EMAIL_READ",
+    name: "Consultar e-mails operacionais",
+    description: "Permite consultar acoes operacionais de e-mail por lancamento, responsavel, prazo e status.",
+    module: "operations"
+  },
+  {
+    code: "OPERATIONAL_EMAIL_UPDATE",
+    name: "Atualizar e-mails operacionais",
+    description: "Permite atualizar status, prazo, responsavel e observacoes de e-mails operacionais.",
+    module: "operations"
+  },
+  {
+    code: "OPERATIONAL_EMAIL_DEACTIVATE",
+    name: "Inativar e-mails operacionais",
+    description: "Permite realizar exclusao logica de acoes operacionais de e-mail preservando historico.",
+    module: "operations"
   }
 ];
 

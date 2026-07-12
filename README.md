@@ -74,6 +74,10 @@ src
 - `GET /api/v1/discord-operations`
 - `PUT /api/v1/discord-operations/:operationId`
 - `DELETE /api/v1/discord-operations/:operationId`
+- `POST /api/v1/operational-emails`
+- `GET /api/v1/operational-emails`
+- `PUT /api/v1/operational-emails/:emailActionId`
+- `DELETE /api/v1/operational-emails/:emailActionId`
 - `POST /api/v1/reels`
 - `PUT /api/v1/reels/:reelId`
 - `POST /api/v1/stories`
@@ -263,6 +267,7 @@ A documentação fica disponível em:
 - A agenda de aulas pode ser gerenciada via `POST`, `GET`, `PUT` e `DELETE /api/v1/class-schedules`, exige lançamento válido, título, horário em UTC, responsável e status, permite filtros por período, responsável e status, registra auditoria nas alterações e usa exclusão lógica.
 - Os eventos ao vivo podem ser gerenciados via `POST`, `GET`, `PUT` e `DELETE /api/v1/live-events`, exigem lançamento válido, nome, horário em UTC, canal, responsável e status, permitem filtros por período, canal, responsável e status, auditam mudanças operacionais e usam exclusão lógica.
 - A operação de Discord pode ser gerenciada via `POST`, `GET`, `PUT` e `DELETE /api/v1/discord-operations`, exige lançamento válido, tipo, atividade, responsável, prazo e status, permite filtros por período, tipo, responsável e status, preserva histórico por auditoria e usa exclusão lógica.
+- O e-mail marketing operacional pode ser gerenciado via `POST`, `GET`, `PUT` e `DELETE /api/v1/operational-emails`, exige lançamento válido, objetivo, responsável, prazo em UTC e status, permite filtros por período, responsável e status, audita alterações e usa exclusão lógica.
 - As aprovações de conteúdo podem ser gerenciadas via `POST /api/v1/content-approvals/:contentType/:contentId/status`, respeitam a ordem `CREATED -> REVIEW -> EXPERT -> APPROVED -> PUBLISHED`, exigem permissões por etapa, registram observações de aprovação ou reprovação no histórico e impedem publicação antes da aprovação.
 - A biblioteca de ativos pode ser gerenciada via `POST`, `GET` e `DELETE /api/v1/assets`, permite ativos globais ou vinculados a lançamentos, suporta busca por tipo, tag, lançamento e status, retorna UUID e datas em UTC e preserva histórico por exclusão lógica.
 - Os conteúdos de YouTube podem ser gerenciados via `POST`, `PUT` e `DELETE /api/v1/youtube-contents`, exigem lançamento e linha editorial vigente, mantêm pauta, roteiro, responsável e status rastreável, retornam horários de gravação/publicação em UTC e preservam histórico por exclusão lógica.
