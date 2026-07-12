@@ -6,6 +6,7 @@ import { authRoutes } from "./auth.routes.js";
 import { carouselRoutes } from "./carousel.routes.js";
 import { contentApprovalRoutes } from "./content-approval.routes.js";
 import { copywritingRoutes } from "./copywriting.routes.js";
+import { contentStatusRoutes } from "./content-status.routes.js";
 import { contentIdeaRoutes } from "./content-idea.routes.js";
 import { dashboardRoutes } from "./dashboard.routes.js";
 import { editorialCalendarRoutes } from "./editorial-calendar.routes.js";
@@ -26,7 +27,7 @@ apiRoutes.get("/", (_request, response) => {
   response.status(200).json({
     service: "flow-jl-api",
     version: "v1",
-    modules: ["assets", "audits", "auth", "carousels", "content-approvals", "content-ideas", "copywritings", "dashboards", "editorial-calendar", "emails", "launches", "production-checklists", "profiles", "publications", "reels", "roles", "stories", "users", "youtube-contents", "swagger"]
+    modules: ["assets", "audits", "auth", "carousels", "content-approvals", "content-ideas", "content-statuses", "copywritings", "dashboards", "editorial-calendar", "emails", "launches", "production-checklists", "profiles", "publications", "reels", "roles", "stories", "users", "youtube-contents", "swagger"]
   });
 });
 
@@ -37,6 +38,7 @@ apiRoutes.use("/carousels", carouselRoutes);
 apiRoutes.use("/content-approvals", contentApprovalRoutes);
 apiRoutes.use("/copywritings", copywritingRoutes);
 apiRoutes.use("/content-ideas", contentIdeaRoutes);
+apiRoutes.use("/content-statuses", contentStatusRoutes);
 apiRoutes.use("/dashboards", dashboardRoutes);
 apiRoutes.use("/editorial-calendar", editorialCalendarRoutes);
 apiRoutes.use("/emails", emailCampaignRoutes);
