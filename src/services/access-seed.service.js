@@ -404,6 +404,18 @@ const corePermissions = [
     name: "Reabrir checklist de producao",
     description: "Permite reabrir checklists concluidos mantendo historico auditavel.",
     module: "content"
+  },
+  {
+    code: "CONTENT_STATUS_UPDATE",
+    name: "Atualizar status de conteudo",
+    description: "Permite alterar o status operacional de pecas seguindo o fluxo permitido.",
+    module: "content"
+  },
+  {
+    code: "CONTENT_STATUS_READ",
+    name: "Consultar historico de status",
+    description: "Permite consultar o historico auditavel de mudancas de status de conteudo.",
+    module: "content"
   }
 ];
 

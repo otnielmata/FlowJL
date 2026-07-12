@@ -13,6 +13,7 @@ tags:
   - name: Dashboards
   - name: Editorial Calendar
   - name: Content Approvals
+  - name: Content Statuses
   - name: Copywritings
   - name: Publications
   - name: Production Checklists
@@ -454,6 +455,79 @@ paths:
           description: Conteudo nao encontrado
         '409':
           description: Ordem de aprovacao invalida para a peca
+  /api/v1/content-statuses/{contentType}/{contentId}:
+    post:
+      tags: [Content Statuses]
+      summary: Atualiza o status operacional de uma peca de conteudo
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: contentType
+          required: true
+          schema:
+            type: string
+            enum: [REEL, CAROUSEL, STORY_SEQUENCE, EMAIL_CAMPAIGN, YOUTUBE_CONTENT]
+        - in: path
+          name: contentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [targetStatus]
+              properties:
+                targetStatus:
+                  type: string
+                  description: Proximo status permitido no fluxo do tipo de conteudo.
+                reason:
+                  type: string
+      responses:
+        '200':
+          description: Status atualizado e historico registrado
+        '400':
+          description: Dados invalidos ou status alvo nao suportado
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Conteudo nao encontrado
+        '409':
+          description: Transicao invalida ou checklist pendente para publicacao
+  /api/v1/content-statuses/{contentType}/{contentId}/history:
+    get:
+      tags: [Content Statuses]
+      summary: Consulta historico de mudancas de status de uma peca
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: contentType
+          required: true
+          schema:
+            type: string
+            enum: [REEL, CAROUSEL, STORY_SEQUENCE, EMAIL_CAMPAIGN, YOUTUBE_CONTENT]
+        - in: path
+          name: contentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Historico retornado com sucesso
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Conteudo nao encontrado
   /api/v1/copywritings:
     post:
       tags: [Copywritings]
