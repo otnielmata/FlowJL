@@ -758,6 +758,24 @@ const corePermissions = [
     name: "Inativar checklists operacionais",
     description: "Permite realizar exclusao logica de checklists operacionais preservando historico.",
     module: "operations"
+  },
+  {
+    code: "AI_SCHEDULE_GENERATE",
+    name: "Gerar cronogramas com IA",
+    description: "Permite gerar propostas estruturadas de cronograma com IA para revisao humana.",
+    module: "corporate-ai"
+  },
+  {
+    code: "AI_SCHEDULE_CREATE",
+    name: "Salvar cronogramas gerados por IA",
+    description: "Permite persistir cronogramas gerados por IA para edicao e aprovacao posterior.",
+    module: "corporate-ai"
+  },
+  {
+    code: "AI_SCHEDULE_READ",
+    name: "Consultar cronogramas gerados por IA",
+    description: "Permite consultar cronogramas gerados por IA e seus metadados seguros.",
+    module: "corporate-ai"
   }
 ];
 

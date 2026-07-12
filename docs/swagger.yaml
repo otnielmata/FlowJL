@@ -7,6 +7,7 @@ servers:
   - url: http://localhost:3000
 tags:
   - name: Health
+  - name: AI Schedules
   - name: Assets
   - name: Audit
   - name: Auth
@@ -45,6 +46,83 @@ paths:
       responses:
         '200':
           description: API disponivel
+  /api/v1/ai-schedules:
+    post:
+      tags: [AI Schedules]
+      summary: Persiste um cronograma gerado por IA para revisao
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AiScheduleRequest'
+      responses:
+        '201':
+          description: Cronograma salvo para edicao e aprovacao posterior
+        '400':
+          description: Dados invalidos ou contexto divergente
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento nao encontrado
+    get:
+      tags: [AI Schedules]
+      summary: Lista cronogramas gerados por IA
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: launchId
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: reviewStatus
+          required: false
+          schema:
+            type: string
+            enum: [PENDING_REVIEW, APPROVED, REJECTED]
+        - in: query
+          name: active
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Cronogramas retornados sem prompts ou fontes internas sensiveis
+        '400':
+          description: Filtros invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+  /api/v1/ai-schedules/{scheduleId}:
+    get:
+      tags: [AI Schedules]
+      summary: Consulta um cronograma gerado por IA
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: scheduleId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Cronograma consultado com metadados seguros e revisao humana pendente
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Cronograma nao encontrado
   /api/v1:
     get:
       tags: [Health]
@@ -2677,6 +2755,36 @@ paths:
           description: Acesso negado
         '404':
           description: Lancamento nao encontrado
+  /api/v1/launches/{launchId}/ai-schedules/generate:
+    post:
+      tags: [AI Schedules]
+      summary: Gera uma proposta estruturada de cronograma completo com IA
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: launchId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenerateAiScheduleRequest'
+      responses:
+        '200':
+          description: Proposta de cronograma retornada para revisao humana
+        '400':
+          description: Briefing invalido ou contexto minimo insuficiente
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento nao encontrado
   /api/v1/launches/{launchId}/competitor-researches:
     post:
       tags: [Launches]
@@ -4346,6 +4454,128 @@ components:
       properties:
         refreshToken:
           type: string
+    GenerateAiScheduleRequest:
+      type: object
+      required: [objective, briefing]
+      properties:
+        objective:
+          type: string
+          minLength: 8
+          maxLength: 180
+        briefing:
+          type: string
+          minLength: 30
+          maxLength: 5000
+    AiScheduleActivity:
+      type: object
+      required: [title, stage, area, suggestedResponsibleRole, dueAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+          minLength: 3
+          maxLength: 180
+        stage:
+          type: string
+          minLength: 3
+          maxLength: 120
+        area:
+          type: string
+          minLength: 2
+          maxLength: 120
+        suggestedResponsibleRole:
+          type: string
+          minLength: 2
+          maxLength: 80
+        dueAt:
+          type: string
+          format: date-time
+        dependencies:
+          type: array
+          items:
+            type: string
+        reviewNotes:
+          type: array
+          items:
+            type: string
+    AiSchedulePhase:
+      type: object
+      required: [name, objective, startsAt, endsAt, activities]
+      properties:
+        name:
+          type: string
+          minLength: 3
+          maxLength: 120
+        objective:
+          type: string
+          minLength: 8
+          maxLength: 300
+        startsAt:
+          type: string
+          format: date-time
+        endsAt:
+          type: string
+          format: date-time
+        activities:
+          type: array
+          items:
+            $ref: '#/components/schemas/AiScheduleActivity'
+    AiScheduleSourceContext:
+      type: object
+      required: [launchId, launchName, product, expert, contentPlanVersion, smartScheduleVersion, internalSignals]
+      properties:
+        launchId:
+          type: string
+          format: uuid
+        launchName:
+          type: string
+        product:
+          type: string
+        expert:
+          type: string
+        contentPlanVersion:
+          type: integer
+          nullable: true
+        smartScheduleVersion:
+          type: integer
+          nullable: true
+        internalSignals:
+          type: object
+          additionalProperties:
+            type: integer
+    AiScheduleRequest:
+      type: object
+      required: [launchId, objective, briefing, periodStart, periodEnd, phases, sourceContext]
+      properties:
+        launchId:
+          type: string
+          format: uuid
+        objective:
+          type: string
+          minLength: 8
+          maxLength: 180
+        briefing:
+          type: string
+          minLength: 30
+          maxLength: 5000
+        periodStart:
+          type: string
+          format: date-time
+        periodEnd:
+          type: string
+          format: date-time
+        phases:
+          type: array
+          items:
+            $ref: '#/components/schemas/AiSchedulePhase'
+        reviewNotes:
+          type: array
+          items:
+            type: string
+        sourceContext:
+          $ref: '#/components/schemas/AiScheduleSourceContext'
     ClassScheduleRequest:
       type: object
       required: [launchId, title, scheduledAt, responsible, status]

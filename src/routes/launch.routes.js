@@ -1,5 +1,6 @@
 import { Router } from "express";
 
+import { aiScheduleController } from "../controllers/ai-schedule.controller.js";
 import { avatarController } from "../controllers/avatar.controller.js";
 import { competitorResearchController } from "../controllers/competitor-research.controller.js";
 import { contentPlanController } from "../controllers/content-plan.controller.js";
@@ -30,6 +31,12 @@ launchRoutes.post(
   authMiddleware,
   asyncHandler(requirePermission("COPYWRITING_GENERATE")),
   asyncHandler(copywritingController.generate.bind(copywritingController))
+);
+launchRoutes.post(
+  "/:launchId/ai-schedules/generate",
+  authMiddleware,
+  asyncHandler(requirePermission("AI_SCHEDULE_GENERATE")),
+  asyncHandler(aiScheduleController.generate.bind(aiScheduleController))
 );
 launchRoutes.post(
   "/:launchId/competitor-researches",

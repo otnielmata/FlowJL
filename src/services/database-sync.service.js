@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 
+import "../models/ai-schedule.model.js";
 import "../models/asset-library-item.model.js";
 import "../models/audit-event.model.js";
 import "../models/auth-session.model.js";
