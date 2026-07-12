@@ -734,6 +734,30 @@ const corePermissions = [
     name: "Inativar atendimentos de suporte",
     description: "Permite realizar exclusao logica de atendimentos de suporte preservando historico.",
     module: "operations"
+  },
+  {
+    code: "OPERATIONAL_CHECKLIST_CREATE",
+    name: "Registrar checklists operacionais",
+    description: "Permite registrar checklists de rotinas e eventos operacionais.",
+    module: "operations"
+  },
+  {
+    code: "OPERATIONAL_CHECKLIST_READ",
+    name: "Consultar checklists operacionais",
+    description: "Permite consultar progresso, itens e historico de checklists operacionais.",
+    module: "operations"
+  },
+  {
+    code: "OPERATIONAL_CHECKLIST_UPDATE",
+    name: "Executar checklists operacionais",
+    description: "Permite marcar itens, atualizar progresso e concluir checklists operacionais.",
+    module: "operations"
+  },
+  {
+    code: "OPERATIONAL_CHECKLIST_DEACTIVATE",
+    name: "Inativar checklists operacionais",
+    description: "Permite realizar exclusao logica de checklists operacionais preservando historico.",
+    module: "operations"
   }
 ];
 

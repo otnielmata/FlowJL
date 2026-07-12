@@ -23,6 +23,7 @@ tags:
   - name: YouTube Contents
   - name: Launches
   - name: Live Events
+  - name: Operational Checklists
   - name: Operational Emails
   - name: Profiles
   - name: Users
@@ -3863,6 +3864,169 @@ paths:
           description: Acesso negado
         '404':
           description: Atendimento nao encontrado
+  /api/v1/operational-checklists:
+    post:
+      tags: [Operational Checklists]
+      summary: Registra um checklist operacional
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OperationalChecklistRequest'
+      responses:
+        '201':
+          description: Checklist operacional registrado com progresso inicial
+        '400':
+          description: Dados invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Contexto operacional nao encontrado
+        '409':
+          description: Itens obrigatorios pendentes impedem conclusao
+    get:
+      tags: [Operational Checklists]
+      summary: Lista checklists operacionais por contexto, tipo e status
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: operationType
+          required: false
+          schema:
+            type: string
+            enum: [LAUNCH, CLASS_SCHEDULE, LIVE_EVENT, DISCORD_OPERATION, OPERATIONAL_EMAIL, STUDENT, SUPPORT_TICKET]
+        - in: query
+          name: contextId
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: status
+          required: false
+          schema:
+            type: string
+            enum: [OPEN, PARTIAL, COMPLETED]
+        - in: query
+          name: active
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Checklists operacionais retornados
+        '400':
+          description: Filtros invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+  /api/v1/operational-checklists/{checklistId}:
+    get:
+      tags: [Operational Checklists]
+      summary: Consulta um checklist operacional por identificador
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: checklistId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Checklist operacional consultado com historico
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Checklist nao encontrado
+    put:
+      tags: [Operational Checklists]
+      summary: Atualiza itens e progresso de um checklist operacional
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: checklistId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateOperationalChecklistRequest'
+      responses:
+        '200':
+          description: Checklist atualizado com historico auditavel
+        '400':
+          description: Dados invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Checklist nao encontrado
+        '409':
+          description: Itens obrigatorios pendentes ou checklist concluido
+    delete:
+      tags: [Operational Checklists]
+      summary: Inativa um checklist operacional preservando historico
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: checklistId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Checklist inativado por exclusao logica
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Checklist nao encontrado
+        '409':
+          description: Checklist ja inativo
+  /api/v1/operational-checklists/{checklistId}/complete:
+    post:
+      tags: [Operational Checklists]
+      summary: Conclui um checklist operacional com data UTC
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: checklistId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Checklist concluido com data em UTC
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Checklist nao encontrado
+        '409':
+          description: Itens obrigatorios pendentes impedem conclusao
   /api/v1/roles:
     get:
       tags: [Roles]
@@ -4374,6 +4538,78 @@ components:
           type: string
           maxLength: 1000
           nullable: true
+    OperationalChecklistItem:
+      type: object
+      required: [label]
+      properties:
+        id:
+          type: string
+          format: uuid
+        label:
+          type: string
+          minLength: 3
+          maxLength: 160
+        required:
+          type: boolean
+          default: true
+        completed:
+          type: boolean
+          default: false
+        notes:
+          type: string
+          maxLength: 500
+    UpdateOperationalChecklistItem:
+      type: object
+      required: [id]
+      properties:
+        id:
+          type: string
+          format: uuid
+        label:
+          type: string
+          minLength: 3
+          maxLength: 160
+        required:
+          type: boolean
+        completed:
+          type: boolean
+        notes:
+          type: string
+          maxLength: 500
+          nullable: true
+    OperationalChecklistRequest:
+      type: object
+      required: [operationType, contextId, title]
+      properties:
+        operationType:
+          type: string
+          enum: [LAUNCH, CLASS_SCHEDULE, LIVE_EVENT, DISCORD_OPERATION, OPERATIONAL_EMAIL, STUDENT, SUPPORT_TICKET]
+        contextId:
+          type: string
+          format: uuid
+        title:
+          type: string
+          minLength: 3
+          maxLength: 160
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OperationalChecklistItem'
+        conclude:
+          type: boolean
+    UpdateOperationalChecklistRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 3
+          maxLength: 160
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/UpdateOperationalChecklistItem'
+        conclude:
+          type: boolean
     StudentRequest:
       type: object
       required: [name, email, product, status]

@@ -89,6 +89,12 @@ src
 - `PUT /api/v1/support-tickets/:ticketId`
 - `POST /api/v1/support-tickets/:ticketId/close`
 - `DELETE /api/v1/support-tickets/:ticketId`
+- `POST /api/v1/operational-checklists`
+- `GET /api/v1/operational-checklists`
+- `GET /api/v1/operational-checklists/:checklistId`
+- `PUT /api/v1/operational-checklists/:checklistId`
+- `POST /api/v1/operational-checklists/:checklistId/complete`
+- `DELETE /api/v1/operational-checklists/:checklistId`
 - `POST /api/v1/reels`
 - `PUT /api/v1/reels/:reelId`
 - `POST /api/v1/stories`
@@ -281,6 +287,7 @@ A documentação fica disponível em:
 - O e-mail marketing operacional pode ser gerenciado via `POST`, `GET`, `PUT` e `DELETE /api/v1/operational-emails`, exige lançamento válido, objetivo, responsável, prazo em UTC e status, permite filtros por período, responsável e status, audita alterações e usa exclusão lógica.
 - Os alunos podem ser gerenciados via `POST`, `GET`, `GET /:studentId`, `PUT` e `DELETE /api/v1/students`, exigem dados mínimos e produto, aceitam vínculo opcional com lançamento, usam UUID interno, auditam alterações e preservam histórico por exclusão lógica.
 - Os atendimentos de suporte podem ser gerenciados via `POST`, `GET`, `GET /:ticketId`, `PUT`, `POST /:ticketId/close` e `DELETE /api/v1/support-tickets`, exigem solicitante, tipo de demanda, responsável, status e vínculo com lançamento ou aluno, preservam histórico de interações, registram encerramento em UTC e usam exclusão lógica quando inativados.
+- Os checklists operacionais podem ser executados via `POST`, `GET`, `GET /:checklistId`, `PUT`, `POST /:checklistId/complete` e `DELETE /api/v1/operational-checklists`, aceitam tipos variados de operação, validam o contexto informado, bloqueiam conclusão com itens obrigatórios pendentes, registram conclusão em UTC e preservam histórico auditável com exclusão lógica.
 - As aprovações de conteúdo podem ser gerenciadas via `POST /api/v1/content-approvals/:contentType/:contentId/status`, respeitam a ordem `CREATED -> REVIEW -> EXPERT -> APPROVED -> PUBLISHED`, exigem permissões por etapa, registram observações de aprovação ou reprovação no histórico e impedem publicação antes da aprovação.
 - A biblioteca de ativos pode ser gerenciada via `POST`, `GET` e `DELETE /api/v1/assets`, permite ativos globais ou vinculados a lançamentos, suporta busca por tipo, tag, lançamento e status, retorna UUID e datas em UTC e preserva histórico por exclusão lógica.
 - Os conteúdos de YouTube podem ser gerenciados via `POST`, `PUT` e `DELETE /api/v1/youtube-contents`, exigem lançamento e linha editorial vigente, mantêm pauta, roteiro, responsável e status rastreável, retornam horários de gravação/publicação em UTC e preservam histórico por exclusão lógica.
