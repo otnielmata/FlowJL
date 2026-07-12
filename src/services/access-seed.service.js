@@ -284,6 +284,18 @@ const corePermissions = [
     name: "Inativar pautas de YouTube",
     description: "Permite realizar exclusao logica de pautas de YouTube preservando historico.",
     module: "content"
+  },
+  {
+    code: "COPYWRITING_GENERATE",
+    name: "Gerar copywriting com IA",
+    description: "Permite gerar sugestoes estruturadas de copywriting com base no contexto do lancamento.",
+    module: "content"
+  },
+  {
+    code: "COPYWRITING_CREATE",
+    name: "Salvar copywriting gerado",
+    description: "Permite persistir a copy estruturada para edicao humana posterior.",
+    module: "content"
   }
 ];
 

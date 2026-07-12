@@ -9,6 +9,7 @@ tags:
   - name: Health
   - name: Audit
   - name: Auth
+  - name: Copywritings
   - name: YouTube Contents
   - name: Launches
   - name: Profiles
@@ -184,6 +185,29 @@ paths:
           description: Ideia nao encontrada
         '409':
           description: Ideia ja esta inativa
+  /api/v1/copywritings:
+    post:
+      tags: [Copywritings]
+      summary: Persiste uma copy gerada para edicao posterior
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCopywritingRequest'
+      responses:
+        '201':
+          description: Copy salva com sucesso
+        '400':
+          description: Dados invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento nao encontrado
   /api/v1/emails:
     post:
       tags: [Emails]
@@ -571,6 +595,36 @@ paths:
           description: Pesquisa de mercado criada
         '400':
           description: Briefing, objetivo ou contexto insuficientes
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento nao encontrado
+  /api/v1/launches/{launchId}/copywritings/generate:
+    post:
+      tags: [Copywritings]
+      summary: Gera uma sugestao estruturada de copywriting com IA
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: launchId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenerateCopywritingRequest'
+      responses:
+        '200':
+          description: Sugestao de copy retornada com sucesso
+        '400':
+          description: Briefing invalido ou contexto estrategico insuficiente
         '401':
           description: JWT ausente ou invalido
         '403':
@@ -1564,6 +1618,84 @@ components:
           type: string
         observations:
           type: string
+    GenerateCopywritingRequest:
+      type: object
+      required: [format, objective, briefing]
+      properties:
+        format:
+          type: string
+          enum: [REEL, CAROUSEL, STORIES, EMAIL, YOUTUBE, ADS, LANDING_PAGE]
+        objective:
+          type: string
+        briefing:
+          type: string
+    CreateCopywritingRequest:
+      type: object
+      required: [launchId, format, objective, briefing, headline, hook, bodySections, cta, sourceContext]
+      properties:
+        launchId:
+          type: string
+          format: uuid
+        format:
+          type: string
+          enum: [REEL, CAROUSEL, STORIES, EMAIL, YOUTUBE, ADS, LANDING_PAGE]
+        objective:
+          type: string
+        briefing:
+          type: string
+        headline:
+          type: string
+        hook:
+          type: string
+        bodySections:
+          type: array
+          items:
+            type: object
+            required: [label, content]
+            properties:
+              label:
+                type: string
+              content:
+                type: string
+        cta:
+          type: string
+        reviewNotes:
+          type: array
+          items:
+            type: string
+        sourceContext:
+          type: object
+          required: [launchId, launchName, product, expert, editorialPillars, languageCues]
+          properties:
+            launchId:
+              type: string
+              format: uuid
+            launchName:
+              type: string
+            product:
+              type: string
+            expert:
+              type: string
+            offerVersion:
+              type: integer
+              nullable: true
+            positioningVersion:
+              type: integer
+              nullable: true
+            editorialLineVersion:
+              type: integer
+              nullable: true
+            avatarVersion:
+              type: integer
+              nullable: true
+            editorialPillars:
+              type: array
+              items:
+                type: string
+            languageCues:
+              type: array
+              items:
+                type: string
     CreateEmailCampaignRequest:
       type: object
       required: [launchId, type, subject, objective, cta, status]

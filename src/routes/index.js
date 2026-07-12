@@ -3,6 +3,7 @@ import { Router } from "express";
 import { auditRoutes } from "./audit.routes.js";
 import { authRoutes } from "./auth.routes.js";
 import { carouselRoutes } from "./carousel.routes.js";
+import { copywritingRoutes } from "./copywriting.routes.js";
 import { contentIdeaRoutes } from "./content-idea.routes.js";
 import { emailCampaignRoutes } from "./email-campaign.routes.js";
 import { launchRoutes } from "./launch.routes.js";
@@ -19,13 +20,14 @@ apiRoutes.get("/", (_request, response) => {
   response.status(200).json({
     service: "flow-jl-api",
     version: "v1",
-    modules: ["audits", "auth", "carousels", "content-ideas", "emails", "launches", "profiles", "reels", "roles", "stories", "users", "youtube-contents", "swagger"]
+    modules: ["audits", "auth", "carousels", "content-ideas", "copywritings", "emails", "launches", "profiles", "reels", "roles", "stories", "users", "youtube-contents", "swagger"]
   });
 });
 
 apiRoutes.use("/audits", auditRoutes);
 apiRoutes.use("/auth", authRoutes);
 apiRoutes.use("/carousels", carouselRoutes);
+apiRoutes.use("/copywritings", copywritingRoutes);
 apiRoutes.use("/content-ideas", contentIdeaRoutes);
 apiRoutes.use("/emails", emailCampaignRoutes);
 apiRoutes.use("/launches", launchRoutes);

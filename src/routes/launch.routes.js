@@ -3,6 +3,7 @@ import { Router } from "express";
 import { avatarController } from "../controllers/avatar.controller.js";
 import { competitorResearchController } from "../controllers/competitor-research.controller.js";
 import { contentPlanController } from "../controllers/content-plan.controller.js";
+import { copywritingController } from "../controllers/copywriting.controller.js";
 import { editorialLineController } from "../controllers/editorial-line.controller.js";
 import { expertApprovalController } from "../controllers/expert-approval.controller.js";
 import { launchController } from "../controllers/launch.controller.js";
@@ -23,6 +24,12 @@ launchRoutes.post(
   authMiddleware,
   asyncHandler(requirePermission("MARKET_RESEARCH_CREATE")),
   asyncHandler(marketResearchController.create.bind(marketResearchController))
+);
+launchRoutes.post(
+  "/:launchId/copywritings/generate",
+  authMiddleware,
+  asyncHandler(requirePermission("COPYWRITING_GENERATE")),
+  asyncHandler(copywritingController.generate.bind(copywritingController))
 );
 launchRoutes.post(
   "/:launchId/competitor-researches",
