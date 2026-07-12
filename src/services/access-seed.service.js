@@ -590,6 +590,30 @@ const corePermissions = [
     name: "Consultar ROI de trafego",
     description: "Permite consultar ROI consolidado de trafego por lancamento, periodo e campanha.",
     module: "traffic"
+  },
+  {
+    code: "CLASS_SCHEDULE_CREATE",
+    name: "Cadastrar aulas agendadas",
+    description: "Permite cadastrar aulas vinculadas a operacao de um lancamento.",
+    module: "operations"
+  },
+  {
+    code: "CLASS_SCHEDULE_READ",
+    name: "Consultar agenda de aulas",
+    description: "Permite consultar aulas por lancamento, periodo, responsavel, status e ativacao.",
+    module: "operations"
+  },
+  {
+    code: "CLASS_SCHEDULE_UPDATE",
+    name: "Atualizar aulas agendadas",
+    description: "Permite alterar data, responsavel, status e dados operacionais de aulas.",
+    module: "operations"
+  },
+  {
+    code: "CLASS_SCHEDULE_DEACTIVATE",
+    name: "Inativar aulas agendadas",
+    description: "Permite realizar exclusao logica de aulas preservando historico.",
+    module: "operations"
   }
 ];
 
