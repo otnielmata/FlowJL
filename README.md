@@ -90,6 +90,11 @@ src
 - `GET /api/v1/traffic-creatives`
 - `PUT /api/v1/traffic-creatives/:creativeId`
 - `DELETE /api/v1/traffic-creatives/:creativeId`
+- `POST /api/v1/traffic-pixels`
+- `GET /api/v1/traffic-pixels`
+- `PUT /api/v1/traffic-pixels/:pixelId`
+- `PUT /api/v1/traffic-pixels/:pixelId/links`
+- `DELETE /api/v1/traffic-pixels/:pixelId`
 - `POST /api/v1/youtube-contents`
 - `PUT /api/v1/youtube-contents/:contentId`
 - `DELETE /api/v1/youtube-contents/:contentId`
@@ -227,6 +232,7 @@ A documentação fica disponível em:
 - A preparação de integração futura com Meta e YouTube pode ser gerenciada via `/api/v1/external-publication`, armazenando credenciais protegidas, identificadores externos e estados de sincronização sem expor tokens em consultas, além de permitir vínculos auditáveis entre publicações internas e IDs externos.
 - As campanhas de tráfego podem ser gerenciadas via `POST`, `GET`, `PUT` e `DELETE /api/v1/traffic-campaigns`, exigem lançamento válido, mantêm período e status em histórico auditável, tratam datas em UTC e usam exclusão lógica.
 - Os criativos de tráfego podem ser gerenciados via `POST`, `GET`, `PUT` e `DELETE /api/v1/traffic-creatives`, exigem campanha válida, podem se relacionar à biblioteca de ativos, preservam histórico auditável de status/classificação/desempenho e usam exclusão lógica.
+- Os pixels de tráfego podem ser gerenciados via `POST`, `GET`, `PUT`, `PUT /api/v1/traffic-pixels/:pixelId/links` e `DELETE /api/v1/traffic-pixels/:pixelId`, exigem lançamento ou campanha válida, suportam vínculos auditáveis com campanhas e eventos de conversão, protegem tokens/segredos e permitem cadastro manual sem integração ativa.
 - As aprovações de conteúdo podem ser gerenciadas via `POST /api/v1/content-approvals/:contentType/:contentId/status`, respeitam a ordem `CREATED -> REVIEW -> EXPERT -> APPROVED -> PUBLISHED`, exigem permissões por etapa, registram observações de aprovação ou reprovação no histórico e impedem publicação antes da aprovação.
 - A biblioteca de ativos pode ser gerenciada via `POST`, `GET` e `DELETE /api/v1/assets`, permite ativos globais ou vinculados a lançamentos, suporta busca por tipo, tag, lançamento e status, retorna UUID e datas em UTC e preserva histórico por exclusão lógica.
 - Os conteúdos de YouTube podem ser gerenciados via `POST`, `PUT` e `DELETE /api/v1/youtube-contents`, exigem lançamento e linha editorial vigente, mantêm pauta, roteiro, responsável e status rastreável, retornam horários de gravação/publicação em UTC e preservam histórico por exclusão lógica.

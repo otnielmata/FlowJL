@@ -494,6 +494,36 @@ const corePermissions = [
     name: "Inativar criativos de trafego",
     description: "Permite realizar exclusao logica de criativos preservando historico.",
     module: "traffic"
+  },
+  {
+    code: "TRAFFIC_PIXEL_CREATE",
+    name: "Cadastrar pixels de trafego",
+    description: "Permite cadastrar pixels vinculados a lancamentos ou campanhas.",
+    module: "traffic"
+  },
+  {
+    code: "TRAFFIC_PIXEL_READ",
+    name: "Consultar pixels de trafego",
+    description: "Permite consultar pixels sem expor segredos ou tokens internos.",
+    module: "traffic"
+  },
+  {
+    code: "TRAFFIC_PIXEL_UPDATE",
+    name: "Atualizar pixels de trafego",
+    description: "Permite atualizar finalidade, status e credenciais protegidas de pixels.",
+    module: "traffic"
+  },
+  {
+    code: "TRAFFIC_PIXEL_LINK",
+    name: "Vincular pixels de trafego",
+    description: "Permite vincular pixels a campanhas e eventos de conversao.",
+    module: "traffic"
+  },
+  {
+    code: "TRAFFIC_PIXEL_DEACTIVATE",
+    name: "Inativar pixels de trafego",
+    description: "Permite realizar exclusao logica de pixels preservando historico.",
+    module: "traffic"
   }
 ];
 
