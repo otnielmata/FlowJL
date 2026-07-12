@@ -25,6 +25,7 @@ import { trafficConversionEventRoutes } from "./traffic-conversion-event.routes.
 import { trafficCreativeRoutes } from "./traffic-creative.routes.js";
 import { trafficPixelRoutes } from "./traffic-pixel.routes.js";
 import { trafficReportRoutes } from "./traffic-report.routes.js";
+import { trafficRoiRoutes } from "./traffic-roi.routes.js";
 import { youtubeContentRoutes } from "./youtube-content.routes.js";
 import { userRoutes } from "./user.routes.js";
 
@@ -34,7 +35,7 @@ apiRoutes.get("/", (_request, response) => {
   response.status(200).json({
     service: "flow-jl-api",
     version: "v1",
-    modules: ["assets", "audits", "auth", "carousels", "content-approvals", "content-ideas", "content-statuses", "copywritings", "dashboards", "editorial-calendar", "emails", "external-publication", "launches", "production-checklists", "profiles", "publications", "reels", "roles", "stories", "traffic-audiences", "traffic-campaigns", "traffic-conversion-events", "traffic-creatives", "traffic-pixels", "traffic-reports", "users", "youtube-contents", "swagger"]
+    modules: ["assets", "audits", "auth", "carousels", "content-approvals", "content-ideas", "content-statuses", "copywritings", "dashboards", "editorial-calendar", "emails", "external-publication", "launches", "production-checklists", "profiles", "publications", "reels", "roles", "stories", "traffic-audiences", "traffic-campaigns", "traffic-conversion-events", "traffic-creatives", "traffic-pixels", "traffic-reports", "traffic-roi", "users", "youtube-contents", "swagger"]
   });
 });
 
@@ -63,5 +64,6 @@ apiRoutes.use("/traffic-conversion-events", trafficConversionEventRoutes);
 apiRoutes.use("/traffic-creatives", trafficCreativeRoutes);
 apiRoutes.use("/traffic-pixels", trafficPixelRoutes);
 apiRoutes.use("/traffic-reports", trafficReportRoutes);
+apiRoutes.use("/traffic-roi", trafficRoiRoutes);
 apiRoutes.use("/youtube-contents", youtubeContentRoutes);
 apiRoutes.use("/users", userRoutes);

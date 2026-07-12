@@ -105,6 +105,7 @@ src
 - `PUT /api/v1/traffic-conversion-events/:eventId/links`
 - `DELETE /api/v1/traffic-conversion-events/:eventId`
 - `GET /api/v1/traffic-reports`
+- `GET /api/v1/traffic-roi`
 - `POST /api/v1/youtube-contents`
 - `PUT /api/v1/youtube-contents/:contentId`
 - `DELETE /api/v1/youtube-contents/:contentId`
@@ -246,6 +247,7 @@ A documentação fica disponível em:
 - Os públicos de tráfego podem ser gerenciados via `POST`, `GET`, `PUT` e `DELETE /api/v1/traffic-audiences`, exigem lançamento ou campanha válida, objetivo e critérios mínimos de segmentação, mantêm vínculos com campanhas específicas e preservam histórico auditável por exclusão lógica.
 - Os eventos de conversão podem ser gerenciados via `POST`, `GET`, `PUT`, `PUT /api/v1/traffic-conversion-events/:eventId/links` e `DELETE /api/v1/traffic-conversion-events/:eventId`, exigem lançamento ou campanha válida, nome, objetivo e origem, mantêm vínculos auditáveis com campanhas e pixels, preservam coerência com o lançamento e retornam datas associadas em UTC.
 - Os relatórios de tráfego podem ser consultados via `GET /api/v1/traffic-reports`, exigem lançamento e período válidos, aceitam filtro por campanha, consolidam campanhas, criativos, públicos, pixels, eventos e snapshots incrementais de fontes externas, retornando datas em UTC sem expor detalhes internos de processamento.
+- O ROI de tráfego pode ser consultado via `GET /api/v1/traffic-roi`, exige lançamento e período explícito, aceita filtro por campanha, usa a fórmula consistente `(revenue - investment) / investment`, sinaliza base insuficiente quando faltam investimento ou resultado e registra auditoria do cálculo.
 - As aprovações de conteúdo podem ser gerenciadas via `POST /api/v1/content-approvals/:contentType/:contentId/status`, respeitam a ordem `CREATED -> REVIEW -> EXPERT -> APPROVED -> PUBLISHED`, exigem permissões por etapa, registram observações de aprovação ou reprovação no histórico e impedem publicação antes da aprovação.
 - A biblioteca de ativos pode ser gerenciada via `POST`, `GET` e `DELETE /api/v1/assets`, permite ativos globais ou vinculados a lançamentos, suporta busca por tipo, tag, lançamento e status, retorna UUID e datas em UTC e preserva histórico por exclusão lógica.
 - Os conteúdos de YouTube podem ser gerenciados via `POST`, `PUT` e `DELETE /api/v1/youtube-contents`, exigem lançamento e linha editorial vigente, mantêm pauta, roteiro, responsável e status rastreável, retornam horários de gravação/publicação em UTC e preservam histórico por exclusão lógica.
