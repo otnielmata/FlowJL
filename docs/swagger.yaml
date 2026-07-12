@@ -28,6 +28,7 @@ tags:
   - name: Users
   - name: Roles
   - name: Students
+  - name: Support Tickets
   - name: Traffic Audiences
   - name: Traffic Campaigns
   - name: Traffic Conversion Events
@@ -3686,6 +3687,182 @@ paths:
           description: Aluno nao encontrado
         '409':
           description: Aluno ja inativo
+  /api/v1/support-tickets:
+    post:
+      tags: [Support Tickets]
+      summary: Registra um atendimento de suporte
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SupportTicketRequest'
+      responses:
+        '201':
+          description: Atendimento registrado com sucesso
+        '400':
+          description: Dados invalidos ou contexto ausente
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento ou aluno nao encontrado
+    get:
+      tags: [Support Tickets]
+      summary: Lista atendimentos de suporte por contexto operacional
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: launchId
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: studentId
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: responsibleUserId
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: status
+          required: false
+          schema:
+            type: string
+            enum: [OPEN, IN_PROGRESS, WAITING_CUSTOMER, RESOLVED, CLOSED, CANCELED]
+        - in: query
+          name: priority
+          required: false
+          schema:
+            type: string
+            enum: [LOW, MEDIUM, HIGH, URGENT]
+        - in: query
+          name: active
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Atendimentos retornados com historico operacional
+        '400':
+          description: Filtros invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+  /api/v1/support-tickets/{ticketId}:
+    get:
+      tags: [Support Tickets]
+      summary: Consulta um atendimento de suporte por identificador
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: ticketId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Atendimento consultado com sucesso
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Atendimento nao encontrado
+    put:
+      tags: [Support Tickets]
+      summary: Atualiza andamento, prioridade, observacoes ou interacao do atendimento
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: ticketId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSupportTicketRequest'
+      responses:
+        '200':
+          description: Atendimento atualizado com auditoria
+        '400':
+          description: Dados invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Atendimento, lancamento ou aluno nao encontrado
+    delete:
+      tags: [Support Tickets]
+      summary: Inativa um atendimento de suporte preservando historico
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: ticketId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Atendimento inativado por exclusao logica
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Atendimento nao encontrado
+        '409':
+          description: Atendimento ja inativo
+  /api/v1/support-tickets/{ticketId}/close:
+    post:
+      tags: [Support Tickets]
+      summary: Encerra um atendimento de suporte com data UTC
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: ticketId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CloseSupportTicketRequest'
+      responses:
+        '200':
+          description: Atendimento encerrado com data em UTC
+        '400':
+          description: Dados invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Atendimento nao encontrado
   /api/v1/roles:
     get:
       tags: [Roles]
@@ -4255,6 +4432,97 @@ components:
           type: array
           items:
             type: string
+    SupportTicketInteraction:
+      type: object
+      required: [type, note]
+      properties:
+        type:
+          type: string
+          minLength: 2
+          maxLength: 80
+        note:
+          type: string
+          minLength: 2
+          maxLength: 2000
+    SupportTicketRequest:
+      type: object
+      required: [requester, demandType, responsibleUserId, status]
+      properties:
+        launchId:
+          type: string
+          format: uuid
+        studentId:
+          type: string
+          format: uuid
+        requester:
+          type: string
+          minLength: 2
+        demandType:
+          type: string
+          minLength: 2
+        responsibleUserId:
+          type: string
+          minLength: 2
+        status:
+          type: string
+          enum: [OPEN, IN_PROGRESS, WAITING_CUSTOMER, RESOLVED, CLOSED, CANCELED]
+        priority:
+          type: string
+          enum: [LOW, MEDIUM, HIGH, URGENT]
+          default: MEDIUM
+        observations:
+          type: string
+          maxLength: 2000
+        initialInteraction:
+          $ref: '#/components/schemas/SupportTicketInteraction'
+    UpdateSupportTicketRequest:
+      type: object
+      properties:
+        launchId:
+          type: string
+          format: uuid
+          nullable: true
+        studentId:
+          type: string
+          format: uuid
+          nullable: true
+        requester:
+          type: string
+          minLength: 2
+        demandType:
+          type: string
+          minLength: 2
+        responsibleUserId:
+          type: string
+          minLength: 2
+        status:
+          type: string
+          enum: [OPEN, IN_PROGRESS, WAITING_CUSTOMER, RESOLVED, CLOSED, CANCELED]
+        priority:
+          type: string
+          enum: [LOW, MEDIUM, HIGH, URGENT]
+        observations:
+          type: string
+          maxLength: 2000
+          nullable: true
+        interaction:
+          $ref: '#/components/schemas/SupportTicketInteraction'
+    CloseSupportTicketRequest:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [RESOLVED, CLOSED]
+        observations:
+          type: string
+          maxLength: 2000
+          nullable: true
+        note:
+          type: string
+          minLength: 2
+          maxLength: 2000
+        interaction:
+          $ref: '#/components/schemas/SupportTicketInteraction'
     CreateLaunchRequest:
       type: object
       required: [name, expert, product, baseDate, milestones]

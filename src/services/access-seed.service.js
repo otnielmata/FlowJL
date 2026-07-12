@@ -710,6 +710,30 @@ const corePermissions = [
     name: "Inativar alunos",
     description: "Permite realizar exclusao logica de alunos preservando historico.",
     module: "operations"
+  },
+  {
+    code: "SUPPORT_TICKET_CREATE",
+    name: "Registrar atendimentos de suporte",
+    description: "Permite registrar atendimentos de suporte vinculados a aluno ou lancamento.",
+    module: "operations"
+  },
+  {
+    code: "SUPPORT_TICKET_READ",
+    name: "Consultar atendimentos de suporte",
+    description: "Permite consultar atendimentos, responsaveis, status e historico de suporte.",
+    module: "operations"
+  },
+  {
+    code: "SUPPORT_TICKET_UPDATE",
+    name: "Atualizar atendimentos de suporte",
+    description: "Permite atualizar status, prioridade, observacoes e interacoes de suporte.",
+    module: "operations"
+  },
+  {
+    code: "SUPPORT_TICKET_DEACTIVATE",
+    name: "Inativar atendimentos de suporte",
+    description: "Permite realizar exclusao logica de atendimentos de suporte preservando historico.",
+    module: "operations"
   }
 ];
 
