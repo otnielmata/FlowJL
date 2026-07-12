@@ -6,7 +6,7 @@ const smartScheduleActivitySchema = new mongoose.Schema(
   {
     id: {
       type: String,
-      default: randomUUID
+      default: () => randomUUID()
     },
     theme: {
       type: String,
@@ -57,7 +57,7 @@ const smartScheduleSchema = new mongoose.Schema(
   {
     _id: {
       type: String,
-      default: randomUUID
+      default: () => randomUUID()
     },
     launchId: {
       type: String,

@@ -6,7 +6,7 @@ const editorialPillarSchema = new mongoose.Schema(
   {
     id: {
       type: String,
-      default: randomUUID
+      default: () => randomUUID()
     },
     name: {
       type: String,
@@ -38,7 +38,7 @@ const editorialLineSchema = new mongoose.Schema(
   {
     _id: {
       type: String,
-      default: randomUUID
+      default: () => randomUUID()
     },
     launchId: {
       type: String,

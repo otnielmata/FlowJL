@@ -146,6 +146,12 @@ pnpm test
 
 Executa os testes básicos da aplicação.
 
+```bash
+pnpm db:sync
+```
+
+Conecta no MongoDB configurado em `MONGODB_URI`, cria coleções e índices dos models registrados e aplica o seed idempotente de cargos e permissões.
+
 ## Como rodar localmente
 
 1. Instale as dependências:

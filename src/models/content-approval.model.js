@@ -6,7 +6,7 @@ const approvalHistoryEntrySchema = new mongoose.Schema(
   {
     id: {
       type: String,
-      default: randomUUID
+      default: () => randomUUID()
     },
     fromStatus: {
       type: String,
@@ -46,7 +46,7 @@ const contentApprovalSchema = new mongoose.Schema(
   {
     _id: {
       type: String,
-      default: randomUUID
+      default: () => randomUUID()
     },
     contentType: {
       type: String,

@@ -93,6 +93,20 @@ describe("accessSeedService.ensureCoreAccessSeed", () => {
     await accessSeedService.ensureCoreAccessSeed();
 
     expect(permissionModel.updateOne).toHaveBeenCalledTimes(60);
+    expect(permissionModel.updateOne).toHaveBeenCalledWith(
+      { code: "AUTH_LOGIN" },
+      expect.objectContaining({
+        $setOnInsert: {
+          code: "AUTH_LOGIN"
+        },
+        $set: expect.objectContaining({
+          name: "Autenticar usuario",
+          module: "auth",
+          active: true
+        })
+      }),
+      { upsert: true }
+    );
     expect(roleModel.updateOne).toHaveBeenCalledWith(
       { code: "ADMIN" },
       expect.objectContaining({

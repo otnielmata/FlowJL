@@ -6,7 +6,7 @@ const publicationSchema = new mongoose.Schema(
   {
     _id: {
       type: String,
-      default: randomUUID
+      default: () => randomUUID()
     },
     launchId: {
       type: String,

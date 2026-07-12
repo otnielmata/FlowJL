@@ -6,7 +6,7 @@ const auditEventSchema = new mongoose.Schema(
   {
     _id: {
       type: String,
-      default: randomUUID
+      default: () => randomUUID()
     },
     actorUserId: {
       type: String,

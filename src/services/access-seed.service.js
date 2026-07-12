@@ -371,7 +371,9 @@ class AccessSeedService {
       await Permission.updateOne(
         { code: permission.code },
         {
-          $setOnInsert: permission,
+          $setOnInsert: {
+            code: permission.code
+          },
           $set: {
             name: permission.name,
             description: permission.description,
