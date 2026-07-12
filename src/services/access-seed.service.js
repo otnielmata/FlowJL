@@ -614,6 +614,30 @@ const corePermissions = [
     name: "Inativar aulas agendadas",
     description: "Permite realizar exclusao logica de aulas preservando historico.",
     module: "operations"
+  },
+  {
+    code: "LIVE_EVENT_CREATE",
+    name: "Cadastrar eventos ao vivo",
+    description: "Permite cadastrar eventos ao vivo vinculados a operacao de um lancamento.",
+    module: "operations"
+  },
+  {
+    code: "LIVE_EVENT_READ",
+    name: "Consultar eventos ao vivo",
+    description: "Permite consultar eventos ao vivo por lancamento, periodo, canal, responsavel e status.",
+    module: "operations"
+  },
+  {
+    code: "LIVE_EVENT_UPDATE",
+    name: "Atualizar eventos ao vivo",
+    description: "Permite alterar horario, canal, responsavel, status e dados operacionais de eventos ao vivo.",
+    module: "operations"
+  },
+  {
+    code: "LIVE_EVENT_DEACTIVATE",
+    name: "Inativar eventos ao vivo",
+    description: "Permite realizar exclusao logica de eventos ao vivo preservando historico.",
+    module: "operations"
   }
 ];
 

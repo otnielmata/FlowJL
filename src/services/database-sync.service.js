@@ -18,6 +18,7 @@ import "../models/expert-approval.model.js";
 import "../models/external-integration.model.js";
 import "../models/external-publication-link.model.js";
 import "../models/launch.model.js";
+import "../models/live-event.model.js";
 import "../models/market-research.model.js";
 import "../models/offer.model.js";
 import "../models/permission.model.js";

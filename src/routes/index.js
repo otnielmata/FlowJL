@@ -14,6 +14,7 @@ import { editorialCalendarRoutes } from "./editorial-calendar.routes.js";
 import { emailCampaignRoutes } from "./email-campaign.routes.js";
 import { externalIntegrationRoutes } from "./external-integration.routes.js";
 import { launchRoutes } from "./launch.routes.js";
+import { liveEventRoutes } from "./live-event.routes.js";
 import { profileRoutes } from "./profile.routes.js";
 import { publicationRoutes } from "./publication.routes.js";
 import { productionChecklistRoutes } from "./production-checklist.routes.js";
@@ -36,7 +37,7 @@ apiRoutes.get("/", (_request, response) => {
   response.status(200).json({
     service: "flow-jl-api",
     version: "v1",
-    modules: ["assets", "audits", "auth", "carousels", "class-schedules", "content-approvals", "content-ideas", "content-statuses", "copywritings", "dashboards", "editorial-calendar", "emails", "external-publication", "launches", "production-checklists", "profiles", "publications", "reels", "roles", "stories", "traffic-audiences", "traffic-campaigns", "traffic-conversion-events", "traffic-creatives", "traffic-pixels", "traffic-reports", "traffic-roi", "users", "youtube-contents", "swagger"]
+    modules: ["assets", "audits", "auth", "carousels", "class-schedules", "content-approvals", "content-ideas", "content-statuses", "copywritings", "dashboards", "editorial-calendar", "emails", "external-publication", "launches", "live-events", "production-checklists", "profiles", "publications", "reels", "roles", "stories", "traffic-audiences", "traffic-campaigns", "traffic-conversion-events", "traffic-creatives", "traffic-pixels", "traffic-reports", "traffic-roi", "users", "youtube-contents", "swagger"]
   });
 });
 
@@ -54,6 +55,7 @@ apiRoutes.use("/editorial-calendar", editorialCalendarRoutes);
 apiRoutes.use("/emails", emailCampaignRoutes);
 apiRoutes.use("/external-publication", externalIntegrationRoutes);
 apiRoutes.use("/launches", launchRoutes);
+apiRoutes.use("/live-events", liveEventRoutes);
 apiRoutes.use("/profiles", profileRoutes);
 apiRoutes.use("/publications", publicationRoutes);
 apiRoutes.use("/production-checklists", productionChecklistRoutes);
