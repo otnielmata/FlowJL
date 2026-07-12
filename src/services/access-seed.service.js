@@ -416,6 +416,36 @@ const corePermissions = [
     name: "Consultar historico de status",
     description: "Permite consultar o historico auditavel de mudancas de status de conteudo.",
     module: "content"
+  },
+  {
+    code: "EXTERNAL_INTEGRATION_CREATE",
+    name: "Cadastrar integracoes externas",
+    description: "Permite preparar configuracoes futuras de integracao com Meta e YouTube.",
+    module: "content"
+  },
+  {
+    code: "EXTERNAL_INTEGRATION_READ",
+    name: "Consultar integracoes externas",
+    description: "Permite consultar integracoes externas sem expor credenciais sensiveis.",
+    module: "content"
+  },
+  {
+    code: "EXTERNAL_INTEGRATION_UPDATE",
+    name: "Atualizar integracoes externas",
+    description: "Permite atualizar identificadores externos, estado de sincronizacao e credenciais protegidas.",
+    module: "content"
+  },
+  {
+    code: "EXTERNAL_PUBLICATION_LINK_CREATE",
+    name: "Cadastrar vinculos externos de publicacao",
+    description: "Permite vincular publicacoes internas a identificadores externos de Meta ou YouTube.",
+    module: "content"
+  },
+  {
+    code: "EXTERNAL_PUBLICATION_LINK_READ",
+    name: "Consultar vinculos externos de publicacao",
+    description: "Permite consultar vinculos externos e estados de sincronizacao de publicacoes.",
+    module: "content"
   }
 ];
 

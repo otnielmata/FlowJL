@@ -15,6 +15,7 @@ tags:
   - name: Content Approvals
   - name: Content Statuses
   - name: Copywritings
+  - name: External Publication
   - name: Publications
   - name: Production Checklists
   - name: YouTube Contents
@@ -860,6 +861,219 @@ paths:
           description: Checklist nao encontrado
         '409':
           description: Checklist ainda nao concluido
+  /api/v1/external-publication/integrations:
+    post:
+      tags: [External Publication]
+      summary: Prepara configuracao futura de integracao com Meta ou YouTube
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [provider, name]
+              properties:
+                provider:
+                  type: string
+                  enum: [META, YOUTUBE]
+                name:
+                  type: string
+                externalAccountId:
+                  type: string
+                externalBusinessId:
+                  type: string
+                externalChannelId:
+                  type: string
+                credentials:
+                  type: object
+                  description: Segredos sao persistidos protegidos e nunca retornados pela API.
+                  properties:
+                    clientId:
+                      type: string
+                    clientSecret:
+                      type: string
+                    accessToken:
+                      type: string
+                    refreshToken:
+                      type: string
+                    tokenExpiresAt:
+                      type: string
+                      format: date-time
+                    scopes:
+                      type: array
+                      items:
+                        type: string
+                syncState:
+                  type: string
+                  enum: [NOT_CONFIGURED, READY, PENDING, SYNCED, ERROR]
+                status:
+                  type: string
+                  enum: [INACTIVE, READY, ERROR]
+      responses:
+        '201':
+          description: Integracao preparada com credenciais protegidas
+        '400':
+          description: Dados invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '409':
+          description: Integracao duplicada
+    get:
+      tags: [External Publication]
+      summary: Consulta integracoes externas sem expor tokens ou segredos
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: provider
+          required: false
+          schema:
+            type: string
+            enum: [META, YOUTUBE]
+        - in: query
+          name: syncState
+          required: false
+          schema:
+            type: string
+            enum: [NOT_CONFIGURED, READY, PENDING, SYNCED, ERROR]
+      responses:
+        '200':
+          description: Integracoes retornadas com estado mascarado de credenciais
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+  /api/v1/external-publication/integrations/{integrationId}:
+    put:
+      tags: [External Publication]
+      summary: Atualiza configuracao, credenciais protegidas e estado de sincronizacao
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: integrationId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                externalAccountId:
+                  type: string
+                externalBusinessId:
+                  type: string
+                externalChannelId:
+                  type: string
+                credentials:
+                  type: object
+                syncState:
+                  type: string
+                  enum: [NOT_CONFIGURED, READY, PENDING, SYNCED, ERROR]
+                status:
+                  type: string
+                  enum: [INACTIVE, READY, ERROR]
+      responses:
+        '200':
+          description: Integracao atualizada sem expor credenciais
+        '400':
+          description: Dados invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Integracao nao encontrada
+  /api/v1/external-publication/publication-links:
+    post:
+      tags: [External Publication]
+      summary: Registra vinculo externo de uma publicacao interna
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [publicationId, provider, externalPublicationId]
+              properties:
+                publicationId:
+                  type: string
+                  format: uuid
+                provider:
+                  type: string
+                  enum: [META, YOUTUBE]
+                integrationId:
+                  type: string
+                  format: uuid
+                externalPublicationId:
+                  type: string
+                externalPermalink:
+                  type: string
+                  format: uri
+                syncState:
+                  type: string
+                  enum: [PENDING, SYNCED, ERROR]
+                lastSyncAt:
+                  type: string
+                  format: date-time
+                metadata:
+                  type: object
+      responses:
+        '201':
+          description: Vinculo externo registrado com sucesso
+        '400':
+          description: Dados invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Publicacao ou integracao nao encontrada
+        '409':
+          description: Provedor incompatível ou vinculo duplicado
+    get:
+      tags: [External Publication]
+      summary: Consulta vinculos externos de publicacoes
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: publicationId
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: provider
+          required: false
+          schema:
+            type: string
+            enum: [META, YOUTUBE]
+        - in: query
+          name: syncState
+          required: false
+          schema:
+            type: string
+            enum: [PENDING, SYNCED, ERROR]
+      responses:
+        '200':
+          description: Vinculos externos retornados com sucesso
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
   /api/v1/emails:
     post:
       tags: [Emails]
