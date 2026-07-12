@@ -380,6 +380,30 @@ const corePermissions = [
     name: "Atualizar agenda editorial",
     description: "Permite ajustar data, hora, canal e responsavel de itens do calendario editorial.",
     module: "content"
+  },
+  {
+    code: "PRODUCTION_CHECKLIST_CREATE",
+    name: "Executar checklist de producao",
+    description: "Permite iniciar checklists de producao para conteudos aprovados.",
+    module: "content"
+  },
+  {
+    code: "PRODUCTION_CHECKLIST_READ",
+    name: "Consultar checklists de producao",
+    description: "Permite consultar progresso e historico de checklists de producao.",
+    module: "content"
+  },
+  {
+    code: "PRODUCTION_CHECKLIST_UPDATE",
+    name: "Atualizar checklist de producao",
+    description: "Permite marcar itens obrigatorios e salvar progresso parcial ou total.",
+    module: "content"
+  },
+  {
+    code: "PRODUCTION_CHECKLIST_REOPEN",
+    name: "Reabrir checklist de producao",
+    description: "Permite reabrir checklists concluidos mantendo historico auditavel.",
+    module: "content"
   }
 ];
 

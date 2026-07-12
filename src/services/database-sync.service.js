@@ -19,6 +19,7 @@ import "../models/offer.model.js";
 import "../models/permission.model.js";
 import "../models/positioning.model.js";
 import "../models/profile.model.js";
+import "../models/production-checklist.model.js";
 import "../models/publication.model.js";
 import "../models/reel.model.js";
 import "../models/role.model.js";
