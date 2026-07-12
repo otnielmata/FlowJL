@@ -27,6 +27,7 @@ tags:
   - name: Profiles
   - name: Users
   - name: Roles
+  - name: Students
   - name: Traffic Audiences
   - name: Traffic Campaigns
   - name: Traffic Conversion Events
@@ -3541,6 +3542,150 @@ paths:
           description: Acao nao encontrada
         '409':
           description: Acao ja inativa
+  /api/v1/students:
+    post:
+      tags: [Students]
+      summary: Cadastra um aluno operacional
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StudentRequest'
+      responses:
+        '201':
+          description: Aluno cadastrado com sucesso
+        '400':
+          description: Dados invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento nao encontrado
+        '409':
+          description: Aluno ja cadastrado para o produto
+    get:
+      tags: [Students]
+      summary: Lista alunos por contexto operacional
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: launchId
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: product
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: status
+          required: false
+          schema:
+            type: string
+            enum: [ACTIVE, INACTIVE, PENDING, COMPLETED, CANCELED]
+        - in: query
+          name: email
+          required: false
+          schema:
+            type: string
+            format: email
+        - in: query
+          name: active
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Alunos retornados com dados operacionais
+        '400':
+          description: Filtros invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+  /api/v1/students/{studentId}:
+    get:
+      tags: [Students]
+      summary: Consulta um aluno por identificador
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: studentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Aluno consultado com sucesso
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Aluno nao encontrado
+    put:
+      tags: [Students]
+      summary: Atualiza informacoes operacionais de um aluno
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: studentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateStudentRequest'
+      responses:
+        '200':
+          description: Aluno atualizado com auditoria
+        '400':
+          description: Dados invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Aluno ou lancamento nao encontrado
+        '409':
+          description: Aluno ja cadastrado para o produto
+    delete:
+      tags: [Students]
+      summary: Inativa um aluno preservando historico
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: studentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Aluno inativado por exclusao logica
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Aluno nao encontrado
+        '409':
+          description: Aluno ja inativo
   /api/v1/roles:
     get:
       tags: [Roles]
@@ -4052,6 +4197,64 @@ components:
           type: string
           maxLength: 1000
           nullable: true
+    StudentRequest:
+      type: object
+      required: [name, email, product, status]
+      properties:
+        launchId:
+          type: string
+          format: uuid
+        name:
+          type: string
+          minLength: 3
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        product:
+          type: string
+          minLength: 2
+        status:
+          type: string
+          enum: [ACTIVE, INACTIVE, PENDING, COMPLETED, CANCELED]
+        supportNotes:
+          type: string
+          maxLength: 1000
+        tags:
+          type: array
+          items:
+            type: string
+    UpdateStudentRequest:
+      type: object
+      properties:
+        launchId:
+          type: string
+          format: uuid
+          nullable: true
+        name:
+          type: string
+          minLength: 3
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+          nullable: true
+        product:
+          type: string
+          minLength: 2
+        status:
+          type: string
+          enum: [ACTIVE, INACTIVE, PENDING, COMPLETED, CANCELED]
+        supportNotes:
+          type: string
+          maxLength: 1000
+          nullable: true
+        tags:
+          type: array
+          items:
+            type: string
     CreateLaunchRequest:
       type: object
       required: [name, expert, product, baseDate, milestones]

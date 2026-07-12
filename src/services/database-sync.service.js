@@ -32,6 +32,7 @@ import "../models/reel.model.js";
 import "../models/role.model.js";
 import "../models/smart-schedule.model.js";
 import "../models/story-sequence.model.js";
+import "../models/student.model.js";
 import "../models/traffic-audience.model.js";
 import "../models/traffic-campaign.model.js";
 import "../models/traffic-conversion-event.model.js";

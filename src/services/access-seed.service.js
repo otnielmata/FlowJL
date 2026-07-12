@@ -686,6 +686,30 @@ const corePermissions = [
     name: "Inativar e-mails operacionais",
     description: "Permite realizar exclusao logica de acoes operacionais de e-mail preservando historico.",
     module: "operations"
+  },
+  {
+    code: "STUDENT_CREATE",
+    name: "Cadastrar alunos",
+    description: "Permite cadastrar alunos vinculados a produtos, lancamentos e operacao.",
+    module: "operations"
+  },
+  {
+    code: "STUDENT_READ",
+    name: "Consultar alunos",
+    description: "Permite consultar alunos e informacoes operacionais de entrega.",
+    module: "operations"
+  },
+  {
+    code: "STUDENT_UPDATE",
+    name: "Atualizar alunos",
+    description: "Permite atualizar dados operacionais, status e contexto de alunos.",
+    module: "operations"
+  },
+  {
+    code: "STUDENT_DEACTIVATE",
+    name: "Inativar alunos",
+    description: "Permite realizar exclusao logica de alunos preservando historico.",
+    module: "operations"
   }
 ];
 
