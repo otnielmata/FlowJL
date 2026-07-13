@@ -10,6 +10,11 @@ const authSessionModel = {
   findById: vi.fn()
 };
 
+const passwordResetRequestModel = {
+  create: vi.fn(),
+  findOne: vi.fn()
+};
+
 const bcryptMock = {
   compare: vi.fn(),
   hash: vi.fn()
@@ -32,6 +37,10 @@ vi.mock("../src/models/user.model.js", () => ({
 
 vi.mock("../src/models/auth-session.model.js", () => ({
   AuthSession: authSessionModel
+}));
+
+vi.mock("../src/models/password-reset-request.model.js", () => ({
+  PasswordResetRequest: passwordResetRequestModel
 }));
 
 vi.mock("bcryptjs", () => ({
@@ -234,5 +243,115 @@ describe("authService", () => {
       roleId: "role-admin"
     });
     expect(result).not.toHaveProperty("passwordHash");
+  });
+
+  it("requests password recovery with a generic response and creates a one-time request for existing users", async () => {
+    const user = createUser();
+    userModel.findOne.mockResolvedValue(user);
+    bcryptMock.hash.mockResolvedValue("hashed-reset-token");
+    passwordResetRequestModel.create.mockResolvedValue({
+      id: "reset-request-1"
+    });
+
+    const result = await authService.requestPasswordRecovery({
+      email: " Admin@FlowJL.com "
+    });
+
+    expect(userModel.findOne).toHaveBeenCalledWith({ email: "admin@flowjl.com" });
+    expect(passwordResetRequestModel.create).toHaveBeenCalledWith(expect.objectContaining({
+      userId: "user-1",
+      email: "admin@flowjl.com",
+      tokenDigest: expect.any(String),
+      tokenHash: "hashed-reset-token",
+      expiresAt: expect.any(Date),
+      requestedAt: expect.any(Date),
+      usedAt: null,
+      revokedAt: null
+    }));
+    expect(result).toEqual({
+      message: "If the email is registered, password recovery instructions will be sent"
+    });
+    expect(result).not.toHaveProperty("token");
+    expect(auditServiceMock.record).toHaveBeenCalledWith(expect.objectContaining({
+      action: "PASSWORD_RECOVERY_REQUESTED",
+      targetId: "user-1",
+      context: expect.objectContaining({ userFound: true })
+    }));
+  });
+
+  it("does not reveal whether the password recovery email exists", async () => {
+    userModel.findOne.mockResolvedValue(null);
+
+    const result = await authService.requestPasswordRecovery({
+      email: "missing@flowjl.com"
+    });
+
+    expect(passwordResetRequestModel.create).not.toHaveBeenCalled();
+    expect(result).toEqual({
+      message: "If the email is registered, password recovery instructions will be sent"
+    });
+    expect(auditServiceMock.record).toHaveBeenCalledWith(expect.objectContaining({
+      action: "PASSWORD_RECOVERY_REQUESTED",
+      targetId: "UNKNOWN",
+      context: expect.objectContaining({ userFound: false })
+    }));
+  });
+
+  it("resets password with a valid unused recovery request", async () => {
+    const request = {
+      id: "reset-request-1",
+      userId: "user-1",
+      tokenHash: "stored-reset-hash",
+      usedAt: null,
+      revokedAt: null,
+      expiresAt: new Date("2099-01-01T00:00:00.000Z"),
+      save: vi.fn().mockResolvedValue(undefined)
+    };
+    const user = createUser();
+
+    passwordResetRequestModel.findOne.mockResolvedValue(request);
+    bcryptMock.compare.mockResolvedValue(true);
+    bcryptMock.hash.mockResolvedValue("new-password-hash");
+    userModel.findById.mockResolvedValue(user);
+
+    const result = await authService.resetPassword({
+      token: "valid-reset-token-with-enough-length",
+      newPassword: "NewPass@123"
+    });
+
+    expect(passwordResetRequestModel.findOne).toHaveBeenCalledWith(expect.objectContaining({
+      tokenDigest: expect.any(String),
+      usedAt: null,
+      revokedAt: null,
+      expiresAt: { $gt: expect.any(Date) }
+    }));
+    expect(bcryptMock.compare).toHaveBeenCalledWith("valid-reset-token-with-enough-length", "stored-reset-hash");
+    expect(user.passwordHash).toBe("new-password-hash");
+    expect(user.save).toHaveBeenCalled();
+    expect(request.usedAt).toBeInstanceOf(Date);
+    expect(request.usedBy).toBe("user-1");
+    expect(request.save).toHaveBeenCalled();
+    expect(result).toEqual({
+      message: "Password reset successfully"
+    });
+    expect(result).not.toHaveProperty("password");
+    expect(auditServiceMock.record).toHaveBeenCalledWith(expect.objectContaining({
+      action: "PASSWORD_RESET_COMPLETED",
+      targetId: "user-1"
+    }));
+  });
+
+  it("rejects invalid, expired or already used password recovery requests", async () => {
+    passwordResetRequestModel.findOne.mockResolvedValue(null);
+
+    await expect(
+      authService.resetPassword({
+        token: "invalid-reset-token-with-enough-length",
+        newPassword: "NewPass@123"
+      })
+    ).rejects.toMatchObject({
+      statusCode: 400,
+      message: "Invalid or expired password reset request"
+    });
   });
 });

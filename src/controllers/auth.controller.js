@@ -11,6 +11,15 @@ const refreshTokenSchema = z.object({
   refreshToken: z.string().min(1)
 });
 
+const passwordRecoverySchema = z.object({
+  email: z.string().email()
+});
+
+const resetPasswordSchema = z.object({
+  token: z.string().min(32),
+  newPassword: z.string().min(8)
+});
+
 class AuthController {
   async login(request, response) {
     const payload = loginSchema.parse(request.body);
@@ -27,6 +36,18 @@ class AuthController {
   async logout(request, response) {
     const payload = refreshTokenSchema.parse(request.body);
     const result = await authService.logout(payload);
+    response.status(200).json(result);
+  }
+
+  async requestPasswordRecovery(request, response) {
+    const payload = passwordRecoverySchema.parse(request.body);
+    const result = await authService.requestPasswordRecovery(payload);
+    response.status(202).json(result);
+  }
+
+  async resetPassword(request, response) {
+    const payload = resetPasswordSchema.parse(request.body);
+    const result = await authService.resetPassword(payload);
     response.status(200).json(result);
   }
 
