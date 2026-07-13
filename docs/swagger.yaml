@@ -7,9 +7,15 @@ servers:
   - url: http://localhost:3000
 tags:
   - name: Health
+  - name: AI Brand Materials
+  - name: AI Historical Contents
+  - name: AI Metric Insights
+  - name: AI Schedules
+  - name: AI Team Automations
   - name: Assets
   - name: Audit
   - name: Auth
+  - name: Class Schedules
   - name: Dashboards
   - name: Strategies
   - name: Editorial Calendar
@@ -17,16 +23,27 @@ tags:
   - name: Content Statuses
   - name: Copywritings
   - name: External Publication
+  - name: Discord Operations
   - name: Publications
   - name: Production Checklists
   - name: YouTube Contents
   - name: Launches
+  - name: Live Events
+  - name: Operational Checklists
+  - name: Operational Emails
+  - name: Platform Settings
   - name: Profiles
   - name: Users
   - name: Roles
+  - name: Students
+  - name: Support Tickets
+  - name: Traffic Audiences
   - name: Traffic Campaigns
+  - name: Traffic Conversion Events
   - name: Traffic Creatives
   - name: Traffic Pixels
+  - name: Traffic Reports
+  - name: Traffic ROI
 paths:
   /health:
     get:
@@ -35,6 +52,460 @@ paths:
       responses:
         '200':
           description: API disponivel
+  /api/v1/ai-brand-materials:
+    post:
+      tags: [AI Brand Materials]
+      summary: Persiste material gerado por IA para edicao humana
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AiBrandMaterialRequest'
+      responses:
+        '201':
+          description: Material salvo como versao revisavel
+        '400':
+          description: Dados invalidos ou contexto divergente
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento nao encontrado
+    get:
+      tags: [AI Brand Materials]
+      summary: Lista materiais gerados por IA
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: launchId
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: materialType
+          required: false
+          schema:
+            type: string
+            enum: [SCRIPT, COPY, EMAIL]
+        - in: query
+          name: reviewStatus
+          required: false
+          schema:
+            type: string
+            enum: [PENDING_REVIEW, APPROVED, REJECTED]
+        - in: query
+          name: active
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Materiais retornados sem prompts ou fontes sensiveis
+        '400':
+          description: Filtros invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+  /api/v1/ai-brand-materials/{materialId}:
+    get:
+      tags: [AI Brand Materials]
+      summary: Consulta material gerado por IA
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: materialId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Material consultado com contexto seguro e status de revisao
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Material nao encontrado
+  /api/v1/ai-historical-contents:
+    post:
+      tags: [AI Historical Contents]
+      summary: Cadastra conteudo historico classificado por desempenho
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AiHistoricalContentRequest'
+      responses:
+        '201':
+          description: Conteudo historico cadastrado sem expor notas sensiveis
+        '400':
+          description: Dados obrigatorios ausentes ou invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado ao acervo estrategico
+        '404':
+          description: Lancamento nao encontrado
+    get:
+      tags: [AI Historical Contents]
+      summary: Consulta conteudos historicos relevantes por objetivo, formato ou lancamento
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: launchId
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: format
+          required: false
+          schema:
+            type: string
+            enum: [REEL, CAROUSEL, STORY_SEQUENCE, EMAIL, YOUTUBE, AD, LANDING_PAGE, SCRIPT, COPY]
+        - in: query
+          name: objective
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: origin
+          required: false
+          schema:
+            type: string
+            enum: [ORIGINAL, REUSED]
+        - in: query
+          name: tags
+          required: false
+          schema:
+            type: string
+            description: Tags separadas por virgula
+        - in: query
+          name: active
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Conteudos retornados por relevancia sem dados sensiveis
+        '400':
+          description: Filtros invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado ao acervo estrategico
+  /api/v1/ai-historical-contents/recommendations:
+    post:
+      tags: [AI Historical Contents]
+      summary: Sugere reaproveitamento de conteudos historicos para novo contexto
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AiHistoricalRecommendationRequest'
+      responses:
+        '200':
+          description: Recomendacoes correlatas retornadas com tipo de reaproveitamento
+        '400':
+          description: Dados invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado ao acervo estrategico
+        '404':
+          description: Lancamento nao encontrado
+  /api/v1/ai-historical-contents/{contentId}:
+    get:
+      tags: [AI Historical Contents]
+      summary: Consulta um conteudo historico do acervo estrategico
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: contentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Conteudo retornado sem notas sensiveis
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado ao acervo estrategico
+        '404':
+          description: Conteudo historico nao encontrado
+    delete:
+      tags: [AI Historical Contents]
+      summary: Inativa logicamente um conteudo historico
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: contentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Conteudo inativado com historico preservado
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Conteudo historico nao encontrado
+        '409':
+          description: Conteudo historico ja inativo
+  /api/v1/ai-metric-insights:
+    post:
+      tags: [AI Metric Insights]
+      summary: Gera sugestoes de melhoria com base em metricas historicas
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AiMetricInsightRequest'
+      responses:
+        '201':
+          description: Sugestoes estruturadas geradas com base auditavel e revisao humana
+        '400':
+          description: Dados invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento nao encontrado
+        '422':
+          description: Base historica insuficiente para sugerir melhorias
+  /api/v1/ai-metric-insights/{insightId}:
+    get:
+      tags: [AI Metric Insights]
+      summary: Consulta sugestao gerada com sua base historica segura
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: insightId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Sugestao retornada sem detalhes internos de processamento
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Sugestao nao encontrada
+  /api/v1/ai-team-automations:
+    post:
+      tags: [AI Team Automations]
+      summary: Configura automacao recorrente da equipe com controle seguro
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AiTeamAutomationRequest'
+      responses:
+        '201':
+          description: Automacao registrada com gatilho, regra e acao automatizada
+        '400':
+          description: Regra insegura, permissao ausente ou contexto insuficiente
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Contexto de negocio nao encontrado
+  /api/v1/ai-team-automations/{automationId}:
+    get:
+      tags: [AI Team Automations]
+      summary: Consulta automacao recorrente e execucoes registradas
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: automationId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Automacao retornada sem segredos internos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Automacao nao encontrada
+  /api/v1/ai-team-automations/{automationId}/active:
+    patch:
+      tags: [AI Team Automations]
+      summary: Ativa ou inativa automacao recorrente
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: automationId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AiTeamAutomationActiveRequest'
+      responses:
+        '200':
+          description: Estado da automacao atualizado
+        '400':
+          description: Automacao nao atende aos controles seguros para ativacao
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Automacao nao encontrada
+  /api/v1/ai-team-automations/{automationId}/execute:
+    post:
+      tags: [AI Team Automations]
+      summary: Executa automacao ativa dentro das regras configuradas
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: automationId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AiTeamAutomationExecuteRequest'
+      responses:
+        '200':
+          description: Automacao executada e resultado registrado
+        '400':
+          description: Regra insegura ou contexto invalido
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Automacao nao encontrada
+        '409':
+          description: Automacao inativa ou gatilho divergente
+  /api/v1/ai-schedules:
+    post:
+      tags: [AI Schedules]
+      summary: Persiste um cronograma gerado por IA para revisao
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AiScheduleRequest'
+      responses:
+        '201':
+          description: Cronograma salvo para edicao e aprovacao posterior
+        '400':
+          description: Dados invalidos ou contexto divergente
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento nao encontrado
+    get:
+      tags: [AI Schedules]
+      summary: Lista cronogramas gerados por IA
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: launchId
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: reviewStatus
+          required: false
+          schema:
+            type: string
+            enum: [PENDING_REVIEW, APPROVED, REJECTED]
+        - in: query
+          name: active
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Cronogramas retornados sem prompts ou fontes internas sensiveis
+        '400':
+          description: Filtros invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+  /api/v1/ai-schedules/{scheduleId}:
+    get:
+      tags: [AI Schedules]
+      summary: Consulta um cronograma gerado por IA
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: scheduleId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Cronograma consultado com metadados seguros e revisao humana pendente
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Cronograma nao encontrado
   /api/v1:
     get:
       tags: [Health]
@@ -91,6 +562,59 @@ paths:
           description: Sessao encerrada
         '401':
           description: Refresh token invalido ou expirado
+  /api/v1/auth/password-recovery:
+    post:
+      tags: [Auth]
+      summary: Solicita recuperacao de senha sem revelar se o e-mail existe
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordRecoveryRequest'
+      responses:
+        '202':
+          description: Pedido recebido com resposta generica
+        '400':
+          description: E-mail invalido
+  /api/v1/auth/password-reset:
+    post:
+      tags: [Auth]
+      summary: Redefine a senha usando um pedido de recuperacao valido
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordResetRequest'
+      responses:
+        '200':
+          description: Senha redefinida sem retornar a nova credencial
+        '400':
+          description: Pedido invalido, expirado, usado ou senha fora da politica
+        '403':
+          description: Redefinicao nao permitida para o usuario
+  /api/v1/auth/change-password:
+    post:
+      tags: [Auth]
+      summary: Altera a senha do proprio usuario autenticado
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangePasswordRequest'
+      responses:
+        '200':
+          description: Senha alterada sem retornar senha ou hash
+        '400':
+          description: Dados invalidos ou nova senha fora da politica
+        '401':
+          description: JWT ausente, invalido ou senha atual incorreta
+        '403':
+          description: Alteracao de senha nao permitida para o usuario
   /api/v1/auth/me:
     get:
       tags: [Auth]
@@ -115,6 +639,50 @@ paths:
           description: JWT ausente ou invalido
         '403':
           description: Acesso negado
+  /api/v1/platform-settings:
+    get:
+      tags: [Platform Settings]
+      summary: Consulta configuracoes globais permitidas para leitura
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Configuracoes retornadas sem expor valores sensiveis
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+  /api/v1/platform-settings/{key}:
+    put:
+      tags: [Platform Settings]
+      summary: Atualiza configuracao global editavel
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: key
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlatformSettingUpdateRequest'
+      responses:
+        '200':
+          description: Configuracao atualizada com auditoria
+        '400':
+          description: Valor invalido para o tipo da configuracao
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Configuracao nao encontrada
+        '409':
+          description: Configuracao nao editavel
   /api/v1/assets:
     post:
       tags: [Assets]
@@ -202,6 +770,131 @@ paths:
           description: Ativo nao encontrado
         '409':
           description: Ativo ja esta inativo
+  /api/v1/class-schedules:
+    post:
+      tags: [Class Schedules]
+      summary: Cadastra uma aula na agenda operacional
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClassScheduleRequest'
+      responses:
+        '201':
+          description: Aula agendada com sucesso
+        '400':
+          description: Dados invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento nao encontrado
+    get:
+      tags: [Class Schedules]
+      summary: Lista aulas agendadas por contexto operacional
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: launchId
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: status
+          required: false
+          schema:
+            type: string
+            enum: [PLANNED, CONFIRMED, COMPLETED, CANCELED, RESCHEDULED]
+        - in: query
+          name: responsible
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: startAt
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: endAt
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: active
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Aulas retornadas com horarios em UTC
+        '400':
+          description: Filtros invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+  /api/v1/class-schedules/{classScheduleId}:
+    put:
+      tags: [Class Schedules]
+      summary: Atualiza data, responsavel, status ou dados de uma aula
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: classScheduleId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateClassScheduleRequest'
+      responses:
+        '200':
+          description: Aula atualizada com auditoria
+        '400':
+          description: Dados invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Aula nao encontrada
+    delete:
+      tags: [Class Schedules]
+      summary: Inativa uma aula agendada preservando historico
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: classScheduleId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Aula inativada por exclusao logica
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Aula nao encontrada
+        '409':
+          description: Aula ja inativa
   /api/v1/dashboards/strategist:
     get:
       tags: [Dashboards]
@@ -224,6 +917,88 @@ paths:
           description: Acesso negado
         '404':
           description: Lancamento nao encontrado
+  /api/v1/dashboards/overview:
+    get:
+      tags: [Dashboards]
+      summary: Consulta o dashboard executivo com shell, cards, secoes e contadores por modulo
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Dashboard executivo retornado com sucesso
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+  /api/v1/dashboards/notifications:
+    get:
+      tags: [Dashboards]
+      summary: Lista a central de notificacoes do dashboard para o usuario autenticado
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Notificacoes retornadas com sucesso
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+  /api/v1/dashboards/notifications/read-all:
+    patch:
+      tags: [Dashboards]
+      summary: Marca todas as notificacoes visiveis do dashboard como lidas
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Todas as notificacoes foram marcadas como lidas
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+  /api/v1/dashboards/notifications/{notificationId}/read:
+    patch:
+      tags: [Dashboards]
+      summary: Marca uma notificacao especifica do dashboard como lida
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: notificationId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Notificacao marcada como lida com sucesso
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Notificacao nao encontrada
+  /api/v1/dashboards/search:
+    get:
+      tags: [Dashboards]
+      summary: Executa a busca global do dashboard
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: q
+          required: true
+          schema:
+            type: string
+            minLength: 2
+      responses:
+        '200':
+          description: Resultado da busca retornado com sucesso
+        '400':
+          description: Consulta invalida
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
   /api/v1/strategies:
     get:
       tags: [Strategies]
@@ -1339,6 +2114,492 @@ paths:
           description: JWT ausente ou invalido
         '403':
           description: Acesso negado
+  /api/v1/traffic-roi:
+    get:
+      tags: [Traffic ROI]
+      summary: Calcula ROI de trafego por lancamento, periodo e campanha
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: launchId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: periodStart
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: periodEnd
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: campaignId
+          required: false
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: ROI calculado com base consistente e datas em UTC
+        '400':
+          description: Periodo invalido ou parametros obrigatorios ausentes
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento ou campanha nao encontrados
+        '409':
+          description: Campanha nao pertence ao lancamento informado
+        '422':
+          description: Base insuficiente de investimento ou resultado
+  /api/v1/traffic-reports:
+    get:
+      tags: [Traffic Reports]
+      summary: Consulta relatorio consolidado de trafego por lancamento, periodo e campanha
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: launchId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: periodStart
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: periodEnd
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: campaignId
+          required: false
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Relatorio consolidado retornado com dados disponiveis e datas em UTC
+        '400':
+          description: Periodo invalido ou parametros obrigatorios ausentes
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento ou campanha nao encontrados
+        '409':
+          description: Campanha nao pertence ao lancamento informado
+  /api/v1/traffic-conversion-events:
+    post:
+      tags: [Traffic Conversion Events]
+      summary: Cadastra evento de conversao vinculado a lancamento ou campanha
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, objective, origin]
+              properties:
+                launchId:
+                  type: string
+                  format: uuid
+                campaignIds:
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+                pixelIds:
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+                name:
+                  type: string
+                objective:
+                  type: string
+                origin:
+                  type: string
+                  enum: [WEB, CHECKOUT, FORM, WHATSAPP, CRM, ADS_PLATFORM, MANUAL, OTHER]
+                status:
+                  type: string
+                  enum: [DRAFT, ACTIVE, PAUSED, ARCHIVED]
+                eventAt:
+                  type: string
+                  format: date-time
+      responses:
+        '201':
+          description: Evento de conversao cadastrado com sucesso
+        '400':
+          description: Dados invalidos ou ausencia de lancamento/campanha
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento, campanha ou pixel nao encontrados
+        '409':
+          description: Vinculo incompativel com o lancamento ou evento duplicado
+    get:
+      tags: [Traffic Conversion Events]
+      summary: Lista eventos por lancamento, campanha, pixel, origem, status ou ativacao
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: launchId
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: campaignId
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: pixelId
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: origin
+          required: false
+          schema:
+            type: string
+            enum: [WEB, CHECKOUT, FORM, WHATSAPP, CRM, ADS_PLATFORM, MANUAL, OTHER]
+        - in: query
+          name: status
+          required: false
+          schema:
+            type: string
+            enum: [DRAFT, ACTIVE, PAUSED, ARCHIVED]
+        - in: query
+          name: active
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Eventos retornados com datas em UTC
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+  /api/v1/traffic-conversion-events/{eventId}:
+    put:
+      tags: [Traffic Conversion Events]
+      summary: Atualiza objetivo, origem, status ou data associada do evento
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: eventId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                objective:
+                  type: string
+                origin:
+                  type: string
+                  enum: [WEB, CHECKOUT, FORM, WHATSAPP, CRM, ADS_PLATFORM, MANUAL, OTHER]
+                status:
+                  type: string
+                  enum: [DRAFT, ACTIVE, PAUSED, ARCHIVED]
+                eventAt:
+                  type: string
+                  format: date-time
+                  nullable: true
+                reason:
+                  type: string
+      responses:
+        '200':
+          description: Evento atualizado com historico auditavel
+        '400':
+          description: Dados invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Evento nao encontrado
+    delete:
+      tags: [Traffic Conversion Events]
+      summary: Realiza exclusao logica de evento de conversao
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: eventId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Evento inativado com sucesso
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Evento nao encontrado
+        '409':
+          description: Evento ja esta inativo
+  /api/v1/traffic-conversion-events/{eventId}/links:
+    put:
+      tags: [Traffic Conversion Events]
+      summary: Vincula evento de conversao a campanhas ou pixels
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: eventId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                campaignIds:
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+                pixelIds:
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+                reason:
+                  type: string
+      responses:
+        '200':
+          description: Vinculos atualizados com historico auditavel
+        '400':
+          description: Dados invalidos ou nenhum vinculo informado
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Evento, campanha ou pixel nao encontrados
+        '409':
+          description: Vinculo incompativel com o lancamento do evento
+  /api/v1/traffic-audiences:
+    post:
+      tags: [Traffic Audiences]
+      summary: Cadastra publico segmentado vinculado a lancamento ou campanha
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, objective, strategy, segmentationCriteria]
+              properties:
+                launchId:
+                  type: string
+                  format: uuid
+                campaignIds:
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+                name:
+                  type: string
+                objective:
+                  type: string
+                strategy:
+                  type: string
+                segmentationCriteria:
+                  type: object
+                  description: Deve conter ao menos um criterio de segmentacao.
+                  properties:
+                    demographics:
+                      type: array
+                      items:
+                        type: string
+                    interests:
+                      type: array
+                      items:
+                        type: string
+                    behaviors:
+                      type: array
+                      items:
+                        type: string
+                    locations:
+                      type: array
+                      items:
+                        type: string
+                    exclusions:
+                      type: array
+                      items:
+                        type: string
+                    lookalikeSource:
+                      type: string
+                    customRules:
+                      type: array
+                      items:
+                        type: string
+                status:
+                  type: string
+                  enum: [DRAFT, ACTIVE, PAUSED, ARCHIVED]
+      responses:
+        '201':
+          description: Publico cadastrado com sucesso
+        '400':
+          description: Dados invalidos, contexto ausente ou criterios insuficientes
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento ou campanha nao encontrados
+        '409':
+          description: Campanha incompativel ou publico duplicado no lancamento
+    get:
+      tags: [Traffic Audiences]
+      summary: Lista publicos por lancamento, campanha, status ou ativacao
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: launchId
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: campaignId
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: status
+          required: false
+          schema:
+            type: string
+            enum: [DRAFT, ACTIVE, PAUSED, ARCHIVED]
+        - in: query
+          name: active
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Publicos retornados com sucesso
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+  /api/v1/traffic-audiences/{audienceId}:
+    put:
+      tags: [Traffic Audiences]
+      summary: Atualiza estrategia, status, campanhas ou criterios do publico
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: audienceId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                campaignIds:
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+                objective:
+                  type: string
+                strategy:
+                  type: string
+                segmentationCriteria:
+                  type: object
+                status:
+                  type: string
+                  enum: [DRAFT, ACTIVE, PAUSED, ARCHIVED]
+                reason:
+                  type: string
+      responses:
+        '200':
+          description: Publico atualizado com historico auditavel
+        '400':
+          description: Dados invalidos ou criterios insuficientes
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Publico ou campanha nao encontrados
+        '409':
+          description: Campanha incompativel com o lancamento do publico
+    delete:
+      tags: [Traffic Audiences]
+      summary: Realiza exclusao logica de publico de trafego
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: audienceId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Publico inativado com sucesso
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Publico nao encontrado
+        '409':
+          description: Publico ja esta inativo
   /api/v1/traffic-campaigns:
     post:
       tags: [Traffic Campaigns]
@@ -2317,6 +3578,66 @@ paths:
           description: Acesso negado
         '404':
           description: Lancamento nao encontrado
+  /api/v1/launches/{launchId}/ai-schedules/generate:
+    post:
+      tags: [AI Schedules]
+      summary: Gera uma proposta estruturada de cronograma completo com IA
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: launchId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenerateAiScheduleRequest'
+      responses:
+        '200':
+          description: Proposta de cronograma retornada para revisao humana
+        '400':
+          description: Briefing invalido ou contexto minimo insuficiente
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento nao encontrado
+  /api/v1/launches/{launchId}/ai-brand-materials/generate:
+    post:
+      tags: [AI Brand Materials]
+      summary: Gera roteiro, copy ou e-mail no estilo da marca
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: launchId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenerateAiBrandMaterialRequest'
+      responses:
+        '200':
+          description: Proposta retornada para revisao humana
+        '400':
+          description: Briefing, formato ou contexto de marca insuficientes
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento nao encontrado
   /api/v1/launches/{launchId}/competitor-researches:
     post:
       tags: [Launches]
@@ -2799,6 +4120,874 @@ paths:
           description: Lancamento ou submissao de aprovacao nao encontrados
         '409':
           description: Aprovacao fora do fluxo de revisao
+  /api/v1/discord-operations:
+    post:
+      tags: [Discord Operations]
+      summary: Registra uma tarefa operacional do Discord
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DiscordOperationRequest'
+      responses:
+        '201':
+          description: Tarefa de Discord registrada com sucesso
+        '400':
+          description: Dados invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento nao encontrado
+    get:
+      tags: [Discord Operations]
+      summary: Lista tarefas operacionais do Discord
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: launchId
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: type
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: status
+          required: false
+          schema:
+            type: string
+            enum: [TODO, IN_PROGRESS, DONE, BLOCKED, CANCELED]
+        - in: query
+          name: responsible
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: startAt
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: endAt
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: active
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Tarefas retornadas com prazos em UTC
+        '400':
+          description: Filtros invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+  /api/v1/discord-operations/{operationId}:
+    put:
+      tags: [Discord Operations]
+      summary: Atualiza status, observacoes, responsavel ou prazo de tarefa do Discord
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: operationId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateDiscordOperationRequest'
+      responses:
+        '200':
+          description: Tarefa atualizada com auditoria
+        '400':
+          description: Dados invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Tarefa nao encontrada
+    delete:
+      tags: [Discord Operations]
+      summary: Inativa uma tarefa operacional do Discord preservando historico
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: operationId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Tarefa inativada por exclusao logica
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Tarefa nao encontrada
+        '409':
+          description: Tarefa ja inativa
+  /api/v1/live-events:
+    post:
+      tags: [Live Events]
+      summary: Cadastra um evento ao vivo operacional
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LiveEventRequest'
+      responses:
+        '201':
+          description: Evento ao vivo cadastrado com sucesso
+        '400':
+          description: Dados invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento nao encontrado
+    get:
+      tags: [Live Events]
+      summary: Lista eventos ao vivo por contexto operacional
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: launchId
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: status
+          required: false
+          schema:
+            type: string
+            enum: [PLANNED, CONFIRMED, LIVE, COMPLETED, CANCELED, RESCHEDULED]
+        - in: query
+          name: channel
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: responsible
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: startAt
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: endAt
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: active
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Eventos retornados com horarios em UTC
+        '400':
+          description: Filtros invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+  /api/v1/live-events/{liveEventId}:
+    put:
+      tags: [Live Events]
+      summary: Atualiza horario, canal, responsavel, status ou dados de evento ao vivo
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: liveEventId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateLiveEventRequest'
+      responses:
+        '200':
+          description: Evento atualizado com auditoria
+        '400':
+          description: Dados invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Evento nao encontrado
+    delete:
+      tags: [Live Events]
+      summary: Inativa um evento ao vivo preservando historico
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: liveEventId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Evento inativado por exclusao logica
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Evento nao encontrado
+        '409':
+          description: Evento ja inativo
+  /api/v1/operational-emails:
+    post:
+      tags: [Operational Emails]
+      summary: Registra uma acao operacional de e-mail marketing
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OperationalEmailRequest'
+      responses:
+        '201':
+          description: Acao operacional de e-mail registrada com sucesso
+        '400':
+          description: Dados invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento nao encontrado
+    get:
+      tags: [Operational Emails]
+      summary: Lista acoes operacionais de e-mail marketing
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: launchId
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: status
+          required: false
+          schema:
+            type: string
+            enum: [TODO, IN_PROGRESS, SCHEDULED, SENT, DONE, BLOCKED, CANCELED]
+        - in: query
+          name: responsible
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: startAt
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: endAt
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: active
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Acoes retornadas com prazos em UTC
+        '400':
+          description: Filtros invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+  /api/v1/operational-emails/{emailActionId}:
+    put:
+      tags: [Operational Emails]
+      summary: Atualiza status, prazo, responsavel ou observacoes de e-mail operacional
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: emailActionId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateOperationalEmailRequest'
+      responses:
+        '200':
+          description: Acao atualizada com auditoria
+        '400':
+          description: Dados invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Acao nao encontrada
+    delete:
+      tags: [Operational Emails]
+      summary: Inativa uma acao operacional de e-mail preservando historico
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: emailActionId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Acao inativada por exclusao logica
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Acao nao encontrada
+        '409':
+          description: Acao ja inativa
+  /api/v1/students:
+    post:
+      tags: [Students]
+      summary: Cadastra um aluno operacional
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StudentRequest'
+      responses:
+        '201':
+          description: Aluno cadastrado com sucesso
+        '400':
+          description: Dados invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento nao encontrado
+        '409':
+          description: Aluno ja cadastrado para o produto
+    get:
+      tags: [Students]
+      summary: Lista alunos por contexto operacional
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: launchId
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: product
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: status
+          required: false
+          schema:
+            type: string
+            enum: [ACTIVE, INACTIVE, PENDING, COMPLETED, CANCELED]
+        - in: query
+          name: email
+          required: false
+          schema:
+            type: string
+            format: email
+        - in: query
+          name: active
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Alunos retornados com dados operacionais
+        '400':
+          description: Filtros invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+  /api/v1/students/{studentId}:
+    get:
+      tags: [Students]
+      summary: Consulta um aluno por identificador
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: studentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Aluno consultado com sucesso
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Aluno nao encontrado
+    put:
+      tags: [Students]
+      summary: Atualiza informacoes operacionais de um aluno
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: studentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateStudentRequest'
+      responses:
+        '200':
+          description: Aluno atualizado com auditoria
+        '400':
+          description: Dados invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Aluno ou lancamento nao encontrado
+        '409':
+          description: Aluno ja cadastrado para o produto
+    delete:
+      tags: [Students]
+      summary: Inativa um aluno preservando historico
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: studentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Aluno inativado por exclusao logica
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Aluno nao encontrado
+        '409':
+          description: Aluno ja inativo
+  /api/v1/support-tickets:
+    post:
+      tags: [Support Tickets]
+      summary: Registra um atendimento de suporte
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SupportTicketRequest'
+      responses:
+        '201':
+          description: Atendimento registrado com sucesso
+        '400':
+          description: Dados invalidos ou contexto ausente
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento ou aluno nao encontrado
+    get:
+      tags: [Support Tickets]
+      summary: Lista atendimentos de suporte por contexto operacional
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: launchId
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: studentId
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: responsibleUserId
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: status
+          required: false
+          schema:
+            type: string
+            enum: [OPEN, IN_PROGRESS, WAITING_CUSTOMER, RESOLVED, CLOSED, CANCELED]
+        - in: query
+          name: priority
+          required: false
+          schema:
+            type: string
+            enum: [LOW, MEDIUM, HIGH, URGENT]
+        - in: query
+          name: active
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Atendimentos retornados com historico operacional
+        '400':
+          description: Filtros invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+  /api/v1/support-tickets/{ticketId}:
+    get:
+      tags: [Support Tickets]
+      summary: Consulta um atendimento de suporte por identificador
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: ticketId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Atendimento consultado com sucesso
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Atendimento nao encontrado
+    put:
+      tags: [Support Tickets]
+      summary: Atualiza andamento, prioridade, observacoes ou interacao do atendimento
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: ticketId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSupportTicketRequest'
+      responses:
+        '200':
+          description: Atendimento atualizado com auditoria
+        '400':
+          description: Dados invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Atendimento, lancamento ou aluno nao encontrado
+    delete:
+      tags: [Support Tickets]
+      summary: Inativa um atendimento de suporte preservando historico
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: ticketId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Atendimento inativado por exclusao logica
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Atendimento nao encontrado
+        '409':
+          description: Atendimento ja inativo
+  /api/v1/support-tickets/{ticketId}/close:
+    post:
+      tags: [Support Tickets]
+      summary: Encerra um atendimento de suporte com data UTC
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: ticketId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CloseSupportTicketRequest'
+      responses:
+        '200':
+          description: Atendimento encerrado com data em UTC
+        '400':
+          description: Dados invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Atendimento nao encontrado
+  /api/v1/operational-checklists:
+    post:
+      tags: [Operational Checklists]
+      summary: Registra um checklist operacional
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OperationalChecklistRequest'
+      responses:
+        '201':
+          description: Checklist operacional registrado com progresso inicial
+        '400':
+          description: Dados invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Contexto operacional nao encontrado
+        '409':
+          description: Itens obrigatorios pendentes impedem conclusao
+    get:
+      tags: [Operational Checklists]
+      summary: Lista checklists operacionais por contexto, tipo e status
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: operationType
+          required: false
+          schema:
+            type: string
+            enum: [LAUNCH, CLASS_SCHEDULE, LIVE_EVENT, DISCORD_OPERATION, OPERATIONAL_EMAIL, STUDENT, SUPPORT_TICKET]
+        - in: query
+          name: contextId
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: status
+          required: false
+          schema:
+            type: string
+            enum: [OPEN, PARTIAL, COMPLETED]
+        - in: query
+          name: active
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Checklists operacionais retornados
+        '400':
+          description: Filtros invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+  /api/v1/operational-checklists/{checklistId}:
+    get:
+      tags: [Operational Checklists]
+      summary: Consulta um checklist operacional por identificador
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: checklistId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Checklist operacional consultado com historico
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Checklist nao encontrado
+    put:
+      tags: [Operational Checklists]
+      summary: Atualiza itens e progresso de um checklist operacional
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: checklistId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateOperationalChecklistRequest'
+      responses:
+        '200':
+          description: Checklist atualizado com historico auditavel
+        '400':
+          description: Dados invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Checklist nao encontrado
+        '409':
+          description: Itens obrigatorios pendentes ou checklist concluido
+    delete:
+      tags: [Operational Checklists]
+      summary: Inativa um checklist operacional preservando historico
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: checklistId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Checklist inativado por exclusao logica
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Checklist nao encontrado
+        '409':
+          description: Checklist ja inativo
+  /api/v1/operational-checklists/{checklistId}/complete:
+    post:
+      tags: [Operational Checklists]
+      summary: Conclui um checklist operacional com data UTC
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: checklistId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Checklist concluido com data em UTC
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Checklist nao encontrado
+        '409':
+          description: Itens obrigatorios pendentes impedem conclusao
   /api/v1/roles:
     get:
       tags: [Roles]
@@ -3118,6 +5307,895 @@ components:
       properties:
         refreshToken:
           type: string
+    PasswordRecoveryRequest:
+      type: object
+      required: [email]
+      properties:
+        email:
+          type: string
+          format: email
+    PasswordResetRequest:
+      type: object
+      required: [token, newPassword]
+      properties:
+        token:
+          type: string
+        newPassword:
+          type: string
+          minLength: 8
+    ChangePasswordRequest:
+      type: object
+      required: [currentPassword, newPassword]
+      properties:
+        currentPassword:
+          type: string
+          minLength: 8
+        newPassword:
+          type: string
+          minLength: 8
+    PlatformSettingUpdateRequest:
+      type: object
+      required: [value]
+      properties:
+        value:
+          oneOf:
+            - type: string
+            - type: number
+            - type: boolean
+            - type: object
+    GenerateAiBrandMaterialRequest:
+      type: object
+      required: [materialType, objective, briefing]
+      properties:
+        materialType:
+          type: string
+          enum: [SCRIPT, COPY, EMAIL]
+        objective:
+          type: string
+          minLength: 8
+          maxLength: 180
+        briefing:
+          type: string
+          minLength: 30
+          maxLength: 5000
+    AiBrandMaterialSection:
+      type: object
+      required: [label, content]
+      properties:
+        label:
+          type: string
+          minLength: 3
+          maxLength: 80
+        content:
+          type: string
+          minLength: 8
+          maxLength: 3000
+    AiBrandMaterialSourceContext:
+      type: object
+      required: [launchId, launchName, product, expert, avatarVersion, editorialLineVersion, positioningVersion, offerVersion, editorialPillars, languageCues, brandSignals]
+      properties:
+        launchId:
+          type: string
+          format: uuid
+        launchName:
+          type: string
+        product:
+          type: string
+        expert:
+          type: string
+        avatarVersion:
+          type: integer
+          nullable: true
+        editorialLineVersion:
+          type: integer
+          nullable: true
+        positioningVersion:
+          type: integer
+          nullable: true
+        offerVersion:
+          type: integer
+          nullable: true
+        editorialPillars:
+          type: array
+          items:
+            type: string
+        languageCues:
+          type: array
+          items:
+            type: string
+        brandSignals:
+          type: array
+          items:
+            type: string
+    AiBrandMaterialRequest:
+      type: object
+      required: [launchId, materialType, objective, briefing, title, hook, sections, cta, sourceContext]
+      properties:
+        launchId:
+          type: string
+          format: uuid
+        materialType:
+          type: string
+          enum: [SCRIPT, COPY, EMAIL]
+        objective:
+          type: string
+          minLength: 8
+          maxLength: 180
+        briefing:
+          type: string
+          minLength: 30
+          maxLength: 5000
+        title:
+          type: string
+          minLength: 3
+          maxLength: 240
+        hook:
+          type: string
+          minLength: 8
+          maxLength: 800
+        sections:
+          type: array
+          items:
+            $ref: '#/components/schemas/AiBrandMaterialSection'
+        cta:
+          type: string
+          minLength: 3
+          maxLength: 240
+        reviewNotes:
+          type: array
+          items:
+          type: string
+        sourceContext:
+          $ref: '#/components/schemas/AiBrandMaterialSourceContext'
+    AiHistoricalPerformance:
+      type: object
+      required: [score]
+      properties:
+        views:
+          type: integer
+          minimum: 0
+        clicks:
+          type: integer
+          minimum: 0
+        conversions:
+          type: integer
+          minimum: 0
+        revenue:
+          type: number
+          minimum: 0
+        engagementRate:
+          type: number
+          minimum: 0
+        score:
+          type: number
+          minimum: 0
+    AiHistoricalContentRequest:
+      type: object
+      required: [title, format, objective, summary, performance]
+      properties:
+        launchId:
+          type: string
+          format: uuid
+          nullable: true
+        title:
+          type: string
+          minLength: 3
+          maxLength: 240
+        format:
+          type: string
+          enum: [REEL, CAROUSEL, STORY_SEQUENCE, EMAIL, YOUTUBE, AD, LANDING_PAGE, SCRIPT, COPY]
+        objective:
+          type: string
+          minLength: 3
+          maxLength: 180
+        summary:
+          type: string
+          minLength: 8
+          maxLength: 2000
+        tags:
+          type: array
+          items:
+            type: string
+        origin:
+          type: string
+          enum: [ORIGINAL, REUSED]
+        reusedFromContentId:
+          type: string
+          format: uuid
+          nullable: true
+        performance:
+          $ref: '#/components/schemas/AiHistoricalPerformance'
+        sensitiveNotes:
+          type: string
+          nullable: true
+    AiHistoricalRecommendationRequest:
+      type: object
+      required: [launchId, objective]
+      properties:
+        launchId:
+          type: string
+          format: uuid
+        objective:
+          type: string
+          minLength: 3
+          maxLength: 180
+        format:
+          type: string
+          enum: [REEL, CAROUSEL, STORY_SEQUENCE, EMAIL, YOUTUBE, AD, LANDING_PAGE, SCRIPT, COPY]
+        tags:
+          type: array
+          items:
+            type: string
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 20
+    AiMetricInsightRequest:
+      type: object
+      required: [objective]
+      properties:
+        launchId:
+          type: string
+          format: uuid
+        objective:
+          type: string
+          minLength: 3
+          maxLength: 180
+        focusArea:
+          type: string
+          enum: [GENERAL, TRAFFIC, CONTENT, CONVERSION, REVENUE]
+        periodStart:
+          type: string
+          format: date-time
+        periodEnd:
+          type: string
+          format: date-time
+        tags:
+          type: array
+          items:
+            type: string
+    AiMetricInsightSuggestion:
+      type: object
+      properties:
+        title:
+          type: string
+        category:
+          type: string
+        priority:
+          type: string
+          enum: [LOW, MEDIUM, HIGH]
+        recommendation:
+          type: string
+        justification:
+          type: string
+        humanReviewRequired:
+          type: boolean
+        evidenceRefs:
+          type: array
+          items:
+            type: object
+            properties:
+              sourceType:
+                type: string
+                enum: [TRAFFIC_SNAPSHOT, HISTORICAL_CONTENT, AGGREGATED_METRIC]
+              sourceId:
+                type: string
+                nullable: true
+              label:
+                type: string
+              metric:
+                type: string
+              value:
+                type: number
+    AiTeamAutomationRequest:
+      type: object
+      required: [name, description, trigger, rule, action]
+      properties:
+        name:
+          type: string
+          minLength: 3
+          maxLength: 160
+        description:
+          type: string
+          minLength: 8
+          maxLength: 1000
+        trigger:
+          type: object
+          required: [type]
+          properties:
+            type:
+              type: string
+              enum: [SCHEDULED, EVENT, MANUAL]
+            eventName:
+              type: string
+              nullable: true
+            scheduleExpression:
+              type: string
+              nullable: true
+        rule:
+          type: object
+          required: [contextType, requiredPermission]
+          properties:
+            contextType:
+              type: string
+              enum: [LAUNCH, GLOBAL, OPERATION]
+            contextId:
+              type: string
+              format: uuid
+              nullable: true
+            requiredPermission:
+              type: string
+            allowGlobalContext:
+              type: boolean
+            conditions:
+              type: array
+              items:
+                type: string
+        action:
+          type: object
+          required: [type, targetModule]
+          properties:
+            type:
+              type: string
+              enum: [CREATE_OPERATIONAL_CHECKLIST, CREATE_SUPPORT_TICKET, SEND_OPERATIONAL_REMINDER, REGISTER_OPERATION_LOG]
+            targetModule:
+              type: string
+            payloadTemplate:
+              type: object
+              additionalProperties: true
+            secretConfig:
+              type: object
+              nullable: true
+              additionalProperties: true
+        active:
+          type: boolean
+    AiTeamAutomationActiveRequest:
+      type: object
+      required: [active]
+      properties:
+        active:
+          type: boolean
+    AiTeamAutomationExecuteRequest:
+      type: object
+      properties:
+        triggerPayload:
+          type: object
+          additionalProperties: true
+    GenerateAiScheduleRequest:
+      type: object
+      required: [objective, briefing]
+      properties:
+        objective:
+          type: string
+          minLength: 8
+          maxLength: 180
+        briefing:
+          type: string
+          minLength: 30
+          maxLength: 5000
+    AiScheduleActivity:
+      type: object
+      required: [title, stage, area, suggestedResponsibleRole, dueAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+          minLength: 3
+          maxLength: 180
+        stage:
+          type: string
+          minLength: 3
+          maxLength: 120
+        area:
+          type: string
+          minLength: 2
+          maxLength: 120
+        suggestedResponsibleRole:
+          type: string
+          minLength: 2
+          maxLength: 80
+        dueAt:
+          type: string
+          format: date-time
+        dependencies:
+          type: array
+          items:
+            type: string
+        reviewNotes:
+          type: array
+          items:
+            type: string
+    AiSchedulePhase:
+      type: object
+      required: [name, objective, startsAt, endsAt, activities]
+      properties:
+        name:
+          type: string
+          minLength: 3
+          maxLength: 120
+        objective:
+          type: string
+          minLength: 8
+          maxLength: 300
+        startsAt:
+          type: string
+          format: date-time
+        endsAt:
+          type: string
+          format: date-time
+        activities:
+          type: array
+          items:
+            $ref: '#/components/schemas/AiScheduleActivity'
+    AiScheduleSourceContext:
+      type: object
+      required: [launchId, launchName, product, expert, contentPlanVersion, smartScheduleVersion, internalSignals]
+      properties:
+        launchId:
+          type: string
+          format: uuid
+        launchName:
+          type: string
+        product:
+          type: string
+        expert:
+          type: string
+        contentPlanVersion:
+          type: integer
+          nullable: true
+        smartScheduleVersion:
+          type: integer
+          nullable: true
+        internalSignals:
+          type: object
+          additionalProperties:
+            type: integer
+    AiScheduleRequest:
+      type: object
+      required: [launchId, objective, briefing, periodStart, periodEnd, phases, sourceContext]
+      properties:
+        launchId:
+          type: string
+          format: uuid
+        objective:
+          type: string
+          minLength: 8
+          maxLength: 180
+        briefing:
+          type: string
+          minLength: 30
+          maxLength: 5000
+        periodStart:
+          type: string
+          format: date-time
+        periodEnd:
+          type: string
+          format: date-time
+        phases:
+          type: array
+          items:
+            $ref: '#/components/schemas/AiSchedulePhase'
+        reviewNotes:
+          type: array
+          items:
+            type: string
+        sourceContext:
+          $ref: '#/components/schemas/AiScheduleSourceContext'
+    ClassScheduleRequest:
+      type: object
+      required: [launchId, title, scheduledAt, responsible, status]
+      properties:
+        launchId:
+          type: string
+          format: uuid
+        title:
+          type: string
+          minLength: 3
+        scheduledAt:
+          type: string
+          format: date-time
+        responsible:
+          type: string
+          minLength: 2
+        status:
+          type: string
+          enum: [PLANNED, CONFIRMED, COMPLETED, CANCELED, RESCHEDULED]
+        notes:
+          type: string
+          maxLength: 500
+    UpdateClassScheduleRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 3
+        scheduledAt:
+          type: string
+          format: date-time
+        responsible:
+          type: string
+          minLength: 2
+        status:
+          type: string
+          enum: [PLANNED, CONFIRMED, COMPLETED, CANCELED, RESCHEDULED]
+        notes:
+          type: string
+          maxLength: 500
+    LiveEventRequest:
+      type: object
+      required: [launchId, name, scheduledAt, channel, responsible, status]
+      properties:
+        launchId:
+          type: string
+          format: uuid
+        name:
+          type: string
+          minLength: 3
+        scheduledAt:
+          type: string
+          format: date-time
+        channel:
+          type: string
+          minLength: 2
+        responsible:
+          type: string
+          minLength: 2
+        status:
+          type: string
+          enum: [PLANNED, CONFIRMED, LIVE, COMPLETED, CANCELED, RESCHEDULED]
+        accessUrl:
+          type: string
+          format: uri
+        notes:
+          type: string
+          maxLength: 500
+    UpdateLiveEventRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 3
+        scheduledAt:
+          type: string
+          format: date-time
+        channel:
+          type: string
+          minLength: 2
+        responsible:
+          type: string
+          minLength: 2
+        status:
+          type: string
+          enum: [PLANNED, CONFIRMED, LIVE, COMPLETED, CANCELED, RESCHEDULED]
+        accessUrl:
+          type: string
+          format: uri
+          nullable: true
+        notes:
+          type: string
+          maxLength: 500
+          nullable: true
+    DiscordOperationRequest:
+      type: object
+      required: [launchId, type, activity, responsible, dueAt, status]
+      properties:
+        launchId:
+          type: string
+          format: uuid
+        type:
+          type: string
+          minLength: 2
+        activity:
+          type: string
+          minLength: 3
+        responsible:
+          type: string
+          minLength: 2
+        dueAt:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [TODO, IN_PROGRESS, DONE, BLOCKED, CANCELED]
+        observations:
+          type: string
+          maxLength: 1000
+    UpdateDiscordOperationRequest:
+      type: object
+      properties:
+        type:
+          type: string
+          minLength: 2
+        activity:
+          type: string
+          minLength: 3
+        responsible:
+          type: string
+          minLength: 2
+        dueAt:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [TODO, IN_PROGRESS, DONE, BLOCKED, CANCELED]
+        observations:
+          type: string
+          maxLength: 1000
+          nullable: true
+    OperationalEmailRequest:
+      type: object
+      required: [launchId, objective, responsible, dueAt, status]
+      properties:
+        launchId:
+          type: string
+          format: uuid
+        objective:
+          type: string
+          minLength: 3
+        responsible:
+          type: string
+          minLength: 2
+        dueAt:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [TODO, IN_PROGRESS, SCHEDULED, SENT, DONE, BLOCKED, CANCELED]
+        audience:
+          type: string
+        subject:
+          type: string
+        observations:
+          type: string
+          maxLength: 1000
+    UpdateOperationalEmailRequest:
+      type: object
+      properties:
+        objective:
+          type: string
+          minLength: 3
+        responsible:
+          type: string
+          minLength: 2
+        dueAt:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [TODO, IN_PROGRESS, SCHEDULED, SENT, DONE, BLOCKED, CANCELED]
+        audience:
+          type: string
+          nullable: true
+        subject:
+          type: string
+          nullable: true
+        observations:
+          type: string
+          maxLength: 1000
+          nullable: true
+    OperationalChecklistItem:
+      type: object
+      required: [label]
+      properties:
+        id:
+          type: string
+          format: uuid
+        label:
+          type: string
+          minLength: 3
+          maxLength: 160
+        required:
+          type: boolean
+          default: true
+        completed:
+          type: boolean
+          default: false
+        notes:
+          type: string
+          maxLength: 500
+    UpdateOperationalChecklistItem:
+      type: object
+      required: [id]
+      properties:
+        id:
+          type: string
+          format: uuid
+        label:
+          type: string
+          minLength: 3
+          maxLength: 160
+        required:
+          type: boolean
+        completed:
+          type: boolean
+        notes:
+          type: string
+          maxLength: 500
+          nullable: true
+    OperationalChecklistRequest:
+      type: object
+      required: [operationType, contextId, title]
+      properties:
+        operationType:
+          type: string
+          enum: [LAUNCH, CLASS_SCHEDULE, LIVE_EVENT, DISCORD_OPERATION, OPERATIONAL_EMAIL, STUDENT, SUPPORT_TICKET]
+        contextId:
+          type: string
+          format: uuid
+        title:
+          type: string
+          minLength: 3
+          maxLength: 160
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OperationalChecklistItem'
+        conclude:
+          type: boolean
+    UpdateOperationalChecklistRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 3
+          maxLength: 160
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/UpdateOperationalChecklistItem'
+        conclude:
+          type: boolean
+    StudentRequest:
+      type: object
+      required: [name, email, product, status]
+      properties:
+        launchId:
+          type: string
+          format: uuid
+        name:
+          type: string
+          minLength: 3
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        product:
+          type: string
+          minLength: 2
+        status:
+          type: string
+          enum: [ACTIVE, INACTIVE, PENDING, COMPLETED, CANCELED]
+        supportNotes:
+          type: string
+          maxLength: 1000
+        tags:
+          type: array
+          items:
+            type: string
+    UpdateStudentRequest:
+      type: object
+      properties:
+        launchId:
+          type: string
+          format: uuid
+          nullable: true
+        name:
+          type: string
+          minLength: 3
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+          nullable: true
+        product:
+          type: string
+          minLength: 2
+        status:
+          type: string
+          enum: [ACTIVE, INACTIVE, PENDING, COMPLETED, CANCELED]
+        supportNotes:
+          type: string
+          maxLength: 1000
+          nullable: true
+        tags:
+          type: array
+          items:
+            type: string
+    SupportTicketInteraction:
+      type: object
+      required: [type, note]
+      properties:
+        type:
+          type: string
+          minLength: 2
+          maxLength: 80
+        note:
+          type: string
+          minLength: 2
+          maxLength: 2000
+    SupportTicketRequest:
+      type: object
+      required: [requester, demandType, responsibleUserId, status]
+      properties:
+        launchId:
+          type: string
+          format: uuid
+        studentId:
+          type: string
+          format: uuid
+        requester:
+          type: string
+          minLength: 2
+        demandType:
+          type: string
+          minLength: 2
+        responsibleUserId:
+          type: string
+          minLength: 2
+        status:
+          type: string
+          enum: [OPEN, IN_PROGRESS, WAITING_CUSTOMER, RESOLVED, CLOSED, CANCELED]
+        priority:
+          type: string
+          enum: [LOW, MEDIUM, HIGH, URGENT]
+          default: MEDIUM
+        observations:
+          type: string
+          maxLength: 2000
+        initialInteraction:
+          $ref: '#/components/schemas/SupportTicketInteraction'
+    UpdateSupportTicketRequest:
+      type: object
+      properties:
+        launchId:
+          type: string
+          format: uuid
+          nullable: true
+        studentId:
+          type: string
+          format: uuid
+          nullable: true
+        requester:
+          type: string
+          minLength: 2
+        demandType:
+          type: string
+          minLength: 2
+        responsibleUserId:
+          type: string
+          minLength: 2
+        status:
+          type: string
+          enum: [OPEN, IN_PROGRESS, WAITING_CUSTOMER, RESOLVED, CLOSED, CANCELED]
+        priority:
+          type: string
+          enum: [LOW, MEDIUM, HIGH, URGENT]
+        observations:
+          type: string
+          maxLength: 2000
+          nullable: true
+        interaction:
+          $ref: '#/components/schemas/SupportTicketInteraction'
+    CloseSupportTicketRequest:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [RESOLVED, CLOSED]
+        observations:
+          type: string
+          maxLength: 2000
+          nullable: true
+        note:
+          type: string
+          minLength: 2
+          maxLength: 2000
+        interaction:
+          $ref: '#/components/schemas/SupportTicketInteraction'
     CreateLaunchRequest:
       type: object
       required: [name, expert, product, baseDate, milestones]

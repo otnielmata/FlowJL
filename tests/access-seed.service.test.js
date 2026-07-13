@@ -9,6 +9,10 @@ const roleModel = {
   updateOne: vi.fn()
 };
 
+const auditService = {
+  record: vi.fn()
+};
+
 vi.mock("../src/models/permission.model.js", () => ({
   Permission: permissionModel
 }));
@@ -17,11 +21,17 @@ vi.mock("../src/models/role.model.js", () => ({
   Role: roleModel
 }));
 
+vi.mock("../src/services/audit.service.js", () => ({
+  auditService
+}));
+
 const { accessSeedService } = await import("../src/services/access-seed.service.js");
 
 describe("accessSeedService.ensureCoreAccessSeed", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    permissionModel.updateOne.mockResolvedValue({ modifiedCount: 0, upsertedCount: 0 });
+    roleModel.updateOne.mockResolvedValue({ modifiedCount: 0, upsertedCount: 0 });
   });
 
   it("upserts permissions and the admin role with the initial matrix", async () => {
@@ -39,6 +49,8 @@ describe("accessSeedService.ensureCoreAccessSeed", () => {
       "USER_ACTIVATE",
       "USER_DEACTIVATE",
       "USER_CHANGE_ROLE",
+      "PLATFORM_SETTING_READ",
+      "PLATFORM_SETTING_UPDATE",
       "LAUNCH_CREATE",
       "LAUNCH_READ",
       "MARKET_RESEARCH_CREATE",
@@ -65,6 +77,8 @@ describe("accessSeedService.ensureCoreAccessSeed", () => {
       "STRATEGY_READ",
       "STRATEGY_SUBMIT_APPROVAL",
       "STRATEGY_UPDATE",
+      "DASHBOARD_OVERVIEW_READ",
+      "STRATEGIST_DASHBOARD_READ",
       "ASSET_LIBRARY_CREATE",
       "ASSET_LIBRARY_DEACTIVATE",
       "ASSET_LIBRARY_READ",
@@ -89,7 +103,6 @@ describe("accessSeedService.ensureCoreAccessSeed", () => {
       "CONTENT_APPROVAL_EXPERT",
       "CONTENT_APPROVAL_PUBLISH",
       "CONTENT_APPROVAL_REVIEW",
-      "STRATEGIST_DASHBOARD_READ",
       "PUBLICATION_CREATE",
       "PUBLICATION_READ",
       "PUBLICATION_UPDATE",
@@ -119,7 +132,62 @@ describe("accessSeedService.ensureCoreAccessSeed", () => {
       "TRAFFIC_PIXEL_READ",
       "TRAFFIC_PIXEL_UPDATE",
       "TRAFFIC_PIXEL_LINK",
-      "TRAFFIC_PIXEL_DEACTIVATE"
+      "TRAFFIC_PIXEL_DEACTIVATE",
+      "TRAFFIC_AUDIENCE_CREATE",
+      "TRAFFIC_AUDIENCE_READ",
+      "TRAFFIC_AUDIENCE_UPDATE",
+      "TRAFFIC_AUDIENCE_DEACTIVATE",
+      "TRAFFIC_CONVERSION_EVENT_CREATE",
+      "TRAFFIC_CONVERSION_EVENT_READ",
+      "TRAFFIC_CONVERSION_EVENT_UPDATE",
+      "TRAFFIC_CONVERSION_EVENT_LINK",
+      "TRAFFIC_CONVERSION_EVENT_DEACTIVATE",
+      "TRAFFIC_REPORT_READ",
+      "TRAFFIC_ROI_READ",
+      "CLASS_SCHEDULE_CREATE",
+      "CLASS_SCHEDULE_READ",
+      "CLASS_SCHEDULE_UPDATE",
+      "CLASS_SCHEDULE_DEACTIVATE",
+      "LIVE_EVENT_CREATE",
+      "LIVE_EVENT_READ",
+      "LIVE_EVENT_UPDATE",
+      "LIVE_EVENT_DEACTIVATE",
+      "DISCORD_OPERATION_CREATE",
+      "DISCORD_OPERATION_READ",
+      "DISCORD_OPERATION_UPDATE",
+      "DISCORD_OPERATION_DEACTIVATE",
+      "OPERATIONAL_EMAIL_CREATE",
+      "OPERATIONAL_EMAIL_READ",
+      "OPERATIONAL_EMAIL_UPDATE",
+      "OPERATIONAL_EMAIL_DEACTIVATE",
+      "STUDENT_CREATE",
+      "STUDENT_READ",
+      "STUDENT_UPDATE",
+      "STUDENT_DEACTIVATE",
+      "SUPPORT_TICKET_CREATE",
+      "SUPPORT_TICKET_READ",
+      "SUPPORT_TICKET_UPDATE",
+      "SUPPORT_TICKET_DEACTIVATE",
+      "OPERATIONAL_CHECKLIST_CREATE",
+      "OPERATIONAL_CHECKLIST_READ",
+      "OPERATIONAL_CHECKLIST_UPDATE",
+      "OPERATIONAL_CHECKLIST_DEACTIVATE",
+      "AI_SCHEDULE_GENERATE",
+      "AI_SCHEDULE_CREATE",
+      "AI_SCHEDULE_READ",
+      "AI_BRAND_MATERIAL_GENERATE",
+      "AI_BRAND_MATERIAL_CREATE",
+      "AI_BRAND_MATERIAL_READ",
+      "AI_HISTORICAL_CONTENT_CREATE",
+      "AI_HISTORICAL_CONTENT_READ",
+      "AI_HISTORICAL_CONTENT_RECOMMEND",
+      "AI_HISTORICAL_CONTENT_DEACTIVATE",
+      "AI_METRIC_INSIGHT_GENERATE",
+      "AI_METRIC_INSIGHT_READ",
+      "AI_TEAM_AUTOMATION_CREATE",
+      "AI_TEAM_AUTOMATION_READ",
+      "AI_TEAM_AUTOMATION_UPDATE",
+      "AI_TEAM_AUTOMATION_EXECUTE"
     ];
 
     permissionModel.find.mockReturnValue({
@@ -132,15 +200,23 @@ describe("accessSeedService.ensureCoreAccessSeed", () => {
     await accessSeedService.ensureCoreAccessSeed();
 
     expect(permissionModel.updateOne).toHaveBeenCalledTimes(permissionCodes.length);
-    expect(permissionModel.updateOne).toHaveBeenCalledWith(
-      { code: "AUTH_LOGIN" },
+    expect(permissionModel.find).toHaveBeenCalledWith(
+      {
+        code: {
+          $in: expect.arrayContaining(["AUTH_LOGIN", "STRATEGY_CREATE", "DASHBOARD_OVERVIEW_READ", "PLATFORM_SETTING_UPDATE"])
+        }
+      },
+      { _id: 1, code: 1 }
+    );
+    expect(roleModel.updateOne).toHaveBeenCalledWith(
+      { code: "ADMIN" },
       expect.objectContaining({
-        $setOnInsert: {
-          code: "AUTH_LOGIN"
-        },
+        $setOnInsert: expect.objectContaining({
+          code: "ADMIN",
+          permissionIds: permissionCodes.map((_code, index) => `perm-${index}`)
+        }),
         $set: expect.objectContaining({
-          name: "Autenticar usuario",
-          module: "auth",
+          name: "Administrador",
           active: true
         })
       }),
@@ -148,14 +224,14 @@ describe("accessSeedService.ensureCoreAccessSeed", () => {
     );
     expect(roleModel.updateOne).toHaveBeenCalledWith(
       { code: "ADMIN" },
-      expect.objectContaining({
-        $set: expect.objectContaining({
-          permissionIds: permissionCodes.map((_code, index) => `perm-${index}`),
-          active: true
-        })
-      }),
-      { upsert: true }
+      {
+        $addToSet: {
+          permissionIds: {
+            $each: permissionCodes.map((_code, index) => `perm-${index}`)
+          }
+        }
+      }
     );
-    expect(roleModel.updateOne).toHaveBeenCalledTimes(6);
+    expect(roleModel.updateOne).toHaveBeenCalledTimes(12);
   });
 });
