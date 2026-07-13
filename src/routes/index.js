@@ -5,6 +5,7 @@ import { aiHistoricalContentRoutes } from "./ai-historical-content.routes.js";
 import { aiMetricInsightRoutes } from "./ai-metric-insight.routes.js";
 import { aiScheduleRoutes } from "./ai-schedule.routes.js";
 import { aiTeamAutomationRoutes } from "./ai-team-automation.routes.js";
+import { approvalsManagementRoutes } from "./approvals-management.routes.js";
 import { auditRoutes } from "./audit.routes.js";
 import { assetLibraryRoutes } from "./asset-library.routes.js";
 import { authRoutes } from "./auth.routes.js";
@@ -54,7 +55,7 @@ apiRoutes.get("/", (_request, response) => {
   response.status(200).json({
     service: "flow-jl-api",
     version: "v1",
-    modules: ["ai-brand-materials", "ai-historical-contents", "ai-metric-insights", "ai-schedules", "ai-team-automations", "assets", "audits", "auth", "carousels", "class-schedules", "content-approvals", "content-ideas", "content-productions", "content-statuses", "copywritings", "dashboards", "discord-operations", "editorial-calendar", "emails", "external-publication", "launches", "live-events", "operational-checklists", "operational-emails", "operational-schedules", "operations-management", "platform-settings", "production-checklists", "profiles", "publications", "reels", "roles", "social-media", "stories", "strategies", "students", "support-tickets", "traffic-audiences", "traffic-campaigns", "traffic-conversion-events", "traffic-creatives", "traffic-management", "traffic-pixels", "traffic-reports", "traffic-roi", "users", "youtube-contents", "swagger"]
+    modules: ["ai-brand-materials", "ai-historical-contents", "ai-metric-insights", "ai-schedules", "ai-team-automations", "approvals-management", "assets", "audits", "auth", "carousels", "class-schedules", "content-approvals", "content-ideas", "content-productions", "content-statuses", "copywritings", "dashboards", "discord-operations", "editorial-calendar", "emails", "external-publication", "launches", "live-events", "operational-checklists", "operational-emails", "operational-schedules", "operations-management", "platform-settings", "production-checklists", "profiles", "publications", "reels", "roles", "social-media", "stories", "strategies", "students", "support-tickets", "traffic-audiences", "traffic-campaigns", "traffic-conversion-events", "traffic-creatives", "traffic-management", "traffic-pixels", "traffic-reports", "traffic-roi", "users", "youtube-contents", "swagger"]
   });
 });
 
@@ -63,6 +64,7 @@ apiRoutes.use("/ai-historical-contents", aiHistoricalContentRoutes);
 apiRoutes.use("/ai-metric-insights", aiMetricInsightRoutes);
 apiRoutes.use("/ai-schedules", aiScheduleRoutes);
 apiRoutes.use("/ai-team-automations", aiTeamAutomationRoutes);
+apiRoutes.use("/approvals-management", approvalsManagementRoutes);
 apiRoutes.use("/assets", assetLibraryRoutes);
 apiRoutes.use("/audits", auditRoutes);
 apiRoutes.use("/auth", authRoutes);
