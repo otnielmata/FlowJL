@@ -156,6 +156,12 @@ src
 - `GET /api/v1/traffic-campaigns`
 - `PUT /api/v1/traffic-campaigns/:campaignId`
 - `DELETE /api/v1/traffic-campaigns/:campaignId`
+- `GET /api/v1/traffic-management/campaigns`
+- `POST /api/v1/traffic-management/campaigns`
+- `PUT /api/v1/traffic-management/campaigns/:campaignId`
+- `GET /api/v1/traffic-management/dashboard`
+- `POST /api/v1/traffic-management/compare`
+- `POST /api/v1/traffic-management/campaigns/:campaignId/actions`
 - `POST /api/v1/traffic-creatives`
 - `GET /api/v1/traffic-creatives`
 - `PUT /api/v1/traffic-creatives/:creativeId`

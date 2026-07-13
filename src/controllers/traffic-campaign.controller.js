@@ -36,7 +36,9 @@ const listTrafficCampaignSchema = z.object({
 
 const updateTrafficCampaignSchema = z
   .object({
+    name: z.string().trim().min(3).max(160).optional(),
     objective: z.string().trim().min(3).max(240).optional(),
+    channel: channelSchema.optional(),
     periodStart: z.string().datetime().optional(),
     periodEnd: z.string().datetime().optional(),
     status: statusSchema.optional(),
