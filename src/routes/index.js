@@ -23,6 +23,7 @@ import { launchRoutes } from "./launch.routes.js";
 import { liveEventRoutes } from "./live-event.routes.js";
 import { operationalEmailRoutes } from "./operational-email.routes.js";
 import { operationalChecklistRoutes } from "./operational-checklist.routes.js";
+import { platformSettingRoutes } from "./platform-setting.routes.js";
 import { profileRoutes } from "./profile.routes.js";
 import { publicationRoutes } from "./publication.routes.js";
 import { productionChecklistRoutes } from "./production-checklist.routes.js";
@@ -47,7 +48,7 @@ apiRoutes.get("/", (_request, response) => {
   response.status(200).json({
     service: "flow-jl-api",
     version: "v1",
-    modules: ["ai-brand-materials", "ai-historical-contents", "ai-metric-insights", "ai-schedules", "ai-team-automations", "assets", "audits", "auth", "carousels", "class-schedules", "content-approvals", "content-ideas", "content-statuses", "copywritings", "dashboards", "discord-operations", "editorial-calendar", "emails", "external-publication", "launches", "live-events", "operational-checklists", "operational-emails", "production-checklists", "profiles", "publications", "reels", "roles", "stories", "students", "support-tickets", "traffic-audiences", "traffic-campaigns", "traffic-conversion-events", "traffic-creatives", "traffic-pixels", "traffic-reports", "traffic-roi", "users", "youtube-contents", "swagger"]
+    modules: ["ai-brand-materials", "ai-historical-contents", "ai-metric-insights", "ai-schedules", "ai-team-automations", "assets", "audits", "auth", "carousels", "class-schedules", "content-approvals", "content-ideas", "content-statuses", "copywritings", "dashboards", "discord-operations", "editorial-calendar", "emails", "external-publication", "launches", "live-events", "operational-checklists", "operational-emails", "platform-settings", "production-checklists", "profiles", "publications", "reels", "roles", "stories", "students", "support-tickets", "traffic-audiences", "traffic-campaigns", "traffic-conversion-events", "traffic-creatives", "traffic-pixels", "traffic-reports", "traffic-roi", "users", "youtube-contents", "swagger"]
   });
 });
 
@@ -74,6 +75,7 @@ apiRoutes.use("/launches", launchRoutes);
 apiRoutes.use("/live-events", liveEventRoutes);
 apiRoutes.use("/operational-checklists", operationalChecklistRoutes);
 apiRoutes.use("/operational-emails", operationalEmailRoutes);
+apiRoutes.use("/platform-settings", platformSettingRoutes);
 apiRoutes.use("/profiles", profileRoutes);
 apiRoutes.use("/publications", publicationRoutes);
 apiRoutes.use("/production-checklists", productionChecklistRoutes);
