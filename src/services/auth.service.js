@@ -321,6 +321,44 @@ class AuthService {
     };
   }
 
+  async changePassword(auth, { currentPassword, newPassword }) {
+    const user = await User.findById(auth.sub);
+
+    if (!user || user.status !== "ACTIVE") {
+      throw {
+        statusCode: 403,
+        message: "Password change is not allowed"
+      };
+    }
+
+    const currentPasswordMatches = await bcrypt.compare(currentPassword, user.passwordHash);
+
+    if (!currentPasswordMatches) {
+      throw {
+        statusCode: 401,
+        message: "Invalid current password"
+      };
+    }
+
+    user.passwordHash = await bcrypt.hash(newPassword, 10);
+    user.updatedBy = user.id;
+    await user.save();
+
+    await auditService.record({
+      actorUserId: user.id,
+      action: "PASSWORD_CHANGED",
+      targetType: "USER",
+      targetId: user.id,
+      context: {
+        changedBySelf: true
+      }
+    });
+
+    return {
+      message: "Password changed successfully"
+    };
+  }
+
   async getAuthenticatedUser(auth) {
     const user = await User.findById(auth.sub).populate("profile").populate("roleId");
 

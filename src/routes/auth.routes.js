@@ -11,4 +11,5 @@ authRoutes.post("/refresh", asyncHandler(authController.refresh.bind(authControl
 authRoutes.post("/logout", asyncHandler(authController.logout.bind(authController)));
 authRoutes.post("/password-recovery", asyncHandler(authController.requestPasswordRecovery.bind(authController)));
 authRoutes.post("/password-reset", asyncHandler(authController.resetPassword.bind(authController)));
+authRoutes.post("/change-password", authMiddleware, asyncHandler(authController.changePassword.bind(authController)));
 authRoutes.get("/me", authMiddleware, asyncHandler(authController.me.bind(authController)));

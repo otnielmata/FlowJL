@@ -354,4 +354,62 @@ describe("authService", () => {
       message: "Invalid or expired password reset request"
     });
   });
+
+  it("changes password for the authenticated user with valid current password", async () => {
+    const user = createUser();
+    userModel.findById.mockResolvedValue(user);
+    bcryptMock.compare.mockResolvedValue(true);
+    bcryptMock.hash.mockResolvedValue("new-password-hash");
+
+    const result = await authService.changePassword(
+      { sub: "user-1" },
+      {
+        currentPassword: "Admin@123",
+        newPassword: "NewPass@123"
+      }
+    );
+
+    expect(userModel.findById).toHaveBeenCalledWith("user-1");
+    expect(bcryptMock.compare).toHaveBeenCalledWith("Admin@123", "stored-hash");
+    expect(bcryptMock.hash).toHaveBeenCalledWith("NewPass@123", 10);
+    expect(user.passwordHash).toBe("new-password-hash");
+    expect(user.updatedBy).toBe("user-1");
+    expect(user.save).toHaveBeenCalled();
+    expect(result).toEqual({
+      message: "Password changed successfully"
+    });
+    expect(result).not.toHaveProperty("password");
+    expect(result).not.toHaveProperty("passwordHash");
+    expect(auditServiceMock.record).toHaveBeenCalledWith({
+      actorUserId: "user-1",
+      action: "PASSWORD_CHANGED",
+      targetType: "USER",
+      targetId: "user-1",
+      context: {
+        changedBySelf: true
+      }
+    });
+  });
+
+  it("rejects password change when current password is invalid", async () => {
+    const user = createUser();
+    userModel.findById.mockResolvedValue(user);
+    bcryptMock.compare.mockResolvedValue(false);
+
+    await expect(
+      authService.changePassword(
+        { sub: "user-1" },
+        {
+          currentPassword: "wrong-pass",
+          newPassword: "NewPass@123"
+        }
+      )
+    ).rejects.toMatchObject({
+      statusCode: 401,
+      message: "Invalid current password"
+    });
+
+    expect(bcryptMock.hash).not.toHaveBeenCalled();
+    expect(user.save).not.toHaveBeenCalled();
+  });
 });

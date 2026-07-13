@@ -592,6 +592,27 @@ paths:
           description: Pedido invalido, expirado, usado ou senha fora da politica
         '403':
           description: Redefinicao nao permitida para o usuario
+  /api/v1/auth/change-password:
+    post:
+      tags: [Auth]
+      summary: Altera a senha do proprio usuario autenticado
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangePasswordRequest'
+      responses:
+        '200':
+          description: Senha alterada sem retornar senha ou hash
+        '400':
+          description: Dados invalidos ou nova senha fora da politica
+        '401':
+          description: JWT ausente, invalido ou senha atual incorreta
+        '403':
+          description: Alteracao de senha nao permitida para o usuario
   /api/v1/auth/me:
     get:
       tags: [Auth]
@@ -4910,6 +4931,16 @@ components:
       properties:
         token:
           type: string
+        newPassword:
+          type: string
+          minLength: 8
+    ChangePasswordRequest:
+      type: object
+      required: [currentPassword, newPassword]
+      properties:
+        currentPassword:
+          type: string
+          minLength: 8
         newPassword:
           type: string
           minLength: 8
