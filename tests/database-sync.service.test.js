@@ -3,9 +3,14 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const accessSeedService = {
   ensureCoreAccessSeed: vi.fn()
 };
+const ensureDefaultSettings = vi.fn();
 
 vi.mock("../src/services/access-seed.service.js", () => ({
   accessSeedService
+}));
+
+vi.mock("../src/services/platform-setting.service.js", () => ({
+  ensureDefaultSettings
 }));
 
 const { DatabaseSyncService } = await import("../src/services/database-sync.service.js");
@@ -15,7 +20,7 @@ describe("DatabaseSyncService.sync", () => {
     vi.clearAllMocks();
   });
 
-  it("creates collections, indexes and applies access seed", async () => {
+  it("creates collections, indexes and applies default seeds", async () => {
     const models = [
       {
         modelName: "Launch",
@@ -37,10 +42,12 @@ describe("DatabaseSyncService.sync", () => {
     expect(models[1].createCollection).toHaveBeenCalledOnce();
     expect(models[1].createIndexes).toHaveBeenCalledOnce();
     expect(accessSeedService.ensureCoreAccessSeed).toHaveBeenCalledOnce();
+    expect(ensureDefaultSettings).toHaveBeenCalledOnce();
     expect(result).toEqual({
       syncedModels: ["Launch", "Role"],
       syncedModelsCount: 2,
-      accessSeedApplied: true
+      accessSeedApplied: true,
+      platformSettingsSeedApplied: true
     });
   });
 

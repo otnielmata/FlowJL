@@ -49,8 +49,32 @@ src
 - `POST /api/v1/auth/login`
 - `POST /api/v1/auth/refresh`
 - `POST /api/v1/auth/logout`
+- `POST /api/v1/auth/password-recovery`
+- `POST /api/v1/auth/password-reset`
+- `POST /api/v1/auth/change-password`
 - `GET /api/v1/auth/me`
 - `GET /api/v1/audits`
+- `GET /api/v1/platform-settings`
+- `PUT /api/v1/platform-settings/:key`
+- `POST /api/v1/launches/:launchId/ai-brand-materials/generate`
+- `POST /api/v1/ai-brand-materials`
+- `GET /api/v1/ai-brand-materials`
+- `GET /api/v1/ai-brand-materials/:materialId`
+- `POST /api/v1/ai-historical-contents`
+- `GET /api/v1/ai-historical-contents`
+- `GET /api/v1/ai-historical-contents/:contentId`
+- `POST /api/v1/ai-historical-contents/recommendations`
+- `DELETE /api/v1/ai-historical-contents/:contentId`
+- `POST /api/v1/ai-metric-insights`
+- `GET /api/v1/ai-metric-insights/:insightId`
+- `POST /api/v1/ai-team-automations`
+- `GET /api/v1/ai-team-automations/:automationId`
+- `PATCH /api/v1/ai-team-automations/:automationId/active`
+- `POST /api/v1/ai-team-automations/:automationId/execute`
+- `POST /api/v1/launches/:launchId/ai-schedules/generate`
+- `POST /api/v1/ai-schedules`
+- `GET /api/v1/ai-schedules`
+- `GET /api/v1/ai-schedules/:scheduleId`
 - `POST /api/v1/assets`
 - `GET /api/v1/assets`
 - `DELETE /api/v1/assets/:assetId`
@@ -62,6 +86,39 @@ src
 - `GET /api/v1/content-statuses/:contentType/:contentId/history`
 - `POST /api/v1/carousels`
 - `PUT /api/v1/carousels/:carouselId`
+- `POST /api/v1/class-schedules`
+- `GET /api/v1/class-schedules`
+- `PUT /api/v1/class-schedules/:classScheduleId`
+- `DELETE /api/v1/class-schedules/:classScheduleId`
+- `POST /api/v1/live-events`
+- `GET /api/v1/live-events`
+- `PUT /api/v1/live-events/:liveEventId`
+- `DELETE /api/v1/live-events/:liveEventId`
+- `POST /api/v1/discord-operations`
+- `GET /api/v1/discord-operations`
+- `PUT /api/v1/discord-operations/:operationId`
+- `DELETE /api/v1/discord-operations/:operationId`
+- `POST /api/v1/operational-emails`
+- `GET /api/v1/operational-emails`
+- `PUT /api/v1/operational-emails/:emailActionId`
+- `DELETE /api/v1/operational-emails/:emailActionId`
+- `POST /api/v1/students`
+- `GET /api/v1/students`
+- `GET /api/v1/students/:studentId`
+- `PUT /api/v1/students/:studentId`
+- `DELETE /api/v1/students/:studentId`
+- `POST /api/v1/support-tickets`
+- `GET /api/v1/support-tickets`
+- `GET /api/v1/support-tickets/:ticketId`
+- `PUT /api/v1/support-tickets/:ticketId`
+- `POST /api/v1/support-tickets/:ticketId/close`
+- `DELETE /api/v1/support-tickets/:ticketId`
+- `POST /api/v1/operational-checklists`
+- `GET /api/v1/operational-checklists`
+- `GET /api/v1/operational-checklists/:checklistId`
+- `PUT /api/v1/operational-checklists/:checklistId`
+- `POST /api/v1/operational-checklists/:checklistId/complete`
+- `DELETE /api/v1/operational-checklists/:checklistId`
 - `POST /api/v1/reels`
 - `PUT /api/v1/reels/:reelId`
 - `POST /api/v1/stories`
@@ -95,6 +152,17 @@ src
 - `PUT /api/v1/traffic-pixels/:pixelId`
 - `PUT /api/v1/traffic-pixels/:pixelId/links`
 - `DELETE /api/v1/traffic-pixels/:pixelId`
+- `POST /api/v1/traffic-audiences`
+- `GET /api/v1/traffic-audiences`
+- `PUT /api/v1/traffic-audiences/:audienceId`
+- `DELETE /api/v1/traffic-audiences/:audienceId`
+- `POST /api/v1/traffic-conversion-events`
+- `GET /api/v1/traffic-conversion-events`
+- `PUT /api/v1/traffic-conversion-events/:eventId`
+- `PUT /api/v1/traffic-conversion-events/:eventId/links`
+- `DELETE /api/v1/traffic-conversion-events/:eventId`
+- `GET /api/v1/traffic-reports`
+- `GET /api/v1/traffic-roi`
 - `POST /api/v1/youtube-contents`
 - `PUT /api/v1/youtube-contents/:contentId`
 - `DELETE /api/v1/youtube-contents/:contentId`
@@ -182,7 +250,7 @@ Executa os testes básicos da aplicação.
 pnpm db:sync
 ```
 
-Conecta no MongoDB configurado em `MONGODB_URI`, cria coleções e índices dos models registrados e aplica o seed idempotente de cargos e permissões.
+Conecta no MongoDB configurado em `MONGODB_URI`, cria coleções e índices dos models registrados e aplica o seed idempotente de cargos e permissões. O seed de acesso garante a matriz mínima entre `Role` e `Permission`, preserva permissões extras adicionadas manualmente aos cargos e registra auditoria quando persistir alterações.
 
 ## Como rodar localmente
 
@@ -217,6 +285,9 @@ A documentação fica disponível em:
 - A consulta de colaboradores usa permissões de papel: `USER_LIST` para listagem e `USER_READ` para consulta individual.
 - A manutenção de colaboradores via `PUT /api/v1/users/:id` exige as permissões adequadas por ação: `USER_UPDATE`, `USER_CHANGE_ROLE`, `USER_ACTIVATE` e `USER_DEACTIVATE`.
 - A API rejeita auto-inativação e também impede a inativação do último administrador ativo.
+- A recuperação de senha usa `POST /api/v1/auth/password-recovery` com resposta genérica para qualquer e-mail e `POST /api/v1/auth/password-reset` com token válido de uso único, sem retornar a nova senha ou revelar existência de conta.
+- A alteração de senha autenticada usa `POST /api/v1/auth/change-password`, exige senha atual correta e nova senha válida, persiste apenas o hash, audita a operação e retorna resposta sem senha ou detalhes internos do hash.
+- As configurações globais da plataforma podem ser consultadas via `GET /api/v1/platform-settings` e atualizadas via `PUT /api/v1/platform-settings/:key`, exigem permissões administrativas, persistem entidades com UUID, ocultam valores sensíveis em respostas comuns e auditam alterações.
 - A reativação de colaborador reaproveita `PUT /api/v1/users/:id` com `status = ACTIVE`, limpa `deactivatedAt` e retorna regra clara quando o usuário já está ativo.
 - A inativação de colaborador reaproveita `PUT /api/v1/users/:id` com `status = INACTIVE`, preenche `deactivatedAt` e bloqueia a ação para a própria conta e para o último administrador ativo.
 - A troca de cargo do colaborador reaproveita `PUT /api/v1/users/:id` com `roleId`, exige um cargo existente e ativo e registra a mudança com autor e data.
@@ -238,6 +309,22 @@ A documentação fica disponível em:
 - As campanhas de tráfego podem ser gerenciadas via `POST`, `GET`, `PUT` e `DELETE /api/v1/traffic-campaigns`, exigem lançamento válido, mantêm período e status em histórico auditável, tratam datas em UTC e usam exclusão lógica.
 - Os criativos de tráfego podem ser gerenciados via `POST`, `GET`, `PUT` e `DELETE /api/v1/traffic-creatives`, exigem campanha válida, podem se relacionar à biblioteca de ativos, preservam histórico auditável de status/classificação/desempenho e usam exclusão lógica.
 - Os pixels de tráfego podem ser gerenciados via `POST`, `GET`, `PUT`, `PUT /api/v1/traffic-pixels/:pixelId/links` e `DELETE /api/v1/traffic-pixels/:pixelId`, exigem lançamento ou campanha válida, suportam vínculos auditáveis com campanhas e eventos de conversão, protegem tokens/segredos e permitem cadastro manual sem integração ativa.
+- Os públicos de tráfego podem ser gerenciados via `POST`, `GET`, `PUT` e `DELETE /api/v1/traffic-audiences`, exigem lançamento ou campanha válida, objetivo e critérios mínimos de segmentação, mantêm vínculos com campanhas específicas e preservam histórico auditável por exclusão lógica.
+- Os eventos de conversão podem ser gerenciados via `POST`, `GET`, `PUT`, `PUT /api/v1/traffic-conversion-events/:eventId/links` e `DELETE /api/v1/traffic-conversion-events/:eventId`, exigem lançamento ou campanha válida, nome, objetivo e origem, mantêm vínculos auditáveis com campanhas e pixels, preservam coerência com o lançamento e retornam datas associadas em UTC.
+- Os relatórios de tráfego podem ser consultados via `GET /api/v1/traffic-reports`, exigem lançamento e período válidos, aceitam filtro por campanha, consolidam campanhas, criativos, públicos, pixels, eventos e snapshots incrementais de fontes externas, retornando datas em UTC sem expor detalhes internos de processamento.
+- O ROI de tráfego pode ser consultado via `GET /api/v1/traffic-roi`, exige lançamento e período explícito, aceita filtro por campanha, usa a fórmula consistente `(revenue - investment) / investment`, sinaliza base insuficiente quando faltam investimento ou resultado e registra auditoria do cálculo.
+- A agenda de aulas pode ser gerenciada via `POST`, `GET`, `PUT` e `DELETE /api/v1/class-schedules`, exige lançamento válido, título, horário em UTC, responsável e status, permite filtros por período, responsável e status, registra auditoria nas alterações e usa exclusão lógica.
+- Os eventos ao vivo podem ser gerenciados via `POST`, `GET`, `PUT` e `DELETE /api/v1/live-events`, exigem lançamento válido, nome, horário em UTC, canal, responsável e status, permitem filtros por período, canal, responsável e status, auditam mudanças operacionais e usam exclusão lógica.
+- A operação de Discord pode ser gerenciada via `POST`, `GET`, `PUT` e `DELETE /api/v1/discord-operations`, exige lançamento válido, tipo, atividade, responsável, prazo e status, permite filtros por período, tipo, responsável e status, preserva histórico por auditoria e usa exclusão lógica.
+- O e-mail marketing operacional pode ser gerenciado via `POST`, `GET`, `PUT` e `DELETE /api/v1/operational-emails`, exige lançamento válido, objetivo, responsável, prazo em UTC e status, permite filtros por período, responsável e status, audita alterações e usa exclusão lógica.
+- Os alunos podem ser gerenciados via `POST`, `GET`, `GET /:studentId`, `PUT` e `DELETE /api/v1/students`, exigem dados mínimos e produto, aceitam vínculo opcional com lançamento, usam UUID interno, auditam alterações e preservam histórico por exclusão lógica.
+- Os atendimentos de suporte podem ser gerenciados via `POST`, `GET`, `GET /:ticketId`, `PUT`, `POST /:ticketId/close` e `DELETE /api/v1/support-tickets`, exigem solicitante, tipo de demanda, responsável, status e vínculo com lançamento ou aluno, preservam histórico de interações, registram encerramento em UTC e usam exclusão lógica quando inativados.
+- Os checklists operacionais podem ser executados via `POST`, `GET`, `GET /:checklistId`, `PUT`, `POST /:checklistId/complete` e `DELETE /api/v1/operational-checklists`, aceitam tipos variados de operação, validam o contexto informado, bloqueiam conclusão com itens obrigatórios pendentes, registram conclusão em UTC e preservam histórico auditável com exclusão lógica.
+- Os cronogramas completos com IA podem ser gerados via `POST /api/v1/launches/:launchId/ai-schedules/generate` e persistidos via `POST /api/v1/ai-schedules`, exigem briefing e contexto mínimo do lançamento, usam histórico interno disponível como sinais agregados, retornam proposta estruturada revisável por humano, não expõem prompts/fontes internas e registram auditoria na geração e no salvamento.
+- Roteiros, copies e e-mails no estilo da marca podem ser gerados via `POST /api/v1/launches/:launchId/ai-brand-materials/generate` e persistidos via `POST /api/v1/ai-brand-materials`, exigem objetivo, formato, briefing e identidade da marca vigente, salvam versões revisáveis por humano, não expõem segredos/prompts/fontes sensíveis e mantêm auditoria.
+- O acervo histórico de maior desempenho pode ser gerenciado via `POST`, `GET`, `GET /:contentId`, `POST /recommendations` e `DELETE /api/v1/ai-historical-contents`, permite cadastrar conteúdos classificados por performance, pesquisar por objetivo, formato, lançamento, origem e tags, recomendar reaproveitamento para novo lançamento, distinguir conteúdo original de reaproveitado, não expõe notas sensíveis e usa exclusão lógica.
+- Sugestões de melhoria baseadas em métricas anteriores podem ser geradas via `POST /api/v1/ai-metric-insights` e consultadas via `GET /api/v1/ai-metric-insights/:insightId`, usam snapshots de tráfego e acervo histórico como base auditável, retornam recomendações estruturadas com justificativas, exigem revisão humana, não expõem detalhes internos de processamento e sinalizam insuficiência de contexto quando não houver dados mínimos.
+- Automações recorrentes da equipe podem ser configuradas via `POST /api/v1/ai-team-automations`, consultadas via `GET /:automationId`, ativadas ou inativadas via `PATCH /:automationId/active` e executadas via `POST /:automationId/execute`, exigem gatilho, regra, permissão e contexto seguro, registram resultado auditável e não expõem segredos ou detalhes internos da implementação.
 - As aprovações de conteúdo podem ser gerenciadas via `POST /api/v1/content-approvals/:contentType/:contentId/status`, respeitam a ordem `CREATED -> REVIEW -> EXPERT -> APPROVED -> PUBLISHED`, exigem permissões por etapa, registram observações de aprovação ou reprovação no histórico e impedem publicação antes da aprovação.
 - A biblioteca de ativos pode ser gerenciada via `POST`, `GET` e `DELETE /api/v1/assets`, permite ativos globais ou vinculados a lançamentos, suporta busca por tipo, tag, lançamento e status, retorna UUID e datas em UTC e preserva histórico por exclusão lógica.
 - Os conteúdos de YouTube podem ser gerenciados via `POST`, `PUT` e `DELETE /api/v1/youtube-contents`, exigem lançamento e linha editorial vigente, mantêm pauta, roteiro, responsável e status rastreável, retornam horários de gravação/publicação em UTC e preservam histórico por exclusão lógica.

@@ -9,6 +9,10 @@ const roleModel = {
   updateOne: vi.fn()
 };
 
+const auditService = {
+  record: vi.fn()
+};
+
 vi.mock("../src/models/permission.model.js", () => ({
   Permission: permissionModel
 }));
@@ -17,116 +21,182 @@ vi.mock("../src/models/role.model.js", () => ({
   Role: roleModel
 }));
 
+vi.mock("../src/services/audit.service.js", () => ({
+  auditService
+}));
+
 const { accessSeedService } = await import("../src/services/access-seed.service.js");
 
 describe("accessSeedService.ensureCoreAccessSeed", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    permissionModel.updateOne.mockResolvedValue({ modifiedCount: 0, upsertedCount: 0 });
+    roleModel.updateOne.mockResolvedValue({ modifiedCount: 0, upsertedCount: 0 });
   });
 
   it("upserts permissions and the admin role with the initial matrix", async () => {
+    const permissionCodes = [
+      "AUDIT_READ",
+      "AUTH_LOGIN",
+      "PERMISSION_READ",
+      "ROLE_READ",
+      "USER_BOOTSTRAP_ADMIN",
+      "USER_CREATE",
+      "USER_LIST",
+      "USER_MANAGE",
+      "USER_READ",
+      "USER_UPDATE",
+      "USER_ACTIVATE",
+      "USER_DEACTIVATE",
+      "USER_CHANGE_ROLE",
+      "PLATFORM_SETTING_READ",
+      "PLATFORM_SETTING_UPDATE",
+      "LAUNCH_CREATE",
+      "LAUNCH_READ",
+      "MARKET_RESEARCH_CREATE",
+      "COMPETITOR_RESEARCH_CREATE",
+      "AVATAR_CREATE",
+      "AVATAR_SUGGEST",
+      "AVATAR_UPDATE",
+      "OFFER_CREATE",
+      "OFFER_UPDATE",
+      "POSITIONING_CREATE",
+      "POSITIONING_UPDATE",
+      "EDITORIAL_LINE_CREATE",
+      "EDITORIAL_LINE_UPDATE",
+      "CONTENT_PLAN_CREATE",
+      "CONTENT_PLAN_UPDATE",
+      "SMART_SCHEDULE_CREATE",
+      "SMART_SCHEDULE_UPDATE",
+      "EXPERT_APPROVAL_DECIDE",
+      "EXPERT_APPROVAL_SUBMIT",
+      "DASHBOARD_OVERVIEW_READ",
+      "STRATEGIST_DASHBOARD_READ",
+      "ASSET_LIBRARY_CREATE",
+      "ASSET_LIBRARY_DEACTIVATE",
+      "ASSET_LIBRARY_READ",
+      "CONTENT_IDEA_CREATE",
+      "CONTENT_IDEA_DEACTIVATE",
+      "CONTENT_IDEA_READ",
+      "REEL_CREATE",
+      "REEL_UPDATE",
+      "CAROUSEL_CREATE",
+      "CAROUSEL_UPDATE",
+      "STORY_SEQUENCE_CREATE",
+      "STORY_SEQUENCE_UPDATE",
+      "EMAIL_CAMPAIGN_CREATE",
+      "EMAIL_CAMPAIGN_DEACTIVATE",
+      "EMAIL_CAMPAIGN_READ",
+      "YOUTUBE_CONTENT_CREATE",
+      "YOUTUBE_CONTENT_DEACTIVATE",
+      "YOUTUBE_CONTENT_UPDATE",
+      "COPYWRITING_CREATE",
+      "COPYWRITING_GENERATE",
+      "CONTENT_APPROVAL_APPROVE",
+      "CONTENT_APPROVAL_EXPERT",
+      "CONTENT_APPROVAL_PUBLISH",
+      "CONTENT_APPROVAL_REVIEW",
+      "PUBLICATION_CREATE",
+      "PUBLICATION_READ",
+      "PUBLICATION_UPDATE",
+      "EDITORIAL_CALENDAR_CREATE",
+      "EDITORIAL_CALENDAR_READ",
+      "EDITORIAL_CALENDAR_UPDATE",
+      "PRODUCTION_CHECKLIST_CREATE",
+      "PRODUCTION_CHECKLIST_READ",
+      "PRODUCTION_CHECKLIST_UPDATE",
+      "PRODUCTION_CHECKLIST_REOPEN",
+      "CONTENT_STATUS_UPDATE",
+      "CONTENT_STATUS_READ",
+      "EXTERNAL_INTEGRATION_CREATE",
+      "EXTERNAL_INTEGRATION_READ",
+      "EXTERNAL_INTEGRATION_UPDATE",
+      "EXTERNAL_PUBLICATION_LINK_CREATE",
+      "EXTERNAL_PUBLICATION_LINK_READ",
+      "TRAFFIC_CAMPAIGN_CREATE",
+      "TRAFFIC_CAMPAIGN_READ",
+      "TRAFFIC_CAMPAIGN_UPDATE",
+      "TRAFFIC_CAMPAIGN_DEACTIVATE",
+      "TRAFFIC_CREATIVE_CREATE",
+      "TRAFFIC_CREATIVE_READ",
+      "TRAFFIC_CREATIVE_UPDATE",
+      "TRAFFIC_CREATIVE_DEACTIVATE",
+      "TRAFFIC_PIXEL_CREATE",
+      "TRAFFIC_PIXEL_READ",
+      "TRAFFIC_PIXEL_UPDATE",
+      "TRAFFIC_PIXEL_LINK",
+      "TRAFFIC_PIXEL_DEACTIVATE",
+      "TRAFFIC_AUDIENCE_CREATE",
+      "TRAFFIC_AUDIENCE_READ",
+      "TRAFFIC_AUDIENCE_UPDATE",
+      "TRAFFIC_AUDIENCE_DEACTIVATE",
+      "TRAFFIC_CONVERSION_EVENT_CREATE",
+      "TRAFFIC_CONVERSION_EVENT_READ",
+      "TRAFFIC_CONVERSION_EVENT_UPDATE",
+      "TRAFFIC_CONVERSION_EVENT_LINK",
+      "TRAFFIC_CONVERSION_EVENT_DEACTIVATE",
+      "TRAFFIC_REPORT_READ",
+      "TRAFFIC_ROI_READ",
+      "CLASS_SCHEDULE_CREATE",
+      "CLASS_SCHEDULE_READ",
+      "CLASS_SCHEDULE_UPDATE",
+      "CLASS_SCHEDULE_DEACTIVATE",
+      "LIVE_EVENT_CREATE",
+      "LIVE_EVENT_READ",
+      "LIVE_EVENT_UPDATE",
+      "LIVE_EVENT_DEACTIVATE",
+      "DISCORD_OPERATION_CREATE",
+      "DISCORD_OPERATION_READ",
+      "DISCORD_OPERATION_UPDATE",
+      "DISCORD_OPERATION_DEACTIVATE",
+      "OPERATIONAL_EMAIL_CREATE",
+      "OPERATIONAL_EMAIL_READ",
+      "OPERATIONAL_EMAIL_UPDATE",
+      "OPERATIONAL_EMAIL_DEACTIVATE",
+      "STUDENT_CREATE",
+      "STUDENT_READ",
+      "STUDENT_UPDATE",
+      "STUDENT_DEACTIVATE",
+      "SUPPORT_TICKET_CREATE",
+      "SUPPORT_TICKET_READ",
+      "SUPPORT_TICKET_UPDATE",
+      "SUPPORT_TICKET_DEACTIVATE",
+      "OPERATIONAL_CHECKLIST_CREATE",
+      "OPERATIONAL_CHECKLIST_READ",
+      "OPERATIONAL_CHECKLIST_UPDATE",
+      "OPERATIONAL_CHECKLIST_DEACTIVATE",
+      "AI_SCHEDULE_GENERATE",
+      "AI_SCHEDULE_CREATE",
+      "AI_SCHEDULE_READ",
+      "AI_BRAND_MATERIAL_GENERATE",
+      "AI_BRAND_MATERIAL_CREATE",
+      "AI_BRAND_MATERIAL_READ",
+      "AI_HISTORICAL_CONTENT_CREATE",
+      "AI_HISTORICAL_CONTENT_READ",
+      "AI_HISTORICAL_CONTENT_RECOMMEND",
+      "AI_HISTORICAL_CONTENT_DEACTIVATE",
+      "AI_METRIC_INSIGHT_GENERATE",
+      "AI_METRIC_INSIGHT_READ",
+      "AI_TEAM_AUTOMATION_CREATE",
+      "AI_TEAM_AUTOMATION_READ",
+      "AI_TEAM_AUTOMATION_UPDATE",
+      "AI_TEAM_AUTOMATION_EXECUTE"
+    ];
+
     permissionModel.find.mockReturnValue({
-      sort: vi.fn().mockResolvedValue([
-        { _id: "perm-0", code: "AUDIT_READ" },
-        { _id: "perm-1", code: "AUTH_LOGIN" },
-        { _id: "perm-2", code: "PERMISSION_READ" },
-        { _id: "perm-3", code: "ROLE_READ" },
-        { _id: "perm-4", code: "USER_BOOTSTRAP_ADMIN" },
-        { _id: "perm-5", code: "USER_CREATE" },
-        { _id: "perm-6", code: "USER_LIST" },
-        { _id: "perm-7", code: "USER_MANAGE" },
-        { _id: "perm-8", code: "USER_READ" },
-        { _id: "perm-9", code: "USER_UPDATE" },
-        { _id: "perm-10", code: "USER_ACTIVATE" },
-        { _id: "perm-11", code: "USER_DEACTIVATE" },
-        { _id: "perm-12", code: "USER_CHANGE_ROLE" },
-        { _id: "perm-13", code: "LAUNCH_CREATE" },
-        { _id: "perm-14", code: "LAUNCH_READ" },
-        { _id: "perm-15", code: "MARKET_RESEARCH_CREATE" },
-        { _id: "perm-16", code: "COMPETITOR_RESEARCH_CREATE" },
-        { _id: "perm-17", code: "AVATAR_CREATE" },
-        { _id: "perm-18", code: "AVATAR_SUGGEST" },
-        { _id: "perm-19", code: "AVATAR_UPDATE" },
-        { _id: "perm-20", code: "OFFER_CREATE" },
-        { _id: "perm-21", code: "OFFER_UPDATE" },
-        { _id: "perm-22", code: "POSITIONING_CREATE" },
-        { _id: "perm-23", code: "POSITIONING_UPDATE" },
-        { _id: "perm-24", code: "EDITORIAL_LINE_CREATE" },
-        { _id: "perm-25", code: "EDITORIAL_LINE_UPDATE" },
-        { _id: "perm-26", code: "CONTENT_PLAN_CREATE" },
-        { _id: "perm-27", code: "CONTENT_PLAN_UPDATE" },
-        { _id: "perm-28", code: "SMART_SCHEDULE_CREATE" },
-        { _id: "perm-29", code: "SMART_SCHEDULE_UPDATE" },
-        { _id: "perm-30", code: "EXPERT_APPROVAL_DECIDE" },
-        { _id: "perm-31", code: "EXPERT_APPROVAL_SUBMIT" },
-        { _id: "perm-32", code: "ASSET_LIBRARY_CREATE" },
-        { _id: "perm-33", code: "ASSET_LIBRARY_DEACTIVATE" },
-        { _id: "perm-34", code: "ASSET_LIBRARY_READ" },
-        { _id: "perm-35", code: "CONTENT_IDEA_CREATE" },
-        { _id: "perm-36", code: "CONTENT_IDEA_DEACTIVATE" },
-        { _id: "perm-37", code: "CONTENT_IDEA_READ" },
-        { _id: "perm-38", code: "REEL_CREATE" },
-        { _id: "perm-39", code: "REEL_UPDATE" },
-        { _id: "perm-40", code: "CAROUSEL_CREATE" },
-        { _id: "perm-41", code: "CAROUSEL_UPDATE" },
-        { _id: "perm-42", code: "STORY_SEQUENCE_CREATE" },
-        { _id: "perm-43", code: "STORY_SEQUENCE_UPDATE" },
-        { _id: "perm-44", code: "EMAIL_CAMPAIGN_CREATE" },
-        { _id: "perm-45", code: "EMAIL_CAMPAIGN_DEACTIVATE" },
-        { _id: "perm-46", code: "EMAIL_CAMPAIGN_READ" },
-        { _id: "perm-47", code: "YOUTUBE_CONTENT_CREATE" },
-        { _id: "perm-48", code: "YOUTUBE_CONTENT_DEACTIVATE" },
-        { _id: "perm-49", code: "YOUTUBE_CONTENT_UPDATE" },
-        { _id: "perm-50", code: "COPYWRITING_CREATE" },
-        { _id: "perm-51", code: "COPYWRITING_GENERATE" },
-        { _id: "perm-52", code: "CONTENT_APPROVAL_APPROVE" },
-        { _id: "perm-53", code: "CONTENT_APPROVAL_EXPERT" },
-        { _id: "perm-54", code: "CONTENT_APPROVAL_PUBLISH" },
-        { _id: "perm-55", code: "CONTENT_APPROVAL_REVIEW" },
-        { _id: "perm-56", code: "DASHBOARD_OVERVIEW_READ" },
-        { _id: "perm-57", code: "STRATEGIST_DASHBOARD_READ" },
-        { _id: "perm-58", code: "PUBLICATION_CREATE" },
-        { _id: "perm-59", code: "PUBLICATION_READ" },
-        { _id: "perm-60", code: "PUBLICATION_UPDATE" },
-        { _id: "perm-61", code: "EDITORIAL_CALENDAR_CREATE" },
-        { _id: "perm-62", code: "EDITORIAL_CALENDAR_READ" },
-        { _id: "perm-63", code: "EDITORIAL_CALENDAR_UPDATE" },
-        { _id: "perm-64", code: "PRODUCTION_CHECKLIST_CREATE" },
-        { _id: "perm-65", code: "PRODUCTION_CHECKLIST_READ" },
-        { _id: "perm-66", code: "PRODUCTION_CHECKLIST_UPDATE" },
-        { _id: "perm-67", code: "PRODUCTION_CHECKLIST_REOPEN" },
-        { _id: "perm-68", code: "CONTENT_STATUS_UPDATE" },
-        { _id: "perm-69", code: "CONTENT_STATUS_READ" },
-        { _id: "perm-70", code: "EXTERNAL_INTEGRATION_CREATE" },
-        { _id: "perm-71", code: "EXTERNAL_INTEGRATION_READ" },
-        { _id: "perm-72", code: "EXTERNAL_INTEGRATION_UPDATE" },
-        { _id: "perm-73", code: "EXTERNAL_PUBLICATION_LINK_CREATE" },
-        { _id: "perm-74", code: "EXTERNAL_PUBLICATION_LINK_READ" },
-        { _id: "perm-75", code: "TRAFFIC_CAMPAIGN_CREATE" },
-        { _id: "perm-76", code: "TRAFFIC_CAMPAIGN_READ" },
-        { _id: "perm-77", code: "TRAFFIC_CAMPAIGN_UPDATE" },
-        { _id: "perm-78", code: "TRAFFIC_CAMPAIGN_DEACTIVATE" },
-        { _id: "perm-79", code: "TRAFFIC_CREATIVE_CREATE" },
-        { _id: "perm-80", code: "TRAFFIC_CREATIVE_READ" },
-        { _id: "perm-81", code: "TRAFFIC_CREATIVE_UPDATE" },
-        { _id: "perm-82", code: "TRAFFIC_CREATIVE_DEACTIVATE" },
-        { _id: "perm-83", code: "TRAFFIC_PIXEL_CREATE" },
-        { _id: "perm-84", code: "TRAFFIC_PIXEL_READ" },
-        { _id: "perm-85", code: "TRAFFIC_PIXEL_UPDATE" },
-        { _id: "perm-86", code: "TRAFFIC_PIXEL_LINK" },
-        { _id: "perm-87", code: "TRAFFIC_PIXEL_DEACTIVATE" }
-      ])
+      sort: vi.fn().mockResolvedValue(permissionCodes.map((code, index) => ({
+        _id: `perm-${index}`,
+        code
+      })))
     });
 
     await accessSeedService.ensureCoreAccessSeed();
 
-    expect(permissionModel.updateOne).toHaveBeenCalledTimes(88);
+    expect(permissionModel.updateOne).toHaveBeenCalledTimes(permissionCodes.length);
     expect(permissionModel.updateOne).toHaveBeenCalledWith(
       { code: "AUTH_LOGIN" },
       expect.objectContaining({
-        $setOnInsert: {
-          code: "AUTH_LOGIN"
-        },
+        $setOnInsert: { code: "AUTH_LOGIN" },
         $set: expect.objectContaining({
           name: "Autenticar usuario",
           module: "auth",
@@ -135,16 +205,38 @@ describe("accessSeedService.ensureCoreAccessSeed", () => {
       }),
       { upsert: true }
     );
+    expect(permissionModel.find).toHaveBeenCalledWith(
+      {
+        code: {
+          $in: expect.arrayContaining(["AUTH_LOGIN", "DASHBOARD_OVERVIEW_READ", "PLATFORM_SETTING_UPDATE"])
+        }
+      },
+      { _id: 1, code: 1 }
+    );
     expect(roleModel.updateOne).toHaveBeenCalledWith(
       { code: "ADMIN" },
       expect.objectContaining({
+        $setOnInsert: expect.objectContaining({
+          code: "ADMIN",
+          permissionIds: permissionCodes.map((_code, index) => `perm-${index}`)
+        }),
         $set: expect.objectContaining({
-          permissionIds: ["perm-0", "perm-1", "perm-2", "perm-3", "perm-4", "perm-5", "perm-6", "perm-7", "perm-8", "perm-9", "perm-10", "perm-11", "perm-12", "perm-13", "perm-14", "perm-15", "perm-16", "perm-17", "perm-18", "perm-19", "perm-20", "perm-21", "perm-22", "perm-23", "perm-24", "perm-25", "perm-26", "perm-27", "perm-28", "perm-29", "perm-30", "perm-31", "perm-32", "perm-33", "perm-34", "perm-35", "perm-36", "perm-37", "perm-38", "perm-39", "perm-40", "perm-41", "perm-42", "perm-43", "perm-44", "perm-45", "perm-46", "perm-47", "perm-48", "perm-49", "perm-50", "perm-51", "perm-52", "perm-53", "perm-54", "perm-55", "perm-56", "perm-57", "perm-58", "perm-59", "perm-60", "perm-61", "perm-62", "perm-63", "perm-64", "perm-65", "perm-66", "perm-67", "perm-68", "perm-69", "perm-70", "perm-71", "perm-72", "perm-73", "perm-74", "perm-75", "perm-76", "perm-77", "perm-78", "perm-79", "perm-80", "perm-81", "perm-82", "perm-83", "perm-84", "perm-85", "perm-86", "perm-87"],
+          name: "Administrador",
           active: true
         })
       }),
       { upsert: true }
     );
-    expect(roleModel.updateOne).toHaveBeenCalledTimes(6);
+    expect(roleModel.updateOne).toHaveBeenCalledWith(
+      { code: "ADMIN" },
+      {
+        $addToSet: {
+          permissionIds: {
+            $each: permissionCodes.map((_code, index) => `perm-${index}`)
+          }
+        }
+      }
+    );
+    expect(roleModel.updateOne).toHaveBeenCalledTimes(12);
   });
 });

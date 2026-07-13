@@ -1,6 +1,9 @@
 import { Permission } from "../models/permission.model.js";
 import { Role } from "../models/role.model.js";
+import { auditService } from "./audit.service.js";
 import { roleCatalog } from "./role-catalog.js";
+
+const seedAuditTargetId = "core-access-seed";
 
 const corePermissions = [
   {
@@ -80,6 +83,18 @@ const corePermissions = [
     name: "Consultar permissoes",
     description: "Permite consultar permissoes disponiveis no core.",
     module: "permission"
+  },
+  {
+    code: "PLATFORM_SETTING_READ",
+    name: "Consultar configuracoes da plataforma",
+    description: "Permite consultar configuracoes globais nao sensiveis da plataforma.",
+    module: "settings"
+  },
+  {
+    code: "PLATFORM_SETTING_UPDATE",
+    name: "Atualizar configuracoes da plataforma",
+    description: "Permite alterar configuracoes globais editaveis com auditoria.",
+    module: "settings"
   },
   {
     code: "LAUNCH_CREATE",
@@ -530,13 +545,351 @@ const corePermissions = [
     name: "Inativar pixels de trafego",
     description: "Permite realizar exclusao logica de pixels preservando historico.",
     module: "traffic"
+  },
+  {
+    code: "TRAFFIC_AUDIENCE_CREATE",
+    name: "Cadastrar publicos de trafego",
+    description: "Permite cadastrar publicos vinculados a lancamentos ou campanhas.",
+    module: "traffic"
+  },
+  {
+    code: "TRAFFIC_AUDIENCE_READ",
+    name: "Consultar publicos de trafego",
+    description: "Permite consultar publicos por lancamento, campanha, status e ativacao.",
+    module: "traffic"
+  },
+  {
+    code: "TRAFFIC_AUDIENCE_UPDATE",
+    name: "Atualizar publicos de trafego",
+    description: "Permite atualizar estrategia, status e segmentacao de publicos.",
+    module: "traffic"
+  },
+  {
+    code: "TRAFFIC_AUDIENCE_DEACTIVATE",
+    name: "Inativar publicos de trafego",
+    description: "Permite realizar exclusao logica de publicos preservando historico.",
+    module: "traffic"
+  },
+  {
+    code: "TRAFFIC_CONVERSION_EVENT_CREATE",
+    name: "Cadastrar eventos de conversao",
+    description: "Permite cadastrar eventos de conversao vinculados a lancamentos ou campanhas.",
+    module: "traffic"
+  },
+  {
+    code: "TRAFFIC_CONVERSION_EVENT_READ",
+    name: "Consultar eventos de conversao",
+    description: "Permite consultar eventos por lancamento, campanha, pixel, origem, status e ativacao.",
+    module: "traffic"
+  },
+  {
+    code: "TRAFFIC_CONVERSION_EVENT_UPDATE",
+    name: "Atualizar eventos de conversao",
+    description: "Permite atualizar objetivo, origem, status e datas associadas de eventos.",
+    module: "traffic"
+  },
+  {
+    code: "TRAFFIC_CONVERSION_EVENT_LINK",
+    name: "Vincular eventos de conversao",
+    description: "Permite vincular eventos de conversao a campanhas e pixels.",
+    module: "traffic"
+  },
+  {
+    code: "TRAFFIC_CONVERSION_EVENT_DEACTIVATE",
+    name: "Inativar eventos de conversao",
+    description: "Permite realizar exclusao logica de eventos preservando historico.",
+    module: "traffic"
+  },
+  {
+    code: "TRAFFIC_REPORT_READ",
+    name: "Consultar relatorios de trafego",
+    description: "Permite consultar relatorios consolidados de trafego por lancamento, periodo e campanha.",
+    module: "traffic"
+  },
+  {
+    code: "TRAFFIC_ROI_READ",
+    name: "Consultar ROI de trafego",
+    description: "Permite consultar ROI consolidado de trafego por lancamento, periodo e campanha.",
+    module: "traffic"
+  },
+  {
+    code: "CLASS_SCHEDULE_CREATE",
+    name: "Cadastrar aulas agendadas",
+    description: "Permite cadastrar aulas vinculadas a operacao de um lancamento.",
+    module: "operations"
+  },
+  {
+    code: "CLASS_SCHEDULE_READ",
+    name: "Consultar agenda de aulas",
+    description: "Permite consultar aulas por lancamento, periodo, responsavel, status e ativacao.",
+    module: "operations"
+  },
+  {
+    code: "CLASS_SCHEDULE_UPDATE",
+    name: "Atualizar aulas agendadas",
+    description: "Permite alterar data, responsavel, status e dados operacionais de aulas.",
+    module: "operations"
+  },
+  {
+    code: "CLASS_SCHEDULE_DEACTIVATE",
+    name: "Inativar aulas agendadas",
+    description: "Permite realizar exclusao logica de aulas preservando historico.",
+    module: "operations"
+  },
+  {
+    code: "LIVE_EVENT_CREATE",
+    name: "Cadastrar eventos ao vivo",
+    description: "Permite cadastrar eventos ao vivo vinculados a operacao de um lancamento.",
+    module: "operations"
+  },
+  {
+    code: "LIVE_EVENT_READ",
+    name: "Consultar eventos ao vivo",
+    description: "Permite consultar eventos ao vivo por lancamento, periodo, canal, responsavel e status.",
+    module: "operations"
+  },
+  {
+    code: "LIVE_EVENT_UPDATE",
+    name: "Atualizar eventos ao vivo",
+    description: "Permite alterar horario, canal, responsavel, status e dados operacionais de eventos ao vivo.",
+    module: "operations"
+  },
+  {
+    code: "LIVE_EVENT_DEACTIVATE",
+    name: "Inativar eventos ao vivo",
+    description: "Permite realizar exclusao logica de eventos ao vivo preservando historico.",
+    module: "operations"
+  },
+  {
+    code: "DISCORD_OPERATION_CREATE",
+    name: "Cadastrar operacoes de Discord",
+    description: "Permite cadastrar tarefas operacionais do Discord vinculadas a um lancamento.",
+    module: "operations"
+  },
+  {
+    code: "DISCORD_OPERATION_READ",
+    name: "Consultar operacoes de Discord",
+    description: "Permite consultar tarefas do Discord por lancamento, tipo, responsavel, prazo e status.",
+    module: "operations"
+  },
+  {
+    code: "DISCORD_OPERATION_UPDATE",
+    name: "Atualizar operacoes de Discord",
+    description: "Permite atualizar status, observacoes, responsavel e prazo de tarefas do Discord.",
+    module: "operations"
+  },
+  {
+    code: "DISCORD_OPERATION_DEACTIVATE",
+    name: "Inativar operacoes de Discord",
+    description: "Permite realizar exclusao logica de tarefas do Discord preservando historico.",
+    module: "operations"
+  },
+  {
+    code: "OPERATIONAL_EMAIL_CREATE",
+    name: "Cadastrar e-mails operacionais",
+    description: "Permite cadastrar acoes operacionais de e-mail marketing vinculadas a um lancamento.",
+    module: "operations"
+  },
+  {
+    code: "OPERATIONAL_EMAIL_READ",
+    name: "Consultar e-mails operacionais",
+    description: "Permite consultar acoes operacionais de e-mail por lancamento, responsavel, prazo e status.",
+    module: "operations"
+  },
+  {
+    code: "OPERATIONAL_EMAIL_UPDATE",
+    name: "Atualizar e-mails operacionais",
+    description: "Permite atualizar status, prazo, responsavel e observacoes de e-mails operacionais.",
+    module: "operations"
+  },
+  {
+    code: "OPERATIONAL_EMAIL_DEACTIVATE",
+    name: "Inativar e-mails operacionais",
+    description: "Permite realizar exclusao logica de acoes operacionais de e-mail preservando historico.",
+    module: "operations"
+  },
+  {
+    code: "STUDENT_CREATE",
+    name: "Cadastrar alunos",
+    description: "Permite cadastrar alunos vinculados a produtos, lancamentos e operacao.",
+    module: "operations"
+  },
+  {
+    code: "STUDENT_READ",
+    name: "Consultar alunos",
+    description: "Permite consultar alunos e informacoes operacionais de entrega.",
+    module: "operations"
+  },
+  {
+    code: "STUDENT_UPDATE",
+    name: "Atualizar alunos",
+    description: "Permite atualizar dados operacionais, status e contexto de alunos.",
+    module: "operations"
+  },
+  {
+    code: "STUDENT_DEACTIVATE",
+    name: "Inativar alunos",
+    description: "Permite realizar exclusao logica de alunos preservando historico.",
+    module: "operations"
+  },
+  {
+    code: "SUPPORT_TICKET_CREATE",
+    name: "Registrar atendimentos de suporte",
+    description: "Permite registrar atendimentos de suporte vinculados a aluno ou lancamento.",
+    module: "operations"
+  },
+  {
+    code: "SUPPORT_TICKET_READ",
+    name: "Consultar atendimentos de suporte",
+    description: "Permite consultar atendimentos, responsaveis, status e historico de suporte.",
+    module: "operations"
+  },
+  {
+    code: "SUPPORT_TICKET_UPDATE",
+    name: "Atualizar atendimentos de suporte",
+    description: "Permite atualizar status, prioridade, observacoes e interacoes de suporte.",
+    module: "operations"
+  },
+  {
+    code: "SUPPORT_TICKET_DEACTIVATE",
+    name: "Inativar atendimentos de suporte",
+    description: "Permite realizar exclusao logica de atendimentos de suporte preservando historico.",
+    module: "operations"
+  },
+  {
+    code: "OPERATIONAL_CHECKLIST_CREATE",
+    name: "Registrar checklists operacionais",
+    description: "Permite registrar checklists de rotinas e eventos operacionais.",
+    module: "operations"
+  },
+  {
+    code: "OPERATIONAL_CHECKLIST_READ",
+    name: "Consultar checklists operacionais",
+    description: "Permite consultar progresso, itens e historico de checklists operacionais.",
+    module: "operations"
+  },
+  {
+    code: "OPERATIONAL_CHECKLIST_UPDATE",
+    name: "Executar checklists operacionais",
+    description: "Permite marcar itens, atualizar progresso e concluir checklists operacionais.",
+    module: "operations"
+  },
+  {
+    code: "OPERATIONAL_CHECKLIST_DEACTIVATE",
+    name: "Inativar checklists operacionais",
+    description: "Permite realizar exclusao logica de checklists operacionais preservando historico.",
+    module: "operations"
+  },
+  {
+    code: "AI_SCHEDULE_GENERATE",
+    name: "Gerar cronogramas com IA",
+    description: "Permite gerar propostas estruturadas de cronograma com IA para revisao humana.",
+    module: "corporate-ai"
+  },
+  {
+    code: "AI_SCHEDULE_CREATE",
+    name: "Salvar cronogramas gerados por IA",
+    description: "Permite persistir cronogramas gerados por IA para edicao e aprovacao posterior.",
+    module: "corporate-ai"
+  },
+  {
+    code: "AI_SCHEDULE_READ",
+    name: "Consultar cronogramas gerados por IA",
+    description: "Permite consultar cronogramas gerados por IA e seus metadados seguros.",
+    module: "corporate-ai"
+  },
+  {
+    code: "AI_BRAND_MATERIAL_GENERATE",
+    name: "Gerar materiais no estilo da marca",
+    description: "Permite gerar roteiros, copies e e-mails com IA usando contexto de marca.",
+    module: "corporate-ai"
+  },
+  {
+    code: "AI_BRAND_MATERIAL_CREATE",
+    name: "Salvar materiais gerados por IA",
+    description: "Permite persistir materiais de IA versionaveis para edicao humana.",
+    module: "corporate-ai"
+  },
+  {
+    code: "AI_BRAND_MATERIAL_READ",
+    name: "Consultar materiais gerados por IA",
+    description: "Permite consultar materiais gerados por IA e seus metadados seguros.",
+    module: "corporate-ai"
+  },
+  {
+    code: "AI_HISTORICAL_CONTENT_CREATE",
+    name: "Cadastrar conteudos historicos",
+    description: "Permite cadastrar conteudos historicos classificados por desempenho.",
+    module: "corporate-ai"
+  },
+  {
+    code: "AI_HISTORICAL_CONTENT_READ",
+    name: "Consultar acervo historico estrategico",
+    description: "Permite consultar conteudos historicos relevantes sem expor dados sensiveis.",
+    module: "corporate-ai"
+  },
+  {
+    code: "AI_HISTORICAL_CONTENT_RECOMMEND",
+    name: "Recomendar reaproveitamento historico",
+    description: "Permite gerar recomendacoes de reaproveitamento com base no acervo historico.",
+    module: "corporate-ai"
+  },
+  {
+    code: "AI_HISTORICAL_CONTENT_DEACTIVATE",
+    name: "Inativar conteudos historicos",
+    description: "Permite realizar exclusao logica de itens do acervo historico.",
+    module: "corporate-ai"
+  },
+  {
+    code: "AI_METRIC_INSIGHT_GENERATE",
+    name: "Gerar sugestoes por metricas historicas",
+    description: "Permite gerar sugestoes estruturadas com base em metricas historicas auditaveis.",
+    module: "corporate-ai"
+  },
+  {
+    code: "AI_METRIC_INSIGHT_READ",
+    name: "Consultar sugestoes por metricas historicas",
+    description: "Permite consultar sugestoes geradas e sua base historica segura.",
+    module: "corporate-ai"
+  },
+  {
+    code: "AI_TEAM_AUTOMATION_CREATE",
+    name: "Configurar automacoes recorrentes",
+    description: "Permite configurar automacoes recorrentes com gatilho, regra e acao segura.",
+    module: "corporate-ai"
+  },
+  {
+    code: "AI_TEAM_AUTOMATION_READ",
+    name: "Consultar automacoes recorrentes",
+    description: "Permite consultar automacoes recorrentes e seus resultados seguros.",
+    module: "corporate-ai"
+  },
+  {
+    code: "AI_TEAM_AUTOMATION_UPDATE",
+    name: "Ativar ou inativar automacoes recorrentes",
+    description: "Permite ativar ou inativar automacoes recorrentes com controle seguro.",
+    module: "corporate-ai"
+  },
+  {
+    code: "AI_TEAM_AUTOMATION_EXECUTE",
+    name: "Executar automacoes recorrentes",
+    description: "Permite executar automacoes ativas respeitando gatilho, regra e contexto.",
+    module: "corporate-ai"
   }
 ];
 
+function getWriteCount(result) {
+  return (result?.modifiedCount ?? 0) + (result?.upsertedCount ?? 0);
+}
+
 class AccessSeedService {
   async ensureCoreAccessSeed() {
+    let permissionWrites = 0;
+    let roleWrites = 0;
+    let rolePermissionWrites = 0;
+
     for (const permission of corePermissions) {
-      await Permission.updateOne(
+      const result = await Permission.updateOne(
         { code: permission.code },
         {
           $setOnInsert: {
@@ -551,6 +904,7 @@ class AccessSeedService {
         },
         { upsert: true }
       );
+      permissionWrites += getWriteCount(result);
     }
 
     const permissions = await Permission.find(
@@ -559,7 +913,7 @@ class AccessSeedService {
           $in: corePermissions.map((permission) => permission.code)
         }
       },
-      { _id: 1 }
+      { _id: 1, code: 1 }
     ).sort({ code: 1 });
 
     for (const role of roleCatalog) {
@@ -567,23 +921,65 @@ class AccessSeedService {
         .filter((permission) => role.permissionCodes.includes(permission.code))
         .map((permission) => permission._id);
 
-      await Role.updateOne(
+      const roleResult = await Role.updateOne(
         { code: role.code },
         {
           $setOnInsert: {
-            code: role.code
+            code: role.code,
+            permissionIds
           },
           $set: {
             name: role.name,
             description: role.description,
-            permissionIds,
             active: true
           }
         },
         { upsert: true }
       );
+      roleWrites += getWriteCount(roleResult);
+
+      const matrixResult = await Role.updateOne(
+        { code: role.code },
+        {
+          $addToSet: {
+            permissionIds: {
+              $each: permissionIds
+            }
+          }
+        }
+      );
+      rolePermissionWrites += getWriteCount(matrixResult);
     }
+
+    const totalWrites = permissionWrites + roleWrites + rolePermissionWrites;
+
+    if (totalWrites > 0) {
+      await auditService.record({
+        actorUserId: null,
+        action: "CORE_ACCESS_SEED_APPLIED",
+        targetType: "CORE_ACCESS_SEED",
+        targetId: seedAuditTargetId,
+        context: {
+          permissionCatalogSize: corePermissions.length,
+          roleCatalogSize: roleCatalog.length,
+          permissionWrites,
+          roleWrites,
+          rolePermissionWrites,
+          preservesManualRolePermissions: true
+        }
+      });
+    }
+
+    return {
+      permissionCatalogSize: corePermissions.length,
+      roleCatalogSize: roleCatalog.length,
+      permissionWrites,
+      roleWrites,
+      rolePermissionWrites,
+      auditRecorded: totalWrites > 0
+    };
   }
 }
 
 export const accessSeedService = new AccessSeedService();
+export { corePermissions };
