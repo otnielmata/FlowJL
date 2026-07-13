@@ -679,6 +679,30 @@ const corePermissions = [
     module: "operations"
   },
   {
+    code: "OPERATIONAL_SCHEDULE_CREATE",
+    name: "Cadastrar atividades operacionais",
+    description: "Permite cadastrar atividades do cronograma operacional vinculadas a um lancamento.",
+    module: "operations"
+  },
+  {
+    code: "OPERATIONAL_SCHEDULE_READ",
+    name: "Consultar cronograma operacional",
+    description: "Permite consultar calendario, lista, kanban e timeline com filtros por responsavel, area, status e tipo.",
+    module: "operations"
+  },
+  {
+    code: "OPERATIONAL_SCHEDULE_UPDATE",
+    name: "Atualizar atividades operacionais",
+    description: "Permite atualizar detalhe, checklist, dependencias, anexos e comentarios de atividades operacionais.",
+    module: "operations"
+  },
+  {
+    code: "OPERATIONAL_SCHEDULE_REPLAN",
+    name: "Replanejar cronograma operacional",
+    description: "Permite reorganizar atividades em lote com simulacao de drag and drop preservando regras de dependencias.",
+    module: "operations"
+  },
+  {
     code: "LIVE_EVENT_CREATE",
     name: "Cadastrar eventos ao vivo",
     description: "Permite cadastrar eventos ao vivo vinculados a operacao de um lancamento.",

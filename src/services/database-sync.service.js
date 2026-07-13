@@ -30,6 +30,7 @@ import "../models/market-research.model.js";
 import "../models/offer.model.js";
 import "../models/operational-checklist.model.js";
 import "../models/operational-email.model.js";
+import "../models/operational-schedule.model.js";
 import "../models/password-reset-request.model.js";
 import "../models/permission.model.js";
 import "../models/platform-setting.model.js";

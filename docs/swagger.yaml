@@ -895,6 +895,182 @@ paths:
           description: Aula nao encontrada
         '409':
           description: Aula ja inativa
+  /api/v1/operational-schedules:
+    post:
+      tags: [Operational Schedules]
+      summary: Cadastra uma atividade no cronograma operacional
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OperationalScheduleRequest'
+      responses:
+        '201':
+          description: Atividade operacional cadastrada com sucesso
+        '400':
+          description: Dados invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento ou dependencia nao encontrados
+        '409':
+          description: Dependencias impedem o planejamento
+    get:
+      tags: [Operational Schedules]
+      summary: Lista atividades do cronograma operacional em multiplas visualizacoes
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: launchId
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: responsible
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: area
+          required: false
+          schema:
+            type: string
+            enum: [OPERATIONS, CONTENT, SOCIAL_MEDIA, TRAFFIC, DESIGN, COPY, SALES, LAUNCH]
+        - in: query
+          name: priority
+          required: false
+          schema:
+            type: string
+            enum: [LOW, MEDIUM, HIGH, CRITICAL]
+        - in: query
+          name: status
+          required: false
+          schema:
+            type: string
+            enum: [BACKLOG, PLANNED, IN_PROGRESS, IN_REVIEW, BLOCKED, DONE, CANCELED]
+        - in: query
+          name: type
+          required: false
+          schema:
+            type: string
+            enum: [TASK, MEETING, APPROVAL, DELIVERY, PUBLISHING, AUTOMATION]
+        - in: query
+          name: startAt
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: endAt
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: view
+          required: false
+          schema:
+            type: string
+            enum: [MONTH, WEEK, DAY, LIST, KANBAN, TIMELINE]
+        - in: query
+          name: active
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Cronograma operacional retornado com filtros e projecoes
+        '400':
+          description: Filtros invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+  /api/v1/operational-schedules/replan:
+    post:
+      tags: [Operational Schedules]
+      summary: Replaneja atividades em lote simulando drag and drop
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OperationalScheduleReplanRequest'
+      responses:
+        '200':
+          description: Replanejamento aplicado com confirmacao e projecao atualizada
+        '400':
+          description: Dados invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Atividade ou dependencia nao encontradas
+        '409':
+          description: Dependencias impedem o replanejamento
+  /api/v1/operational-schedules/{activityId}:
+    get:
+      tags: [Operational Schedules]
+      summary: Consulta o detalhe de uma atividade operacional
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: activityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Detalhe retornado com checklist, dependencias, anexos e comentarios
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Atividade nao encontrada
+    put:
+      tags: [Operational Schedules]
+      summary: Atualiza o detalhe de uma atividade operacional
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: activityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateOperationalScheduleRequest'
+      responses:
+        '200':
+          description: Atividade atualizada com auditoria
+        '400':
+          description: Dados invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Atividade ou dependencia nao encontradas
+        '409':
+          description: Dependencias impedem a alteracao
   /api/v1/dashboards/strategist:
     get:
       tags: [Dashboards]
@@ -5823,6 +5999,235 @@ components:
         notes:
           type: string
           maxLength: 500
+    OperationalScheduleChecklistItemRequest:
+      type: object
+      required: [label]
+      properties:
+        id:
+          type: string
+          format: uuid
+        label:
+          type: string
+          minLength: 2
+          maxLength: 160
+        required:
+          type: boolean
+        completed:
+          type: boolean
+    OperationalScheduleAttachmentRequest:
+      type: object
+      required: [name, url]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          minLength: 2
+          maxLength: 180
+        url:
+          type: string
+          format: uri
+        mediaType:
+          type: string
+          minLength: 2
+          maxLength: 120
+    OperationalScheduleCommentRequest:
+      type: object
+      required: [authorUserId, authorName, message, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        authorUserId:
+          type: string
+          minLength: 2
+          maxLength: 120
+        authorName:
+          type: string
+          minLength: 2
+          maxLength: 120
+        message:
+          type: string
+          minLength: 2
+          maxLength: 500
+        createdAt:
+          type: string
+          format: date-time
+    OperationalScheduleRequest:
+      type: object
+      required: [launchId, title, area, priority, status, type, responsible, startsAt, dueAt]
+      properties:
+        launchId:
+          type: string
+          format: uuid
+        title:
+          type: string
+          minLength: 3
+          maxLength: 180
+        description:
+          type: string
+          maxLength: 2000
+        area:
+          type: string
+          enum: [OPERATIONS, CONTENT, SOCIAL_MEDIA, TRAFFIC, DESIGN, COPY, SALES, LAUNCH]
+        priority:
+          type: string
+          enum: [LOW, MEDIUM, HIGH, CRITICAL]
+        status:
+          type: string
+          enum: [BACKLOG, PLANNED, IN_PROGRESS, IN_REVIEW, BLOCKED, DONE, CANCELED]
+        type:
+          type: string
+          enum: [TASK, MEETING, APPROVAL, DELIVERY, PUBLISHING, AUTOMATION]
+        responsible:
+          type: string
+          minLength: 2
+          maxLength: 120
+        startsAt:
+          type: string
+          format: date-time
+        dueAt:
+          type: string
+          format: date-time
+        timelinePosition:
+          type: integer
+          minimum: 0
+        dependencyIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+        checklist:
+          type: array
+          items:
+            $ref: '#/components/schemas/OperationalScheduleChecklistItemRequest'
+        attachments:
+          type: array
+          items:
+            $ref: '#/components/schemas/OperationalScheduleAttachmentRequest'
+        comments:
+          type: array
+          items:
+            $ref: '#/components/schemas/OperationalScheduleCommentRequest'
+        tags:
+          type: array
+          items:
+            type: string
+    UpdateOperationalScheduleRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 3
+          maxLength: 180
+        description:
+          type: string
+          maxLength: 2000
+        area:
+          type: string
+          enum: [OPERATIONS, CONTENT, SOCIAL_MEDIA, TRAFFIC, DESIGN, COPY, SALES, LAUNCH]
+        priority:
+          type: string
+          enum: [LOW, MEDIUM, HIGH, CRITICAL]
+        status:
+          type: string
+          enum: [BACKLOG, PLANNED, IN_PROGRESS, IN_REVIEW, BLOCKED, DONE, CANCELED]
+        type:
+          type: string
+          enum: [TASK, MEETING, APPROVAL, DELIVERY, PUBLISHING, AUTOMATION]
+        responsible:
+          type: string
+          minLength: 2
+          maxLength: 120
+        startsAt:
+          type: string
+          format: date-time
+        dueAt:
+          type: string
+          format: date-time
+        timelinePosition:
+          type: integer
+          minimum: 0
+        dependencyIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+        checklist:
+          type: array
+          items:
+            $ref: '#/components/schemas/OperationalScheduleChecklistItemRequest'
+        attachments:
+          type: array
+          items:
+            $ref: '#/components/schemas/OperationalScheduleAttachmentRequest'
+        comments:
+          type: array
+          items:
+            $ref: '#/components/schemas/OperationalScheduleCommentRequest'
+        tags:
+          type: array
+          items:
+            type: string
+    OperationalScheduleReplanItemRequest:
+      type: object
+      required: [activityId]
+      properties:
+        activityId:
+          type: string
+          format: uuid
+        startsAt:
+          type: string
+          format: date-time
+        dueAt:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [BACKLOG, PLANNED, IN_PROGRESS, IN_REVIEW, BLOCKED, DONE, CANCELED]
+        timelinePosition:
+          type: integer
+          minimum: 0
+        dependencyIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+    OperationalScheduleReplanRequest:
+      type: object
+      required: [items]
+      properties:
+        view:
+          type: string
+          enum: [MONTH, WEEK, DAY, LIST, KANBAN, TIMELINE]
+        filters:
+          type: object
+          properties:
+            responsible:
+              type: string
+            area:
+              type: string
+              enum: [OPERATIONS, CONTENT, SOCIAL_MEDIA, TRAFFIC, DESIGN, COPY, SALES, LAUNCH]
+            priority:
+              type: string
+              enum: [LOW, MEDIUM, HIGH, CRITICAL]
+            status:
+              type: string
+              enum: [BACKLOG, PLANNED, IN_PROGRESS, IN_REVIEW, BLOCKED, DONE, CANCELED]
+            type:
+              type: string
+              enum: [TASK, MEETING, APPROVAL, DELIVERY, PUBLISHING, AUTOMATION]
+            startAt:
+              type: string
+              format: date-time
+            endAt:
+              type: string
+              format: date-time
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OperationalScheduleReplanItemRequest'
     LiveEventRequest:
       type: object
       required: [launchId, name, scheduledAt, channel, responsible, status]
