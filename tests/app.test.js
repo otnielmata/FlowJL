@@ -50,5 +50,6 @@ describe("app", () => {
     expect(response.body.modules).toContain("support-tickets");
     expect(response.body.modules).toContain("ai-schedules");
     expect(response.body.modules).toContain("ai-brand-materials");
+    expect(response.body.modules).toContain("ai-historical-contents");
   });
 });

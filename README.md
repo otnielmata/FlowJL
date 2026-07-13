@@ -55,6 +55,11 @@ src
 - `POST /api/v1/ai-brand-materials`
 - `GET /api/v1/ai-brand-materials`
 - `GET /api/v1/ai-brand-materials/:materialId`
+- `POST /api/v1/ai-historical-contents`
+- `GET /api/v1/ai-historical-contents`
+- `GET /api/v1/ai-historical-contents/:contentId`
+- `POST /api/v1/ai-historical-contents/recommendations`
+- `DELETE /api/v1/ai-historical-contents/:contentId`
 - `POST /api/v1/launches/:launchId/ai-schedules/generate`
 - `POST /api/v1/ai-schedules`
 - `GET /api/v1/ai-schedules`
@@ -298,6 +303,7 @@ A documentação fica disponível em:
 - Os checklists operacionais podem ser executados via `POST`, `GET`, `GET /:checklistId`, `PUT`, `POST /:checklistId/complete` e `DELETE /api/v1/operational-checklists`, aceitam tipos variados de operação, validam o contexto informado, bloqueiam conclusão com itens obrigatórios pendentes, registram conclusão em UTC e preservam histórico auditável com exclusão lógica.
 - Os cronogramas completos com IA podem ser gerados via `POST /api/v1/launches/:launchId/ai-schedules/generate` e persistidos via `POST /api/v1/ai-schedules`, exigem briefing e contexto mínimo do lançamento, usam histórico interno disponível como sinais agregados, retornam proposta estruturada revisável por humano, não expõem prompts/fontes internas e registram auditoria na geração e no salvamento.
 - Roteiros, copies e e-mails no estilo da marca podem ser gerados via `POST /api/v1/launches/:launchId/ai-brand-materials/generate` e persistidos via `POST /api/v1/ai-brand-materials`, exigem objetivo, formato, briefing e identidade da marca vigente, salvam versões revisáveis por humano, não expõem segredos/prompts/fontes sensíveis e mantêm auditoria.
+- O acervo histórico de maior desempenho pode ser gerenciado via `POST`, `GET`, `GET /:contentId`, `POST /recommendations` e `DELETE /api/v1/ai-historical-contents`, permite cadastrar conteúdos classificados por performance, pesquisar por objetivo, formato, lançamento, origem e tags, recomendar reaproveitamento para novo lançamento, distinguir conteúdo original de reaproveitado, não expõe notas sensíveis e usa exclusão lógica.
 - As aprovações de conteúdo podem ser gerenciadas via `POST /api/v1/content-approvals/:contentType/:contentId/status`, respeitam a ordem `CREATED -> REVIEW -> EXPERT -> APPROVED -> PUBLISHED`, exigem permissões por etapa, registram observações de aprovação ou reprovação no histórico e impedem publicação antes da aprovação.
 - A biblioteca de ativos pode ser gerenciada via `POST`, `GET` e `DELETE /api/v1/assets`, permite ativos globais ou vinculados a lançamentos, suporta busca por tipo, tag, lançamento e status, retorna UUID e datas em UTC e preserva histórico por exclusão lógica.
 - Os conteúdos de YouTube podem ser gerenciados via `POST`, `PUT` e `DELETE /api/v1/youtube-contents`, exigem lançamento e linha editorial vigente, mantêm pauta, roteiro, responsável e status rastreável, retornam horários de gravação/publicação em UTC e preservam histórico por exclusão lógica.

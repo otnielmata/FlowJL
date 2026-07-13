@@ -794,6 +794,30 @@ const corePermissions = [
     name: "Consultar materiais gerados por IA",
     description: "Permite consultar materiais gerados por IA e seus metadados seguros.",
     module: "corporate-ai"
+  },
+  {
+    code: "AI_HISTORICAL_CONTENT_CREATE",
+    name: "Cadastrar conteudos historicos",
+    description: "Permite cadastrar conteudos historicos classificados por desempenho.",
+    module: "corporate-ai"
+  },
+  {
+    code: "AI_HISTORICAL_CONTENT_READ",
+    name: "Consultar acervo historico estrategico",
+    description: "Permite consultar conteudos historicos relevantes sem expor dados sensiveis.",
+    module: "corporate-ai"
+  },
+  {
+    code: "AI_HISTORICAL_CONTENT_RECOMMEND",
+    name: "Recomendar reaproveitamento historico",
+    description: "Permite gerar recomendacoes de reaproveitamento com base no acervo historico.",
+    module: "corporate-ai"
+  },
+  {
+    code: "AI_HISTORICAL_CONTENT_DEACTIVATE",
+    name: "Inativar conteudos historicos",
+    description: "Permite realizar exclusao logica de itens do acervo historico.",
+    module: "corporate-ai"
   }
 ];
 
