@@ -17,6 +17,7 @@ tags:
   - name: Auth
   - name: Class Schedules
   - name: Dashboards
+  - name: Strategies
   - name: Editorial Calendar
   - name: Content Approvals
   - name: Content Statuses
@@ -998,6 +999,267 @@ paths:
           description: JWT ausente ou invalido
         '403':
           description: Acesso negado
+  /api/v1/strategies:
+    get:
+      tags: [Strategies]
+      summary: Lista estrategias digitais com filtros e progresso agregado
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: status
+          required: false
+          schema:
+            type: string
+            enum: [DRAFT, IN_PROGRESS, READY_FOR_APPROVAL, IN_REVIEW, APPROVED, ARCHIVED]
+        - in: query
+          name: launchId
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: responsibleUserId
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: search
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Estrategias retornadas com contexto de lancamento e responsavel
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+    post:
+      tags: [Strategies]
+      summary: Cria uma estrategia digital em fluxo guiado
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [launchId, title]
+              properties:
+                launchId:
+                  type: string
+                  format: uuid
+                title:
+                  type: string
+                responsibleUserId:
+                  type: string
+                  format: uuid
+                draft:
+                  type: object
+                  additionalProperties: true
+      responses:
+        '201':
+          description: Estrategia criada com abas, progresso e acoes disponiveis
+        '400':
+          description: Dados invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento nao encontrado
+  /api/v1/strategies/{strategyId}:
+    get:
+      tags: [Strategies]
+      summary: Consulta o detalhe agregado da estrategia digital
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: strategyId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Detalhe retornado com abas, comentarios, historico e acoes
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Estrategia nao encontrada
+  /api/v1/strategies/{strategyId}/draft:
+    patch:
+      tags: [Strategies]
+      summary: Salva progressivamente uma etapa do draft da estrategia
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: strategyId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [stepKey, data]
+              properties:
+                stepKey:
+                  type: string
+                  enum: [overview, persona, offer, positioning, editorialLine, references, contents, schedule]
+                saveMode:
+                  type: string
+                  enum: [AUTO, MANUAL]
+                hasUnsavedChanges:
+                  type: boolean
+                data:
+                  type: object
+                  additionalProperties: true
+      responses:
+        '200':
+          description: Draft salvo com feedback de progresso e autosave
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Estrategia nao encontrada
+        '409':
+          description: Estrategia arquivada nao pode ser editada
+  /api/v1/strategies/{strategyId}/comments:
+    post:
+      tags: [Strategies]
+      summary: Adiciona comentario ao fluxo da estrategia
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: strategyId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [message]
+              properties:
+                message:
+                  type: string
+      responses:
+        '201':
+          description: Comentario registrado com autor e data
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Estrategia nao encontrada
+  /api/v1/strategies/{strategyId}/duplicate:
+    post:
+      tags: [Strategies]
+      summary: Duplica uma estrategia para reaproveitamento operacional
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: strategyId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '201':
+          description: Estrategia duplicada com novo fluxo de trabalho
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Estrategia nao encontrada
+  /api/v1/strategies/{strategyId}/archive:
+    patch:
+      tags: [Strategies]
+      summary: Arquiva uma estrategia mantendo o historico
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: strategyId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Estrategia arquivada
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Estrategia nao encontrada
+        '409':
+          description: Estrategia ja arquivada
+  /api/v1/strategies/{strategyId}/submit-approval:
+    post:
+      tags: [Strategies]
+      summary: Envia a estrategia para aprovacao
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: strategyId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Estrategia enviada para revisao
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Estrategia nao encontrada
+        '409':
+          description: Estrategia ainda nao esta pronta para submissao
+  /api/v1/strategies/{strategyId}/generate-ai-content:
+    post:
+      tags: [Strategies]
+      summary: Gera sugestoes operacionais de conteudo com base na estrategia
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: strategyId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Sugestoes geradas para apoiar o front-end no fluxo de IA
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Estrategia nao encontrada
   /api/v1/editorial-calendar:
     post:
       tags: [Editorial Calendar]

@@ -168,6 +168,15 @@ src
 - `DELETE /api/v1/youtube-contents/:contentId`
 - `GET /api/v1/dashboards/overview`
 - `GET /api/v1/dashboards/strategist`
+- `GET /api/v1/strategies`
+- `POST /api/v1/strategies`
+- `GET /api/v1/strategies/:strategyId`
+- `PATCH /api/v1/strategies/:strategyId/draft`
+- `POST /api/v1/strategies/:strategyId/comments`
+- `POST /api/v1/strategies/:strategyId/duplicate`
+- `PATCH /api/v1/strategies/:strategyId/archive`
+- `POST /api/v1/strategies/:strategyId/submit-approval`
+- `POST /api/v1/strategies/:strategyId/generate-ai-content`
 - `GET /api/v1/dashboards/notifications`
 - `PATCH /api/v1/dashboards/notifications/read-all`
 - `PATCH /api/v1/dashboards/notifications/:notificationId/read`
@@ -329,6 +338,8 @@ A documentação fica disponível em:
 - A biblioteca de ativos pode ser gerenciada via `POST`, `GET` e `DELETE /api/v1/assets`, permite ativos globais ou vinculados a lançamentos, suporta busca por tipo, tag, lançamento e status, retorna UUID e datas em UTC e preserva histórico por exclusão lógica.
 - Os conteúdos de YouTube podem ser gerenciados via `POST`, `PUT` e `DELETE /api/v1/youtube-contents`, exigem lançamento e linha editorial vigente, mantêm pauta, roteiro, responsável e status rastreável, retornam horários de gravação/publicação em UTC e preservam histórico por exclusão lógica.
 - O dashboard da estrategista pode ser consultado em `GET /api/v1/dashboards/strategist`, aceita filtro opcional por `launchId`, consolida progresso, pendências, atrasos e status por etapa a partir do estado atual dos módulos estratégicos, e exige a permissão `STRATEGIST_DASHBOARD_READ`.
+- As estrategias digitais podem ser gerenciadas via `GET`, `POST`, `PATCH` e ações específicas em `/api/v1/strategies`, com listagem filtrável por status, responsável, lançamento e busca textual, percentual agregado de conclusão por etapa, salvamento progressivo de drafts, comentários preservados, detalhe por abas e ações operacionais de duplicar, arquivar, enviar para aprovação e gerar sugestões de conteúdo com IA.
+- O fluxo da estrategia digital exige vínculo obrigatório com lançamento, produto e expert, restringe edição e submissão por permissões dedicadas (`STRATEGY_CREATE`, `STRATEGY_READ`, `STRATEGY_UPDATE`, `STRATEGY_DUPLICATE`, `STRATEGY_ARCHIVE`, `STRATEGY_SUBMIT_APPROVAL` e `STRATEGY_GENERATE_AI`) e passa a expor indicadores de `pendingChanges` e `lastAutoSavedAt` para apoiar o front-end em autosave e alertas de alterações não salvas.
 - O dashboard executivo pode ser consultado em `GET /api/v1/dashboards/overview`, usa a permissão `DASHBOARD_OVERVIEW_READ`, devolve shell do front com sidebar, topbar, temas, cards, gráficos, alertas, equipe, atividades recentes e contadores por módulo para apoiar a experiência da `FJ-67`.
 - A central de notificações do dashboard pode ser consultada em `GET /api/v1/dashboards/notifications`, permite marcar um item como lido em `PATCH /api/v1/dashboards/notifications/:notificationId/read` e marcar tudo como lido em `PATCH /api/v1/dashboards/notifications/read-all`, preservando o estado de leitura por usuário autenticado.
 - A busca global do dashboard pode ser consultada em `GET /api/v1/dashboards/search?q=...`, exige `DASHBOARD_OVERVIEW_READ`, agrega resultados de lançamentos, estratégias derivadas, conteúdos, atividades, eventos, usuários e campanhas, e filtra o retorno conforme os módulos acessíveis ao papel autenticado.

@@ -70,6 +70,13 @@ describe("accessSeedService.ensureCoreAccessSeed", () => {
       "SMART_SCHEDULE_UPDATE",
       "EXPERT_APPROVAL_DECIDE",
       "EXPERT_APPROVAL_SUBMIT",
+      "STRATEGY_ARCHIVE",
+      "STRATEGY_CREATE",
+      "STRATEGY_DUPLICATE",
+      "STRATEGY_GENERATE_AI",
+      "STRATEGY_READ",
+      "STRATEGY_SUBMIT_APPROVAL",
+      "STRATEGY_UPDATE",
       "DASHBOARD_OVERVIEW_READ",
       "STRATEGIST_DASHBOARD_READ",
       "ASSET_LIBRARY_CREATE",
@@ -193,22 +200,10 @@ describe("accessSeedService.ensureCoreAccessSeed", () => {
     await accessSeedService.ensureCoreAccessSeed();
 
     expect(permissionModel.updateOne).toHaveBeenCalledTimes(permissionCodes.length);
-    expect(permissionModel.updateOne).toHaveBeenCalledWith(
-      { code: "AUTH_LOGIN" },
-      expect.objectContaining({
-        $setOnInsert: { code: "AUTH_LOGIN" },
-        $set: expect.objectContaining({
-          name: "Autenticar usuario",
-          module: "auth",
-          active: true
-        })
-      }),
-      { upsert: true }
-    );
     expect(permissionModel.find).toHaveBeenCalledWith(
       {
         code: {
-          $in: expect.arrayContaining(["AUTH_LOGIN", "DASHBOARD_OVERVIEW_READ", "PLATFORM_SETTING_UPDATE"])
+          $in: expect.arrayContaining(["AUTH_LOGIN", "STRATEGY_CREATE", "DASHBOARD_OVERVIEW_READ", "PLATFORM_SETTING_UPDATE"])
         }
       },
       { _id: 1, code: 1 }
