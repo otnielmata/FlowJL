@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { roleCatalog } from "../src/services/role-catalog.js";
+
 const permissionModel = {
   updateOne: vi.fn(),
   find: vi.fn()
@@ -148,6 +150,10 @@ describe("accessSeedService.ensureCoreAccessSeed", () => {
       "CLASS_SCHEDULE_READ",
       "CLASS_SCHEDULE_UPDATE",
       "CLASS_SCHEDULE_DEACTIVATE",
+      "OPERATIONAL_SCHEDULE_CREATE",
+      "OPERATIONAL_SCHEDULE_READ",
+      "OPERATIONAL_SCHEDULE_UPDATE",
+      "OPERATIONAL_SCHEDULE_REPLAN",
       "LIVE_EVENT_CREATE",
       "LIVE_EVENT_READ",
       "LIVE_EVENT_UPDATE",
@@ -208,19 +214,31 @@ describe("accessSeedService.ensureCoreAccessSeed", () => {
       },
       { _id: 1, code: 1 }
     );
+    expect(roleModel.updateOne).toHaveBeenCalledTimes(roleCatalog.length * 2);
     expect(roleModel.updateOne).toHaveBeenCalledWith(
       { code: "ADMIN" },
       expect.objectContaining({
         $setOnInsert: expect.objectContaining({
           code: "ADMIN",
-          permissionIds: permissionCodes.map((_code, index) => `perm-${index}`)
+          permissionIds: expect.arrayContaining(permissionCodes.map((_code, index) => `perm-${index}`))
         }),
         $set: expect.objectContaining({
           name: "Administrador",
+          description: "Cargo inicial com acesso amplo ao core da plataforma.",
           active: true
         })
       }),
       { upsert: true }
+    );
+    expect(roleModel.updateOne).toHaveBeenCalledWith(
+      { code: "ADMIN" },
+      {
+        $addToSet: {
+          permissionIds: {
+            $each: expect.arrayContaining(permissionCodes.map((_code, index) => `perm-${index}`))
+          }
+        }
+      }
     );
     expect(roleModel.updateOne).toHaveBeenCalledWith(
       { code: "ADMIN" },

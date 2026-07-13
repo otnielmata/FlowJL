@@ -90,6 +90,11 @@ src
 - `GET /api/v1/class-schedules`
 - `PUT /api/v1/class-schedules/:classScheduleId`
 - `DELETE /api/v1/class-schedules/:classScheduleId`
+- `POST /api/v1/operational-schedules`
+- `GET /api/v1/operational-schedules`
+- `POST /api/v1/operational-schedules/replan`
+- `GET /api/v1/operational-schedules/:activityId`
+- `PUT /api/v1/operational-schedules/:activityId`
 - `POST /api/v1/live-events`
 - `GET /api/v1/live-events`
 - `PUT /api/v1/live-events/:liveEventId`
@@ -324,6 +329,7 @@ A documentação fica disponível em:
 - Os relatórios de tráfego podem ser consultados via `GET /api/v1/traffic-reports`, exigem lançamento e período válidos, aceitam filtro por campanha, consolidam campanhas, criativos, públicos, pixels, eventos e snapshots incrementais de fontes externas, retornando datas em UTC sem expor detalhes internos de processamento.
 - O ROI de tráfego pode ser consultado via `GET /api/v1/traffic-roi`, exige lançamento e período explícito, aceita filtro por campanha, usa a fórmula consistente `(revenue - investment) / investment`, sinaliza base insuficiente quando faltam investimento ou resultado e registra auditoria do cálculo.
 - A agenda de aulas pode ser gerenciada via `POST`, `GET`, `PUT` e `DELETE /api/v1/class-schedules`, exige lançamento válido, título, horário em UTC, responsável e status, permite filtros por período, responsável e status, registra auditoria nas alterações e usa exclusão lógica.
+- O cronograma operacional pode ser gerenciado via `POST`, `GET`, `GET /:activityId`, `PUT` e `POST /api/v1/operational-schedules/replan`, exige lançamento válido, responsável, área, prioridade, tipo e janela em UTC, retorna projeções de calendário, lista, kanban e timeline sem duplicar regra no front, valida dependências antes do replanejamento, sinaliza conflito ou atraso e preserva checklist, anexos, comentários e auditoria.
 - Os eventos ao vivo podem ser gerenciados via `POST`, `GET`, `PUT` e `DELETE /api/v1/live-events`, exigem lançamento válido, nome, horário em UTC, canal, responsável e status, permitem filtros por período, canal, responsável e status, auditam mudanças operacionais e usam exclusão lógica.
 - A operação de Discord pode ser gerenciada via `POST`, `GET`, `PUT` e `DELETE /api/v1/discord-operations`, exige lançamento válido, tipo, atividade, responsável, prazo e status, permite filtros por período, tipo, responsável e status, preserva histórico por auditoria e usa exclusão lógica.
 - O e-mail marketing operacional pode ser gerenciado via `POST`, `GET`, `PUT` e `DELETE /api/v1/operational-emails`, exige lançamento válido, objetivo, responsável, prazo em UTC e status, permite filtros por período, responsável e status, audita alterações e usa exclusão lógica.
