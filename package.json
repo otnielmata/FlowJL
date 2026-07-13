@@ -8,7 +8,13 @@
     "dev": "node --watch src/server.js",
     "start": "node src/server.js",
     "db:sync": "node scripts/sync-database.js",
-    "test": "vitest run"
+    "test": "vitest run",
+    "web:dev": "npm --prefix apps/web run dev",
+    "web:build": "npm --prefix apps/web run build",
+    "web:start": "npm --prefix apps/web run start",
+    "web:lint": "npm --prefix apps/web run lint",
+    "build": "npm run web:build",
+    "vercel-build": "npm run web:build"
   },
   "engines": {
     "node": ">=20.0.0"

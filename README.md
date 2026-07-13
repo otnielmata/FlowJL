@@ -1,3 +1,33 @@
+# Flow JL
+
+Repositório principal do Flow JL com a API Rest e o front-end web da plataforma operacional.
+
+## Estrutura atual
+
+- API Rest em `src/`
+- Front-end web em `apps/web`
+
+## Deploy web no Vercel
+
+O repositório agora está preparado para publicar o front-end no Vercel usando o app em `apps/web`.
+
+- `vercel.json` configura instalação, build e desenvolvimento para o app web
+- o script de build da raiz delega para `apps/web`
+- o front pode ser validado localmente com:
+
+```bash
+npm run web:lint
+npm run web:build
+```
+
+Para rodar localmente o front:
+
+```bash
+npm run web:dev
+```
+
+O README específico do app web está em [apps/web/README.md](/Users/otnielmata/projects/FlowJL/.worktrees/front-web/apps/web/README.md:1).
+
 # Flow JL API
 
 Estrutura inicial da API Rest do projeto Flow JL, construída com JavaScript, Express, autenticação JWT e conexão com MongoDB.
