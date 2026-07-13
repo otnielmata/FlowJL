@@ -28,6 +28,7 @@ import "../models/reel.model.js";
 import "../models/role.model.js";
 import "../models/smart-schedule.model.js";
 import "../models/story-sequence.model.js";
+import "../models/strategy.model.js";
 import "../models/traffic-campaign.model.js";
 import "../models/traffic-creative.model.js";
 import "../models/traffic-pixel.model.js";

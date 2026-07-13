@@ -99,6 +99,15 @@ src
 - `PUT /api/v1/youtube-contents/:contentId`
 - `DELETE /api/v1/youtube-contents/:contentId`
 - `GET /api/v1/dashboards/strategist`
+- `GET /api/v1/strategies`
+- `POST /api/v1/strategies`
+- `GET /api/v1/strategies/:strategyId`
+- `PATCH /api/v1/strategies/:strategyId/draft`
+- `POST /api/v1/strategies/:strategyId/comments`
+- `POST /api/v1/strategies/:strategyId/duplicate`
+- `PATCH /api/v1/strategies/:strategyId/archive`
+- `POST /api/v1/strategies/:strategyId/submit-approval`
+- `POST /api/v1/strategies/:strategyId/generate-ai-content`
 - `POST /api/v1/editorial-calendar`
 - `GET /api/v1/editorial-calendar`
 - `PUT /api/v1/editorial-calendar/:itemId`
@@ -237,6 +246,8 @@ A documentação fica disponível em:
 - A biblioteca de ativos pode ser gerenciada via `POST`, `GET` e `DELETE /api/v1/assets`, permite ativos globais ou vinculados a lançamentos, suporta busca por tipo, tag, lançamento e status, retorna UUID e datas em UTC e preserva histórico por exclusão lógica.
 - Os conteúdos de YouTube podem ser gerenciados via `POST`, `PUT` e `DELETE /api/v1/youtube-contents`, exigem lançamento e linha editorial vigente, mantêm pauta, roteiro, responsável e status rastreável, retornam horários de gravação/publicação em UTC e preservam histórico por exclusão lógica.
 - O dashboard da estrategista pode ser consultado em `GET /api/v1/dashboards/strategist`, aceita filtro opcional por `launchId`, consolida progresso, pendências, atrasos e status por etapa a partir do estado atual dos módulos estratégicos, e exige a permissão `STRATEGIST_DASHBOARD_READ`.
+- As estrategias digitais podem ser gerenciadas via `GET`, `POST`, `PATCH` e ações específicas em `/api/v1/strategies`, com listagem filtrável por status, responsável, lançamento e busca textual, percentual agregado de conclusão por etapa, salvamento progressivo de drafts, comentários preservados, detalhe por abas e ações operacionais de duplicar, arquivar, enviar para aprovação e gerar sugestões de conteúdo com IA.
+- O fluxo da estrategia digital exige vínculo obrigatório com lançamento, produto e expert, restringe edição e submissão por permissões dedicadas (`STRATEGY_CREATE`, `STRATEGY_READ`, `STRATEGY_UPDATE`, `STRATEGY_DUPLICATE`, `STRATEGY_ARCHIVE`, `STRATEGY_SUBMIT_APPROVAL` e `STRATEGY_GENERATE_AI`) e passa a expor indicadores de `pendingChanges` e `lastAutoSavedAt` para apoiar o front-end em autosave e alertas de alterações não salvas.
 - O calendário editorial pode ser gerenciado via `POST`, `GET` e `PUT /api/v1/editorial-calendar`, exige conteúdo base válido com contexto de lançamento, organiza a consulta por período, data, hora e canal em UTC, sincroniza o agendamento com o conteúdo quando aplicável e registra auditoria nas alterações.
 - O cadastro de lançamentos via `POST /api/v1/launches` exige `LAUNCH_CREATE`, persiste marcos operacionais em UTC e rejeita duplicidade ativa com a mesma combinação de nome, produto e período.
 - A consulta de lançamentos via `GET /api/v1/launches/:launchId` exige `LAUNCH_READ` e retorna o histórico versionado das pesquisas de mercado já associadas.

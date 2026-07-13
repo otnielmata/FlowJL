@@ -19,6 +19,7 @@ import { productionChecklistRoutes } from "./production-checklist.routes.js";
 import { reelRoutes } from "./reel.routes.js";
 import { roleRoutes } from "./role.routes.js";
 import { storySequenceRoutes } from "./story-sequence.routes.js";
+import { strategyRoutes } from "./strategy.routes.js";
 import { trafficCampaignRoutes } from "./traffic-campaign.routes.js";
 import { trafficCreativeRoutes } from "./traffic-creative.routes.js";
 import { trafficPixelRoutes } from "./traffic-pixel.routes.js";
@@ -31,7 +32,7 @@ apiRoutes.get("/", (_request, response) => {
   response.status(200).json({
     service: "flow-jl-api",
     version: "v1",
-    modules: ["assets", "audits", "auth", "carousels", "content-approvals", "content-ideas", "content-statuses", "copywritings", "dashboards", "editorial-calendar", "emails", "external-publication", "launches", "production-checklists", "profiles", "publications", "reels", "roles", "stories", "traffic-campaigns", "traffic-creatives", "traffic-pixels", "users", "youtube-contents", "swagger"]
+    modules: ["assets", "audits", "auth", "carousels", "content-approvals", "content-ideas", "content-statuses", "copywritings", "dashboards", "editorial-calendar", "emails", "external-publication", "launches", "production-checklists", "profiles", "publications", "reels", "roles", "stories", "strategies", "traffic-campaigns", "traffic-creatives", "traffic-pixels", "users", "youtube-contents", "swagger"]
   });
 });
 
@@ -54,6 +55,7 @@ apiRoutes.use("/production-checklists", productionChecklistRoutes);
 apiRoutes.use("/reels", reelRoutes);
 apiRoutes.use("/roles", roleRoutes);
 apiRoutes.use("/stories", storySequenceRoutes);
+apiRoutes.use("/strategies", strategyRoutes);
 apiRoutes.use("/traffic-campaigns", trafficCampaignRoutes);
 apiRoutes.use("/traffic-creatives", trafficCreativeRoutes);
 apiRoutes.use("/traffic-pixels", trafficPixelRoutes);

@@ -196,6 +196,48 @@ const corePermissions = [
     module: "strategy"
   },
   {
+    code: "STRATEGY_CREATE",
+    name: "Cadastrar estrategias digitais",
+    description: "Permite iniciar um fluxo estruturado de estrategia digital por lancamento.",
+    module: "strategy"
+  },
+  {
+    code: "STRATEGY_READ",
+    name: "Consultar estrategias digitais",
+    description: "Permite listar e consultar o detalhe operacional das estrategias digitais.",
+    module: "strategy"
+  },
+  {
+    code: "STRATEGY_UPDATE",
+    name: "Salvar etapas da estrategia digital",
+    description: "Permite salvar drafts, comentarios e progresso da estrategia digital.",
+    module: "strategy"
+  },
+  {
+    code: "STRATEGY_DUPLICATE",
+    name: "Duplicar estrategia digital",
+    description: "Permite duplicar uma estrategia existente para reaproveitamento operacional.",
+    module: "strategy"
+  },
+  {
+    code: "STRATEGY_ARCHIVE",
+    name: "Arquivar estrategia digital",
+    description: "Permite arquivar estrategias descontinuadas sem perder historico.",
+    module: "strategy"
+  },
+  {
+    code: "STRATEGY_SUBMIT_APPROVAL",
+    name: "Enviar estrategia para aprovacao",
+    description: "Permite submeter uma estrategia digital concluida para aprovacao.",
+    module: "strategy"
+  },
+  {
+    code: "STRATEGY_GENERATE_AI",
+    name: "Gerar conteudos com IA a partir da estrategia",
+    description: "Permite obter sugestoes operacionais de conteudo a partir da estrategia registrada.",
+    module: "strategy"
+  },
+  {
     code: "CONTENT_IDEA_CREATE",
     name: "Cadastrar ideias de conteudo",
     description: "Permite registrar ideias reaproveitaveis para futuras pecas de conteudo.",
