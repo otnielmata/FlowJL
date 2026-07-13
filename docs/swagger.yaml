@@ -30,6 +30,7 @@ tags:
   - name: Live Events
   - name: Operational Checklists
   - name: Operational Emails
+  - name: Platform Settings
   - name: Profiles
   - name: Users
   - name: Roles
@@ -637,6 +638,50 @@ paths:
           description: JWT ausente ou invalido
         '403':
           description: Acesso negado
+  /api/v1/platform-settings:
+    get:
+      tags: [Platform Settings]
+      summary: Consulta configuracoes globais permitidas para leitura
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Configuracoes retornadas sem expor valores sensiveis
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+  /api/v1/platform-settings/{key}:
+    put:
+      tags: [Platform Settings]
+      summary: Atualiza configuracao global editavel
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: key
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlatformSettingUpdateRequest'
+      responses:
+        '200':
+          description: Configuracao atualizada com auditoria
+        '400':
+          description: Valor invalido para o tipo da configuracao
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Configuracao nao encontrada
+        '409':
+          description: Configuracao nao editavel
   /api/v1/assets:
     post:
       tags: [Assets]
@@ -4944,6 +4989,16 @@ components:
         newPassword:
           type: string
           minLength: 8
+    PlatformSettingUpdateRequest:
+      type: object
+      required: [value]
+      properties:
+        value:
+          oneOf:
+            - type: string
+            - type: number
+            - type: boolean
+            - type: object
     GenerateAiBrandMaterialRequest:
       type: object
       required: [materialType, objective, briefing]

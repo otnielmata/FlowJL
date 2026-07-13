@@ -54,6 +54,8 @@ src
 - `POST /api/v1/auth/change-password`
 - `GET /api/v1/auth/me`
 - `GET /api/v1/audits`
+- `GET /api/v1/platform-settings`
+- `PUT /api/v1/platform-settings/:key`
 - `POST /api/v1/launches/:launchId/ai-brand-materials/generate`
 - `POST /api/v1/ai-brand-materials`
 - `GET /api/v1/ai-brand-materials`
@@ -280,6 +282,7 @@ A documentação fica disponível em:
 - A API rejeita auto-inativação e também impede a inativação do último administrador ativo.
 - A recuperação de senha usa `POST /api/v1/auth/password-recovery` com resposta genérica para qualquer e-mail e `POST /api/v1/auth/password-reset` com token válido de uso único, sem retornar a nova senha ou revelar existência de conta.
 - A alteração de senha autenticada usa `POST /api/v1/auth/change-password`, exige senha atual correta e nova senha válida, persiste apenas o hash, audita a operação e retorna resposta sem senha ou detalhes internos do hash.
+- As configurações globais da plataforma podem ser consultadas via `GET /api/v1/platform-settings` e atualizadas via `PUT /api/v1/platform-settings/:key`, exigem permissões administrativas, persistem entidades com UUID, ocultam valores sensíveis em respostas comuns e auditam alterações.
 - A reativação de colaborador reaproveita `PUT /api/v1/users/:id` com `status = ACTIVE`, limpa `deactivatedAt` e retorna regra clara quando o usuário já está ativo.
 - A inativação de colaborador reaproveita `PUT /api/v1/users/:id` com `status = INACTIVE`, preenche `deactivatedAt` e bloqueia a ação para a própria conta e para o último administrador ativo.
 - A troca de cargo do colaborador reaproveita `PUT /api/v1/users/:id` com `roleId`, exige um cargo existente e ativo e registra a mudança com autor e data.

@@ -82,6 +82,18 @@ const corePermissions = [
     module: "permission"
   },
   {
+    code: "PLATFORM_SETTING_READ",
+    name: "Consultar configuracoes da plataforma",
+    description: "Permite consultar configuracoes globais nao sensiveis da plataforma.",
+    module: "settings"
+  },
+  {
+    code: "PLATFORM_SETTING_UPDATE",
+    name: "Atualizar configuracoes da plataforma",
+    description: "Permite alterar configuracoes globais editaveis com auditoria.",
+    module: "settings"
+  },
+  {
     code: "LAUNCH_CREATE",
     name: "Cadastrar lancamentos",
     description: "Permite cadastrar novos lancamentos da operacao.",

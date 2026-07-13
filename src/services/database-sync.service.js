@@ -31,6 +31,7 @@ import "../models/operational-checklist.model.js";
 import "../models/operational-email.model.js";
 import "../models/password-reset-request.model.js";
 import "../models/permission.model.js";
+import "../models/platform-setting.model.js";
 import "../models/positioning.model.js";
 import "../models/profile.model.js";
 import "../models/production-checklist.model.js";
@@ -50,6 +51,7 @@ import "../models/traffic-report-snapshot.model.js";
 import "../models/user.model.js";
 import "../models/youtube-content.model.js";
 import { accessSeedService } from "./access-seed.service.js";
+import { ensureDefaultSettings } from "./platform-setting.service.js";
 
 function isCollectionAlreadyExistsError(error) {
   return error?.code === 48 || error?.codeName === "NamespaceExists";
@@ -73,11 +75,13 @@ class DatabaseSyncService {
     }
 
     await accessSeedService.ensureCoreAccessSeed();
+    await ensureDefaultSettings();
 
     return {
       syncedModels,
       syncedModelsCount: syncedModels.length,
-      accessSeedApplied: true
+      accessSeedApplied: true,
+      platformSettingsSeedApplied: true
     };
   }
 }

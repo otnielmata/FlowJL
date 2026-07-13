@@ -17,6 +17,8 @@ export const roleCatalog = [
       "ROLE_READ",
       "AUDIT_READ",
       "PERMISSION_READ",
+      "PLATFORM_SETTING_READ",
+      "PLATFORM_SETTING_UPDATE",
       "LAUNCH_CREATE",
       "LAUNCH_READ",
       "MARKET_RESEARCH_CREATE",
