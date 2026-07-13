@@ -56,6 +56,7 @@ describe("app", () => {
     expect(response.body.modules).toContain("operational-schedules");
     expect(response.body.modules).toContain("operations-management");
     expect(response.body.modules).toContain("platform-settings");
+    expect(response.body.modules).toContain("settings");
     expect(response.body.modules).toContain("students");
     expect(response.body.modules).toContain("support-tickets");
     expect(response.body.modules).toContain("ai-schedules");

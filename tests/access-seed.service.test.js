@@ -56,6 +56,8 @@ describe("accessSeedService.ensureCoreAccessSeed", () => {
       "USER_CHANGE_ROLE",
       "PLATFORM_SETTING_READ",
       "PLATFORM_SETTING_UPDATE",
+      "SETTINGS_PERSONAL_READ",
+      "SETTINGS_PERSONAL_UPDATE",
       "LAUNCH_CREATE",
       "LAUNCH_READ",
       "MARKET_RESEARCH_CREATE",

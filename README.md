@@ -56,6 +56,10 @@ src
 - `GET /api/v1/audits`
 - `GET /api/v1/platform-settings`
 - `PUT /api/v1/platform-settings/:key`
+- `GET /api/v1/settings/personal`
+- `PUT /api/v1/settings/personal`
+- `GET /api/v1/settings/admin/overview`
+- `GET /api/v1/settings/sections/:sectionKey`
 - `POST /api/v1/ai-assistant/conversations`
 - `GET /api/v1/ai-assistant/conversations`
 - `GET /api/v1/ai-assistant/conversations/:conversationId`

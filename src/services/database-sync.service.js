@@ -55,6 +55,7 @@ import "../models/traffic-creative.model.js";
 import "../models/traffic-pixel.model.js";
 import "../models/traffic-report-snapshot.model.js";
 import "../models/user.model.js";
+import "../models/user-preference.model.js";
 import "../models/youtube-content.model.js";
 import { accessSeedService } from "./access-seed.service.js";
 import { ensureDefaultSettings } from "./platform-setting.service.js";

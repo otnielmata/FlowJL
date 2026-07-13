@@ -169,8 +169,8 @@ const sidebarModuleDefinitions = [
     label: "Configuracoes",
     href: "/configuracoes",
     icon: "settings",
-    requiredPermissions: ["USER_LIST", "ROLE_READ", "PERMISSION_READ"],
-    implemented: false
+    requiredPermissions: ["SETTINGS_PERSONAL_READ", "USER_LIST", "ROLE_READ", "PERMISSION_READ"],
+    implemented: true
   }
 ];
 
