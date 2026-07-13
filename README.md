@@ -82,6 +82,11 @@ src
 - `GET /api/v1/content-ideas`
 - `DELETE /api/v1/content-ideas/:ideaId`
 - `POST /api/v1/content-approvals/:contentType/:contentId/status`
+- `POST /api/v1/content-productions`
+- `GET /api/v1/content-productions`
+- `GET /api/v1/content-productions/:contentId`
+- `PUT /api/v1/content-productions/:contentId`
+- `POST /api/v1/content-productions/:contentId/actions`
 - `POST /api/v1/content-statuses/:contentType/:contentId`
 - `GET /api/v1/content-statuses/:contentType/:contentId/history`
 - `POST /api/v1/carousels`
@@ -312,6 +317,7 @@ A documentação fica disponível em:
 - O mapeamento de permissões por cargo via `PUT /api/v1/roles/:code/permissions` rejeita códigos inexistentes e passa a influenciar diretamente a autorização dos endpoints protegidos.
 - A trilha de auditoria inicial pode ser consultada em `GET /api/v1/audits` por usuários com `AUDIT_READ` e registra criação, atualização, inativação, mudança de cargo e autenticação bem-sucedida.
 - O banco de ideias pode ser gerenciado via `POST`, `GET` e `DELETE /api/v1/content-ideas`, aceita vínculo opcional com lançamento, filtra por `launchId`, `objective`, `status` e `active`, preserva autoria e histórico por exclusão lógica, e audita criação e inativação.
+- A produção de conteúdo multicanal pode ser gerenciada via `POST`, `GET`, `GET /:contentId`, `PUT` e `POST /api/v1/content-productions/:contentId/actions`, exige vínculo com lançamento, objetivo, formato, canal e responsável, oferece editor validado com anexos e referências, mantém versões comparáveis com histórico acessível, registra ações de IA e aprovação, preserva motivo de reprovação e permite nova iteração após ajustes.
 - Os carrosséis podem ser produzidos via `POST` e `PUT /api/v1/carousels`, exigem vínculo com lançamento ou plano de conteúdo, mantêm UUID, cards estruturados, status operacional, revisão auditável e responsável pela peça, e permitem evolução do conteúdo sem perder trilha de auditoria.
 - Os reels podem ser produzidos via `POST` e `PUT /api/v1/reels`, exigem contexto mínimo de lançamento ou plano de conteúdo, mantêm status operacional, trilha de aprovação compatível com o módulo, datas em UTC quando houver agendamento, e auditoria nas alterações de roteiro, legenda e status.
 - As sequências de stories podem ser produzidas via `POST` e `PUT /api/v1/stories`, aceitam vínculo com lançamento ou cronograma inteligente, mantêm blocos ordenados, status de produção, responsável e prazo de publicação em UTC, e registram auditoria nas alterações.

@@ -277,6 +277,30 @@ const corePermissions = [
     module: "content"
   },
   {
+    code: "CONTENT_PRODUCTION_CREATE",
+    name: "Cadastrar producoes de conteudo",
+    description: "Permite iniciar pecas multicanal com editor estruturado e anexos.",
+    module: "content"
+  },
+  {
+    code: "CONTENT_PRODUCTION_READ",
+    name: "Consultar producoes de conteudo",
+    description: "Permite listar e consultar detalhe, versoes, historico e aprovador das pecas.",
+    module: "content"
+  },
+  {
+    code: "CONTENT_PRODUCTION_UPDATE",
+    name: "Atualizar producoes de conteudo",
+    description: "Permite editar pecas, gerar novas versoes e controlar status do fluxo.",
+    module: "content"
+  },
+  {
+    code: "CONTENT_PRODUCTION_ACTION",
+    name: "Executar acoes de IA e aprovacao em conteudos",
+    description: "Permite solicitar reescrita, resumo, variacao, adaptacao de canal e envio para aprovacao.",
+    module: "content"
+  },
+  {
     code: "ASSET_LIBRARY_CREATE",
     name: "Cadastrar ativos reutilizaveis",
     description: "Permite registrar ativos reutilizaveis na biblioteca operacional.",
