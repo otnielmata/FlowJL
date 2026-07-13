@@ -11,6 +11,7 @@ tags:
   - name: AI Historical Contents
   - name: AI Metric Insights
   - name: AI Schedules
+  - name: AI Team Automations
   - name: Assets
   - name: Audit
   - name: Auth
@@ -319,6 +320,113 @@ paths:
           description: Acesso negado
         '404':
           description: Sugestao nao encontrada
+  /api/v1/ai-team-automations:
+    post:
+      tags: [AI Team Automations]
+      summary: Configura automacao recorrente da equipe com controle seguro
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AiTeamAutomationRequest'
+      responses:
+        '201':
+          description: Automacao registrada com gatilho, regra e acao automatizada
+        '400':
+          description: Regra insegura, permissao ausente ou contexto insuficiente
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Contexto de negocio nao encontrado
+  /api/v1/ai-team-automations/{automationId}:
+    get:
+      tags: [AI Team Automations]
+      summary: Consulta automacao recorrente e execucoes registradas
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: automationId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Automacao retornada sem segredos internos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Automacao nao encontrada
+  /api/v1/ai-team-automations/{automationId}/active:
+    patch:
+      tags: [AI Team Automations]
+      summary: Ativa ou inativa automacao recorrente
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: automationId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AiTeamAutomationActiveRequest'
+      responses:
+        '200':
+          description: Estado da automacao atualizado
+        '400':
+          description: Automacao nao atende aos controles seguros para ativacao
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Automacao nao encontrada
+  /api/v1/ai-team-automations/{automationId}/execute:
+    post:
+      tags: [AI Team Automations]
+      summary: Executa automacao ativa dentro das regras configuradas
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: automationId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AiTeamAutomationExecuteRequest'
+      responses:
+        '200':
+          description: Automacao executada e resultado registrado
+        '400':
+          description: Regra insegura ou contexto invalido
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Automacao nao encontrada
+        '409':
+          description: Automacao inativa ou gatilho divergente
   /api/v1/ai-schedules:
     post:
       tags: [AI Schedules]
@@ -5001,6 +5109,80 @@ components:
                 type: string
               value:
                 type: number
+    AiTeamAutomationRequest:
+      type: object
+      required: [name, description, trigger, rule, action]
+      properties:
+        name:
+          type: string
+          minLength: 3
+          maxLength: 160
+        description:
+          type: string
+          minLength: 8
+          maxLength: 1000
+        trigger:
+          type: object
+          required: [type]
+          properties:
+            type:
+              type: string
+              enum: [SCHEDULED, EVENT, MANUAL]
+            eventName:
+              type: string
+              nullable: true
+            scheduleExpression:
+              type: string
+              nullable: true
+        rule:
+          type: object
+          required: [contextType, requiredPermission]
+          properties:
+            contextType:
+              type: string
+              enum: [LAUNCH, GLOBAL, OPERATION]
+            contextId:
+              type: string
+              format: uuid
+              nullable: true
+            requiredPermission:
+              type: string
+            allowGlobalContext:
+              type: boolean
+            conditions:
+              type: array
+              items:
+                type: string
+        action:
+          type: object
+          required: [type, targetModule]
+          properties:
+            type:
+              type: string
+              enum: [CREATE_OPERATIONAL_CHECKLIST, CREATE_SUPPORT_TICKET, SEND_OPERATIONAL_REMINDER, REGISTER_OPERATION_LOG]
+            targetModule:
+              type: string
+            payloadTemplate:
+              type: object
+              additionalProperties: true
+            secretConfig:
+              type: object
+              nullable: true
+              additionalProperties: true
+        active:
+          type: boolean
+    AiTeamAutomationActiveRequest:
+      type: object
+      required: [active]
+      properties:
+        active:
+          type: boolean
+    AiTeamAutomationExecuteRequest:
+      type: object
+      properties:
+        triggerPayload:
+          type: object
+          additionalProperties: true
     GenerateAiScheduleRequest:
       type: object
       required: [objective, briefing]

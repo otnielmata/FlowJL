@@ -62,6 +62,10 @@ src
 - `DELETE /api/v1/ai-historical-contents/:contentId`
 - `POST /api/v1/ai-metric-insights`
 - `GET /api/v1/ai-metric-insights/:insightId`
+- `POST /api/v1/ai-team-automations`
+- `GET /api/v1/ai-team-automations/:automationId`
+- `PATCH /api/v1/ai-team-automations/:automationId/active`
+- `POST /api/v1/ai-team-automations/:automationId/execute`
 - `POST /api/v1/launches/:launchId/ai-schedules/generate`
 - `POST /api/v1/ai-schedules`
 - `GET /api/v1/ai-schedules`
@@ -307,6 +311,7 @@ A documentação fica disponível em:
 - Roteiros, copies e e-mails no estilo da marca podem ser gerados via `POST /api/v1/launches/:launchId/ai-brand-materials/generate` e persistidos via `POST /api/v1/ai-brand-materials`, exigem objetivo, formato, briefing e identidade da marca vigente, salvam versões revisáveis por humano, não expõem segredos/prompts/fontes sensíveis e mantêm auditoria.
 - O acervo histórico de maior desempenho pode ser gerenciado via `POST`, `GET`, `GET /:contentId`, `POST /recommendations` e `DELETE /api/v1/ai-historical-contents`, permite cadastrar conteúdos classificados por performance, pesquisar por objetivo, formato, lançamento, origem e tags, recomendar reaproveitamento para novo lançamento, distinguir conteúdo original de reaproveitado, não expõe notas sensíveis e usa exclusão lógica.
 - Sugestões de melhoria baseadas em métricas anteriores podem ser geradas via `POST /api/v1/ai-metric-insights` e consultadas via `GET /api/v1/ai-metric-insights/:insightId`, usam snapshots de tráfego e acervo histórico como base auditável, retornam recomendações estruturadas com justificativas, exigem revisão humana, não expõem detalhes internos de processamento e sinalizam insuficiência de contexto quando não houver dados mínimos.
+- Automações recorrentes da equipe podem ser configuradas via `POST /api/v1/ai-team-automations`, consultadas via `GET /:automationId`, ativadas ou inativadas via `PATCH /:automationId/active` e executadas via `POST /:automationId/execute`, exigem gatilho, regra, permissão e contexto seguro, registram resultado auditável e não expõem segredos ou detalhes internos da implementação.
 - As aprovações de conteúdo podem ser gerenciadas via `POST /api/v1/content-approvals/:contentType/:contentId/status`, respeitam a ordem `CREATED -> REVIEW -> EXPERT -> APPROVED -> PUBLISHED`, exigem permissões por etapa, registram observações de aprovação ou reprovação no histórico e impedem publicação antes da aprovação.
 - A biblioteca de ativos pode ser gerenciada via `POST`, `GET` e `DELETE /api/v1/assets`, permite ativos globais ou vinculados a lançamentos, suporta busca por tipo, tag, lançamento e status, retorna UUID e datas em UTC e preserva histórico por exclusão lógica.
 - Os conteúdos de YouTube podem ser gerenciados via `POST`, `PUT` e `DELETE /api/v1/youtube-contents`, exigem lançamento e linha editorial vigente, mantêm pauta, roteiro, responsável e status rastreável, retornam horários de gravação/publicação em UTC e preservam histórico por exclusão lógica.
