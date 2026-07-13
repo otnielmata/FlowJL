@@ -776,6 +776,24 @@ const corePermissions = [
     name: "Consultar cronogramas gerados por IA",
     description: "Permite consultar cronogramas gerados por IA e seus metadados seguros.",
     module: "corporate-ai"
+  },
+  {
+    code: "AI_BRAND_MATERIAL_GENERATE",
+    name: "Gerar materiais no estilo da marca",
+    description: "Permite gerar roteiros, copies e e-mails com IA usando contexto de marca.",
+    module: "corporate-ai"
+  },
+  {
+    code: "AI_BRAND_MATERIAL_CREATE",
+    name: "Salvar materiais gerados por IA",
+    description: "Permite persistir materiais de IA versionaveis para edicao humana.",
+    module: "corporate-ai"
+  },
+  {
+    code: "AI_BRAND_MATERIAL_READ",
+    name: "Consultar materiais gerados por IA",
+    description: "Permite consultar materiais gerados por IA e seus metadados seguros.",
+    module: "corporate-ai"
   }
 ];
 
