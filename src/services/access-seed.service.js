@@ -427,6 +427,18 @@ const corePermissions = [
     module: "content"
   },
   {
+    code: "APPROVALS_MANAGEMENT_READ",
+    name: "Consultar central de aprovacoes",
+    description: "Permite consultar fila, abas, detalhes, comentarios, historico e comparacoes da central de aprovacoes.",
+    module: "approvals"
+  },
+  {
+    code: "APPROVALS_MANAGEMENT_DECIDE",
+    name: "Decidir na central de aprovacoes",
+    description: "Permite iniciar decisoes de aprovar, reprovar ou solicitar ajuste na central de aprovacoes, respeitando as permissoes do fluxo base.",
+    module: "approvals"
+  },
+  {
     code: "STRATEGIST_DASHBOARD_READ",
     name: "Consultar dashboard da estrategista",
     description: "Permite consultar indicadores consolidados do modulo estrategico por lancamento.",

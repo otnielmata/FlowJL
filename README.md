@@ -82,6 +82,9 @@ src
 - `GET /api/v1/content-ideas`
 - `DELETE /api/v1/content-ideas/:ideaId`
 - `POST /api/v1/content-approvals/:contentType/:contentId/status`
+- `GET /api/v1/approvals-management`
+- `GET /api/v1/approvals-management/:approvalType/:approvalId`
+- `POST /api/v1/approvals-management/:approvalType/:approvalId/decision`
 - `POST /api/v1/content-productions`
 - `GET /api/v1/content-productions`
 - `GET /api/v1/content-productions/:contentId`
