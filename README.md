@@ -9,10 +9,14 @@ Repositório principal do Flow JL com a API Rest e o front-end web da plataforma
 
 ## Deploy web no Vercel
 
-O repositório agora está preparado para publicar o front-end no Vercel usando o app em `apps/web`.
+O front-end web deve ser publicado no Vercel usando:
 
-- `vercel.json` configura instalação, build e desenvolvimento para o app web
-- o script de build da raiz delega para `apps/web`
+- `Root Directory = apps/web`
+- `Framework Preset = Next.js`
+
+Com essa configuração, o Vercel detecta e builda o app diretamente dentro de `apps/web`.
+
+- o script de build da raiz continua disponível para validação local
 - o front pode ser validado localmente com:
 
 ```bash
