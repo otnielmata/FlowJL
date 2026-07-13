@@ -20,6 +20,7 @@ import { asyncHandler } from "../utils/async-handler.js";
 export const launchRoutes = Router();
 
 launchRoutes.post("/", authMiddleware, asyncHandler(requirePermission("LAUNCH_CREATE")), asyncHandler(launchController.create.bind(launchController)));
+launchRoutes.get("/", authMiddleware, asyncHandler(requirePermission("LAUNCH_READ")), asyncHandler(launchController.list.bind(launchController)));
 launchRoutes.get("/:launchId", authMiddleware, asyncHandler(requirePermission("LAUNCH_READ")), asyncHandler(launchController.getById.bind(launchController)));
 launchRoutes.post(
   "/:launchId/market-researches",
