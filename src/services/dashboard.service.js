@@ -161,8 +161,8 @@ const sidebarModuleDefinitions = [
     label: "Relatorios",
     href: "/relatorios",
     icon: "line-chart",
-    requiredPermissions: ["DASHBOARD_OVERVIEW_READ", "STRATEGIST_DASHBOARD_READ"],
-    implemented: false
+    requiredPermissions: ["REPORTS_READ"],
+    implemented: true
   },
   {
     key: "settings",

@@ -195,6 +195,10 @@ src
 - `DELETE /api/v1/traffic-conversion-events/:eventId`
 - `GET /api/v1/traffic-reports`
 - `GET /api/v1/traffic-roi`
+- `GET /api/v1/reports/analytics`
+- `POST /api/v1/reports/exports`
+- `GET /api/v1/reports/views`
+- `POST /api/v1/reports/views`
 - `POST /api/v1/youtube-contents`
 - `PUT /api/v1/youtube-contents/:contentId`
 - `DELETE /api/v1/youtube-contents/:contentId`
