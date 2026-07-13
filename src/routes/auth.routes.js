@@ -9,4 +9,6 @@ export const authRoutes = Router();
 authRoutes.post("/login", asyncHandler(authController.login.bind(authController)));
 authRoutes.post("/refresh", asyncHandler(authController.refresh.bind(authController)));
 authRoutes.post("/logout", asyncHandler(authController.logout.bind(authController)));
+authRoutes.post("/password-recovery", asyncHandler(authController.requestPasswordRecovery.bind(authController)));
+authRoutes.post("/password-reset", asyncHandler(authController.resetPassword.bind(authController)));
 authRoutes.get("/me", authMiddleware, asyncHandler(authController.me.bind(authController)));

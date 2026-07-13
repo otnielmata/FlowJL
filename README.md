@@ -49,6 +49,8 @@ src
 - `POST /api/v1/auth/login`
 - `POST /api/v1/auth/refresh`
 - `POST /api/v1/auth/logout`
+- `POST /api/v1/auth/password-recovery`
+- `POST /api/v1/auth/password-reset`
 - `GET /api/v1/auth/me`
 - `GET /api/v1/audits`
 - `POST /api/v1/launches/:launchId/ai-brand-materials/generate`
@@ -275,6 +277,7 @@ A documentação fica disponível em:
 - A consulta de colaboradores usa permissões de papel: `USER_LIST` para listagem e `USER_READ` para consulta individual.
 - A manutenção de colaboradores via `PUT /api/v1/users/:id` exige as permissões adequadas por ação: `USER_UPDATE`, `USER_CHANGE_ROLE`, `USER_ACTIVATE` e `USER_DEACTIVATE`.
 - A API rejeita auto-inativação e também impede a inativação do último administrador ativo.
+- A recuperação de senha usa `POST /api/v1/auth/password-recovery` com resposta genérica para qualquer e-mail e `POST /api/v1/auth/password-reset` com token válido de uso único, sem retornar a nova senha ou revelar existência de conta.
 - A reativação de colaborador reaproveita `PUT /api/v1/users/:id` com `status = ACTIVE`, limpa `deactivatedAt` e retorna regra clara quando o usuário já está ativo.
 - A inativação de colaborador reaproveita `PUT /api/v1/users/:id` com `status = INACTIVE`, preenche `deactivatedAt` e bloqueia a ação para a própria conta e para o último administrador ativo.
 - A troca de cargo do colaborador reaproveita `PUT /api/v1/users/:id` com `roleId`, exige um cargo existente e ativo e registra a mudança com autor e data.

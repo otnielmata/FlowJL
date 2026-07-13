@@ -560,6 +560,38 @@ paths:
           description: Sessao encerrada
         '401':
           description: Refresh token invalido ou expirado
+  /api/v1/auth/password-recovery:
+    post:
+      tags: [Auth]
+      summary: Solicita recuperacao de senha sem revelar se o e-mail existe
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordRecoveryRequest'
+      responses:
+        '202':
+          description: Pedido recebido com resposta generica
+        '400':
+          description: E-mail invalido
+  /api/v1/auth/password-reset:
+    post:
+      tags: [Auth]
+      summary: Redefine a senha usando um pedido de recuperacao valido
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordResetRequest'
+      responses:
+        '200':
+          description: Senha redefinida sem retornar a nova credencial
+        '400':
+          description: Pedido invalido, expirado, usado ou senha fora da politica
+        '403':
+          description: Redefinicao nao permitida para o usuario
   /api/v1/auth/me:
     get:
       tags: [Auth]
@@ -4865,6 +4897,22 @@ components:
       properties:
         refreshToken:
           type: string
+    PasswordRecoveryRequest:
+      type: object
+      required: [email]
+      properties:
+        email:
+          type: string
+          format: email
+    PasswordResetRequest:
+      type: object
+      required: [token, newPassword]
+      properties:
+        token:
+          type: string
+        newPassword:
+          type: string
+          minLength: 8
     GenerateAiBrandMaterialRequest:
       type: object
       required: [materialType, objective, briefing]
