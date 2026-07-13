@@ -818,6 +818,18 @@ const corePermissions = [
     name: "Inativar conteudos historicos",
     description: "Permite realizar exclusao logica de itens do acervo historico.",
     module: "corporate-ai"
+  },
+  {
+    code: "AI_METRIC_INSIGHT_GENERATE",
+    name: "Gerar sugestoes por metricas historicas",
+    description: "Permite gerar sugestoes estruturadas com base em metricas historicas auditaveis.",
+    module: "corporate-ai"
+  },
+  {
+    code: "AI_METRIC_INSIGHT_READ",
+    name: "Consultar sugestoes por metricas historicas",
+    description: "Permite consultar sugestoes geradas e sua base historica segura.",
+    module: "corporate-ai"
   }
 ];
 
