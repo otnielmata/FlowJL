@@ -830,6 +830,30 @@ const corePermissions = [
     name: "Consultar sugestoes por metricas historicas",
     description: "Permite consultar sugestoes geradas e sua base historica segura.",
     module: "corporate-ai"
+  },
+  {
+    code: "AI_TEAM_AUTOMATION_CREATE",
+    name: "Configurar automacoes recorrentes",
+    description: "Permite configurar automacoes recorrentes com gatilho, regra e acao segura.",
+    module: "corporate-ai"
+  },
+  {
+    code: "AI_TEAM_AUTOMATION_READ",
+    name: "Consultar automacoes recorrentes",
+    description: "Permite consultar automacoes recorrentes e seus resultados seguros.",
+    module: "corporate-ai"
+  },
+  {
+    code: "AI_TEAM_AUTOMATION_UPDATE",
+    name: "Ativar ou inativar automacoes recorrentes",
+    description: "Permite ativar ou inativar automacoes recorrentes com controle seguro.",
+    module: "corporate-ai"
+  },
+  {
+    code: "AI_TEAM_AUTOMATION_EXECUTE",
+    name: "Executar automacoes recorrentes",
+    description: "Permite executar automacoes ativas respeitando gatilho, regra e contexto.",
+    module: "corporate-ai"
   }
 ];
 
