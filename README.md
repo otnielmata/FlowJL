@@ -245,7 +245,7 @@ Executa os testes básicos da aplicação.
 pnpm db:sync
 ```
 
-Conecta no MongoDB configurado em `MONGODB_URI`, cria coleções e índices dos models registrados e aplica o seed idempotente de cargos e permissões.
+Conecta no MongoDB configurado em `MONGODB_URI`, cria coleções e índices dos models registrados e aplica o seed idempotente de cargos e permissões. O seed de acesso garante a matriz mínima entre `Role` e `Permission`, preserva permissões extras adicionadas manualmente aos cargos e registra auditoria quando persistir alterações.
 
 ## Como rodar localmente
 

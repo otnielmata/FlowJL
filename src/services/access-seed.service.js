@@ -1,6 +1,9 @@
 import { Permission } from "../models/permission.model.js";
 import { Role } from "../models/role.model.js";
+import { auditService } from "./audit.service.js";
 import { roleCatalog } from "./role-catalog.js";
+
+const seedAuditTargetId = "core-access-seed";
 
 const corePermissions = [
   {
@@ -869,10 +872,18 @@ const corePermissions = [
   }
 ];
 
+function getWriteCount(result) {
+  return (result?.modifiedCount ?? 0) + (result?.upsertedCount ?? 0);
+}
+
 class AccessSeedService {
   async ensureCoreAccessSeed() {
+    let permissionWrites = 0;
+    let roleWrites = 0;
+    let rolePermissionWrites = 0;
+
     for (const permission of corePermissions) {
-      await Permission.updateOne(
+      const result = await Permission.updateOne(
         { code: permission.code },
         {
           $setOnInsert: {
@@ -887,6 +898,7 @@ class AccessSeedService {
         },
         { upsert: true }
       );
+      permissionWrites += getWriteCount(result);
     }
 
     const permissions = await Permission.find(
@@ -895,7 +907,7 @@ class AccessSeedService {
           $in: corePermissions.map((permission) => permission.code)
         }
       },
-      { _id: 1 }
+      { _id: 1, code: 1 }
     ).sort({ code: 1 });
 
     for (const role of roleCatalog) {
@@ -903,23 +915,65 @@ class AccessSeedService {
         .filter((permission) => role.permissionCodes.includes(permission.code))
         .map((permission) => permission._id);
 
-      await Role.updateOne(
+      const roleResult = await Role.updateOne(
         { code: role.code },
         {
           $setOnInsert: {
-            code: role.code
+            code: role.code,
+            permissionIds
           },
           $set: {
             name: role.name,
             description: role.description,
-            permissionIds,
             active: true
           }
         },
         { upsert: true }
       );
+      roleWrites += getWriteCount(roleResult);
+
+      const matrixResult = await Role.updateOne(
+        { code: role.code },
+        {
+          $addToSet: {
+            permissionIds: {
+              $each: permissionIds
+            }
+          }
+        }
+      );
+      rolePermissionWrites += getWriteCount(matrixResult);
     }
+
+    const totalWrites = permissionWrites + roleWrites + rolePermissionWrites;
+
+    if (totalWrites > 0) {
+      await auditService.record({
+        actorUserId: null,
+        action: "CORE_ACCESS_SEED_APPLIED",
+        targetType: "CORE_ACCESS_SEED",
+        targetId: seedAuditTargetId,
+        context: {
+          permissionCatalogSize: corePermissions.length,
+          roleCatalogSize: roleCatalog.length,
+          permissionWrites,
+          roleWrites,
+          rolePermissionWrites,
+          preservesManualRolePermissions: true
+        }
+      });
+    }
+
+    return {
+      permissionCatalogSize: corePermissions.length,
+      roleCatalogSize: roleCatalog.length,
+      permissionWrites,
+      roleWrites,
+      rolePermissionWrites,
+      auditRecorded: totalWrites > 0
+    };
   }
 }
 
 export const accessSeedService = new AccessSeedService();
+export { corePermissions };
