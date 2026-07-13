@@ -37,3 +37,9 @@ operationalScheduleRoutes.put(
   asyncHandler(requirePermission("OPERATIONAL_SCHEDULE_UPDATE")),
   asyncHandler(operationalScheduleController.update.bind(operationalScheduleController))
 );
+operationalScheduleRoutes.post(
+  "/:activityId/execution",
+  authMiddleware,
+  asyncHandler(requirePermission("OPERATIONAL_SCHEDULE_UPDATE")),
+  asyncHandler(operationalScheduleController.recordExecution.bind(operationalScheduleController))
+);

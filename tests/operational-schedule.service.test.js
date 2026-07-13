@@ -9,6 +9,9 @@ const operationalScheduleModel = {
 };
 
 const launchModel = { findById: vi.fn() };
+const classScheduleModel = { findById: vi.fn() };
+const liveEventModel = { findById: vi.fn() };
+const operationalChecklistModel = { findById: vi.fn() };
 const auditServiceMock = { record: vi.fn() };
 
 vi.mock("../src/models/operational-schedule.model.js", () => ({
@@ -17,9 +20,13 @@ vi.mock("../src/models/operational-schedule.model.js", () => ({
   operationalScheduleAreas: ["OPERATIONS", "CONTENT", "SOCIAL_MEDIA", "TRAFFIC", "DESIGN", "COPY", "SALES", "LAUNCH"],
   operationalSchedulePriorities: ["LOW", "MEDIUM", "HIGH", "CRITICAL"],
   operationalScheduleStatuses: ["BACKLOG", "PLANNED", "IN_PROGRESS", "IN_REVIEW", "BLOCKED", "DONE", "CANCELED"],
-  operationalScheduleTypes: ["TASK", "MEETING", "APPROVAL", "DELIVERY", "PUBLISHING", "AUTOMATION"]
+  operationalScheduleTypes: ["TASK", "MEETING", "APPROVAL", "DELIVERY", "PUBLISHING", "AUTOMATION"],
+  operationalScheduleRecurrenceFrequencies: ["NONE", "DAILY", "WEEKLY", "MONTHLY"]
 }));
 vi.mock("../src/models/launch.model.js", () => ({ Launch: launchModel }));
+vi.mock("../src/models/class-schedule.model.js", () => ({ ClassSchedule: classScheduleModel }));
+vi.mock("../src/models/live-event.model.js", () => ({ LiveEvent: liveEventModel }));
+vi.mock("../src/models/operational-checklist.model.js", () => ({ OperationalChecklist: operationalChecklistModel }));
 vi.mock("../src/services/audit.service.js", () => ({ auditService: auditServiceMock }));
 
 const { operationalScheduleService } = await import("../src/services/operational-schedule.service.js");
@@ -82,6 +89,9 @@ describe("operationalScheduleService", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     launchModel.findById.mockResolvedValue({ id: "launch-1", active: true });
+    classScheduleModel.findById.mockResolvedValue({ id: "class-1", active: true, launchId: "launch-1" });
+    liveEventModel.findById.mockResolvedValue({ id: "live-1", active: true, launchId: "launch-1" });
+    operationalChecklistModel.findById.mockResolvedValue({ id: "checklist-1", active: true });
     auditServiceMock.record.mockResolvedValue(undefined);
     operationalScheduleModel.updateOne.mockResolvedValue({ acknowledged: true, modifiedCount: 1 });
     operationalScheduleModel.bulkWrite.mockResolvedValue({ acknowledged: true, modifiedCount: 1 });
@@ -128,6 +138,70 @@ describe("operationalScheduleService", () => {
     );
     expect(result.attachments).toHaveLength(1);
     expect(result.comments).toHaveLength(1);
+  });
+
+  it("creates an operational activity with recurrence, reminders and relationships", async () => {
+    operationalScheduleModel.create.mockResolvedValue(
+      buildSchedule({
+        recurrence: {
+          frequency: "WEEKLY",
+          interval: 1,
+          count: 4,
+          until: new Date("2026-08-30T00:00:00.000Z")
+        },
+        reminder: {
+          enabled: true,
+          remindAt: new Date("2026-07-18T12:00:00.000Z"),
+          channel: "EMAIL"
+        },
+        relationships: {
+          checklistId: "checklist-1",
+          classScheduleId: "class-1",
+          liveEventId: "live-1",
+          relatedLink: "https://meet.example/ops"
+        },
+        attendance: {
+          present: false,
+          checkedBy: null,
+          checkedAt: null
+        },
+        executionHistory: []
+      })
+    );
+    mockSortedFindValue(operationalScheduleModel, []);
+
+    const result = await operationalScheduleService.create("user-1", {
+      launchId: "launch-1",
+      title: "Operacao recorrente",
+      area: "OPERATIONS",
+      priority: "CRITICAL",
+      status: "PLANNED",
+      type: "MEETING",
+      responsible: "Ana",
+      startsAt: "2026-07-18T13:00:00.000Z",
+      dueAt: "2026-07-18T15:00:00.000Z",
+      recurrence: {
+        frequency: "WEEKLY",
+        interval: 1,
+        count: 4,
+        until: "2026-08-30T00:00:00.000Z"
+      },
+      reminder: {
+        enabled: true,
+        remindAt: "2026-07-18T12:00:00.000Z",
+        channel: "EMAIL"
+      },
+      relationships: {
+        checklistId: "checklist-1",
+        classScheduleId: "class-1",
+        liveEventId: "live-1",
+        relatedLink: "https://meet.example/ops"
+      }
+    });
+
+    expect(result.recurrence.frequency).toBe("WEEKLY");
+    expect(result.reminder.enabled).toBe(true);
+    expect(result.relationships.classScheduleId).toBe("class-1");
   });
 
   it("lists activities with persisted filter context and kanban projection", async () => {
@@ -195,7 +269,16 @@ describe("operationalScheduleService", () => {
       startsAt: new Date("2026-07-18T08:00:00.000Z"),
       dueAt: new Date("2026-07-18T10:00:00.000Z")
     });
-    operationalScheduleModel.findById.mockResolvedValue(buildSchedule({ dependencyIds: ["activity-0"] }));
+    operationalScheduleModel.findById.mockResolvedValue(
+      buildSchedule({
+        dependencyIds: ["activity-0"],
+        recurrence: { frequency: "NONE", interval: 1, count: null, until: null },
+        reminder: { enabled: false, remindAt: null, channel: null },
+        relationships: { checklistId: null, classScheduleId: null, liveEventId: null, relatedLink: null },
+        attendance: { present: false, checkedBy: null, checkedAt: null },
+        executionHistory: []
+      })
+    );
     mockSortedFindValue(operationalScheduleModel, [dependency]);
 
     const result = await operationalScheduleService.update("user-2", "activity-1", {
@@ -215,6 +298,54 @@ describe("operationalScheduleService", () => {
       })
     );
     expect(result.status).toBe("IN_PROGRESS");
+  });
+
+  it("records execution progress, attendance and completion history", async () => {
+    const schedule = buildSchedule({
+      status: "IN_PROGRESS",
+      recurrence: { frequency: "NONE", interval: 1, count: null, until: null },
+      reminder: { enabled: false, remindAt: null, channel: null },
+      relationships: { checklistId: "checklist-1", classScheduleId: null, liveEventId: null, relatedLink: null },
+      attendance: { present: false, checkedBy: null, checkedAt: null },
+      executionHistory: []
+    });
+    operationalScheduleModel.findById.mockResolvedValue(schedule);
+    operationalScheduleModel.find.mockReturnValue({
+      sort: vi.fn().mockResolvedValue([schedule])
+    });
+
+    const result = await operationalScheduleService.recordExecution("user-7", "activity-1", {
+      attendance: {
+        present: true
+      },
+      checklist: [
+        {
+          id: "check-2",
+          label: "Oferta revisada",
+          required: true,
+          completed: true
+        }
+      ],
+      status: "DONE",
+      complete: true
+    });
+
+    expect(operationalScheduleModel.updateOne).toHaveBeenCalledWith(
+      { _id: "activity-1" },
+      expect.objectContaining({
+        $set: expect.objectContaining({
+          status: "DONE",
+          updatedBy: "user-7"
+        })
+      })
+    );
+    expect(result.attendance.present).toBe(true);
+    expect(result.executionHistory.at(-1)).toEqual(
+      expect.objectContaining({
+        actionType: "COMPLETED",
+        toStatus: "DONE"
+      })
+    );
   });
 
   it("replans activities in batch and returns refreshed timeline projection", async () => {

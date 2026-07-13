@@ -8,7 +8,7 @@ import {
   operationalScheduleTypes,
   operationalScheduleViews
 } from "../models/operational-schedule.model.js";
-import { operationalScheduleService } from "../services/operational-schedule.service.js";
+import { operationsManagementService } from "../services/operations-management.service.js";
 
 const viewSchema = z.enum(operationalScheduleViews);
 const areaSchema = z.enum(operationalScheduleAreas);
@@ -59,7 +59,29 @@ const relationshipsSchema = z.object({
   relatedLink: z.string().trim().url().optional()
 });
 
-const createOperationalScheduleSchema = z.object({
+const listSchema = z
+  .object({
+    launchId: z.string().uuid().optional(),
+    responsible: z.string().trim().min(2).max(120).optional(),
+    area: areaSchema.optional(),
+    priority: prioritySchema.optional(),
+    status: statusSchema.optional(),
+    type: typeSchema.optional(),
+    startAt: z.string().datetime().optional(),
+    endAt: z.string().datetime().optional(),
+    view: viewSchema.optional()
+  })
+  .superRefine((value, context) => {
+    if (value.startAt && value.endAt && new Date(value.startAt).getTime() > new Date(value.endAt).getTime()) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "startAt must be before or equal to endAt",
+        path: ["startAt"]
+      });
+    }
+  });
+
+const createSchema = z.object({
   launchId: z.string().uuid(),
   title: z.string().trim().min(3).max(180),
   description: z.string().trim().max(2000).optional(),
@@ -81,30 +103,7 @@ const createOperationalScheduleSchema = z.object({
   relationships: relationshipsSchema.optional()
 });
 
-const listOperationalScheduleSchema = z
-  .object({
-    launchId: z.string().uuid().optional(),
-    responsible: z.string().trim().min(2).max(120).optional(),
-    area: areaSchema.optional(),
-    priority: prioritySchema.optional(),
-    status: statusSchema.optional(),
-    type: typeSchema.optional(),
-    startAt: z.string().datetime().optional(),
-    endAt: z.string().datetime().optional(),
-    view: viewSchema.optional(),
-    active: z.enum(["true", "false"]).transform((value) => value === "true").optional()
-  })
-  .superRefine((value, context) => {
-    if (value.startAt && value.endAt && new Date(value.startAt).getTime() > new Date(value.endAt).getTime()) {
-      context.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "startAt must be before or equal to endAt",
-        path: ["startAt"]
-      });
-    }
-  });
-
-const updateOperationalScheduleSchema = z
+const updateSchema = z
   .object({
     title: z.string().trim().min(3).max(180).optional(),
     description: z.string().trim().max(2000).optional(),
@@ -129,39 +128,7 @@ const updateOperationalScheduleSchema = z
     message: "At least one field must be informed"
   });
 
-const replanOperationalScheduleSchema = z.object({
-  view: viewSchema.optional(),
-  filters: z
-    .object({
-      responsible: z.string().trim().min(2).max(120).optional(),
-      area: areaSchema.optional(),
-      priority: prioritySchema.optional(),
-      status: statusSchema.optional(),
-      type: typeSchema.optional(),
-      startAt: z.string().datetime().optional(),
-      endAt: z.string().datetime().optional()
-    })
-    .optional(),
-  items: z
-    .array(
-      z.object({
-        activityId: z.string().uuid(),
-        startsAt: z.string().datetime().optional(),
-        dueAt: z.string().datetime().optional(),
-        status: statusSchema.optional(),
-        timelinePosition: z.number().int().min(0).optional(),
-        dependencyIds: z.array(z.string().uuid()).max(20).optional()
-      })
-    )
-    .min(1)
-    .max(50)
-});
-
-const paramsSchema = z.object({
-  activityId: z.string().uuid()
-});
-
-const recordExecutionSchema = z
+const executionSchema = z
   .object({
     status: statusSchema.optional(),
     attendance: z
@@ -185,50 +152,40 @@ const recordExecutionSchema = z
     message: "At least one field must be informed"
   });
 
-class OperationalScheduleController {
-  async create(request, response) {
-    const payload = createOperationalScheduleSchema.parse(request.body);
-    const schedule = await operationalScheduleService.create(request.auth.sub, payload);
+const paramsSchema = z.object({
+  activityId: z.string().uuid()
+});
 
-    response.status(201).json(schedule);
-  }
-
+class OperationsManagementController {
   async list(request, response) {
-    const filters = listOperationalScheduleSchema.parse(request.query);
-    const schedules = await operationalScheduleService.list(filters);
+    const filters = listSchema.parse(request.query);
+    const result = await operationsManagementService.list(filters);
 
-    response.status(200).json(schedules);
+    response.status(200).json(result);
   }
 
-  async getById(request, response) {
-    const { activityId } = paramsSchema.parse(request.params);
-    const schedule = await operationalScheduleService.getById(activityId);
+  async create(request, response) {
+    const payload = createSchema.parse(request.body);
+    const result = await operationsManagementService.createActivity(request.auth.sub, payload);
 
-    response.status(200).json(schedule);
+    response.status(201).json(result);
   }
 
   async update(request, response) {
     const { activityId } = paramsSchema.parse(request.params);
-    const payload = updateOperationalScheduleSchema.parse(request.body);
-    const schedule = await operationalScheduleService.update(request.auth.sub, activityId, payload);
-
-    response.status(200).json(schedule);
-  }
-
-  async replan(request, response) {
-    const payload = replanOperationalScheduleSchema.parse(request.body);
-    const result = await operationalScheduleService.replan(request.auth.sub, payload);
+    const payload = updateSchema.parse(request.body);
+    const result = await operationsManagementService.updateActivity(request.auth.sub, activityId, payload);
 
     response.status(200).json(result);
   }
 
   async recordExecution(request, response) {
     const { activityId } = paramsSchema.parse(request.params);
-    const payload = recordExecutionSchema.parse(request.body);
-    const result = await operationalScheduleService.recordExecution(request.auth.sub, activityId, payload);
+    const payload = executionSchema.parse(request.body);
+    const result = await operationsManagementService.recordExecution(request.auth.sub, activityId, payload);
 
     response.status(200).json(result);
   }
 }
 
-export const operationalScheduleController = new OperationalScheduleController();
+export const operationsManagementController = new OperationsManagementController();

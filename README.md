@@ -100,6 +100,11 @@ src
 - `POST /api/v1/operational-schedules/replan`
 - `GET /api/v1/operational-schedules/:activityId`
 - `PUT /api/v1/operational-schedules/:activityId`
+- `POST /api/v1/operational-schedules/:activityId/execution`
+- `GET /api/v1/operations-management/activities`
+- `POST /api/v1/operations-management/activities`
+- `PUT /api/v1/operations-management/activities/:activityId`
+- `POST /api/v1/operations-management/activities/:activityId/execution`
 - `POST /api/v1/live-events`
 - `GET /api/v1/live-events`
 - `PUT /api/v1/live-events/:liveEventId`
