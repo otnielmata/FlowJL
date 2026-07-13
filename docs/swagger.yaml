@@ -8,6 +8,7 @@ servers:
 tags:
   - name: Health
   - name: AI Brand Materials
+  - name: AI Historical Contents
   - name: AI Schedules
   - name: Assets
   - name: Audit
@@ -130,6 +131,146 @@ paths:
           description: Acesso negado
         '404':
           description: Material nao encontrado
+  /api/v1/ai-historical-contents:
+    post:
+      tags: [AI Historical Contents]
+      summary: Cadastra conteudo historico classificado por desempenho
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AiHistoricalContentRequest'
+      responses:
+        '201':
+          description: Conteudo historico cadastrado sem expor notas sensiveis
+        '400':
+          description: Dados obrigatorios ausentes ou invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado ao acervo estrategico
+        '404':
+          description: Lancamento nao encontrado
+    get:
+      tags: [AI Historical Contents]
+      summary: Consulta conteudos historicos relevantes por objetivo, formato ou lancamento
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: launchId
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: format
+          required: false
+          schema:
+            type: string
+            enum: [REEL, CAROUSEL, STORY_SEQUENCE, EMAIL, YOUTUBE, AD, LANDING_PAGE, SCRIPT, COPY]
+        - in: query
+          name: objective
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: origin
+          required: false
+          schema:
+            type: string
+            enum: [ORIGINAL, REUSED]
+        - in: query
+          name: tags
+          required: false
+          schema:
+            type: string
+            description: Tags separadas por virgula
+        - in: query
+          name: active
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Conteudos retornados por relevancia sem dados sensiveis
+        '400':
+          description: Filtros invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado ao acervo estrategico
+  /api/v1/ai-historical-contents/recommendations:
+    post:
+      tags: [AI Historical Contents]
+      summary: Sugere reaproveitamento de conteudos historicos para novo contexto
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AiHistoricalRecommendationRequest'
+      responses:
+        '200':
+          description: Recomendacoes correlatas retornadas com tipo de reaproveitamento
+        '400':
+          description: Dados invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado ao acervo estrategico
+        '404':
+          description: Lancamento nao encontrado
+  /api/v1/ai-historical-contents/{contentId}:
+    get:
+      tags: [AI Historical Contents]
+      summary: Consulta um conteudo historico do acervo estrategico
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: contentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Conteudo retornado sem notas sensiveis
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado ao acervo estrategico
+        '404':
+          description: Conteudo historico nao encontrado
+    delete:
+      tags: [AI Historical Contents]
+      summary: Inativa logicamente um conteudo historico
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: contentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Conteudo inativado com historico preservado
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Conteudo historico nao encontrado
+        '409':
+          description: Conteudo historico ja inativo
   /api/v1/ai-schedules:
     post:
       tags: [AI Schedules]
@@ -4669,9 +4810,92 @@ components:
         reviewNotes:
           type: array
           items:
-            type: string
+          type: string
         sourceContext:
           $ref: '#/components/schemas/AiBrandMaterialSourceContext'
+    AiHistoricalPerformance:
+      type: object
+      required: [score]
+      properties:
+        views:
+          type: integer
+          minimum: 0
+        clicks:
+          type: integer
+          minimum: 0
+        conversions:
+          type: integer
+          minimum: 0
+        revenue:
+          type: number
+          minimum: 0
+        engagementRate:
+          type: number
+          minimum: 0
+        score:
+          type: number
+          minimum: 0
+    AiHistoricalContentRequest:
+      type: object
+      required: [title, format, objective, summary, performance]
+      properties:
+        launchId:
+          type: string
+          format: uuid
+          nullable: true
+        title:
+          type: string
+          minLength: 3
+          maxLength: 240
+        format:
+          type: string
+          enum: [REEL, CAROUSEL, STORY_SEQUENCE, EMAIL, YOUTUBE, AD, LANDING_PAGE, SCRIPT, COPY]
+        objective:
+          type: string
+          minLength: 3
+          maxLength: 180
+        summary:
+          type: string
+          minLength: 8
+          maxLength: 2000
+        tags:
+          type: array
+          items:
+            type: string
+        origin:
+          type: string
+          enum: [ORIGINAL, REUSED]
+        reusedFromContentId:
+          type: string
+          format: uuid
+          nullable: true
+        performance:
+          $ref: '#/components/schemas/AiHistoricalPerformance'
+        sensitiveNotes:
+          type: string
+          nullable: true
+    AiHistoricalRecommendationRequest:
+      type: object
+      required: [launchId, objective]
+      properties:
+        launchId:
+          type: string
+          format: uuid
+        objective:
+          type: string
+          minLength: 3
+          maxLength: 180
+        format:
+          type: string
+          enum: [REEL, CAROUSEL, STORY_SEQUENCE, EMAIL, YOUTUBE, AD, LANDING_PAGE, SCRIPT, COPY]
+        tags:
+          type: array
+          items:
+            type: string
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 20
     GenerateAiScheduleRequest:
       type: object
       required: [objective, briefing]

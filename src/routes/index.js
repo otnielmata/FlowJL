@@ -1,6 +1,7 @@
 import { Router } from "express";
 
 import { aiBrandMaterialRoutes } from "./ai-brand-material.routes.js";
+import { aiHistoricalContentRoutes } from "./ai-historical-content.routes.js";
 import { aiScheduleRoutes } from "./ai-schedule.routes.js";
 import { auditRoutes } from "./audit.routes.js";
 import { assetLibraryRoutes } from "./asset-library.routes.js";
@@ -44,11 +45,12 @@ apiRoutes.get("/", (_request, response) => {
   response.status(200).json({
     service: "flow-jl-api",
     version: "v1",
-    modules: ["ai-brand-materials", "ai-schedules", "assets", "audits", "auth", "carousels", "class-schedules", "content-approvals", "content-ideas", "content-statuses", "copywritings", "dashboards", "discord-operations", "editorial-calendar", "emails", "external-publication", "launches", "live-events", "operational-checklists", "operational-emails", "production-checklists", "profiles", "publications", "reels", "roles", "stories", "students", "support-tickets", "traffic-audiences", "traffic-campaigns", "traffic-conversion-events", "traffic-creatives", "traffic-pixels", "traffic-reports", "traffic-roi", "users", "youtube-contents", "swagger"]
+    modules: ["ai-brand-materials", "ai-historical-contents", "ai-schedules", "assets", "audits", "auth", "carousels", "class-schedules", "content-approvals", "content-ideas", "content-statuses", "copywritings", "dashboards", "discord-operations", "editorial-calendar", "emails", "external-publication", "launches", "live-events", "operational-checklists", "operational-emails", "production-checklists", "profiles", "publications", "reels", "roles", "stories", "students", "support-tickets", "traffic-audiences", "traffic-campaigns", "traffic-conversion-events", "traffic-creatives", "traffic-pixels", "traffic-reports", "traffic-roi", "users", "youtube-contents", "swagger"]
   });
 });
 
 apiRoutes.use("/ai-brand-materials", aiBrandMaterialRoutes);
+apiRoutes.use("/ai-historical-contents", aiHistoricalContentRoutes);
 apiRoutes.use("/ai-schedules", aiScheduleRoutes);
 apiRoutes.use("/assets", assetLibraryRoutes);
 apiRoutes.use("/audits", auditRoutes);
