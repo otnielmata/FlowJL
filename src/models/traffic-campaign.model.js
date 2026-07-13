@@ -109,6 +109,22 @@ const trafficCampaignSchema = new mongoose.Schema(
       default: null,
       trim: true
     },
+    creativeIds: {
+      type: [String],
+      default: []
+    },
+    audienceIds: {
+      type: [String],
+      default: []
+    },
+    pixelIds: {
+      type: [String],
+      default: []
+    },
+    conversionEventIds: {
+      type: [String],
+      default: []
+    },
     history: {
       type: [trafficCampaignHistorySchema],
       default: []

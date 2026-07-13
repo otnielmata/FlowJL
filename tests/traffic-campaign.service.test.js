@@ -7,6 +7,26 @@ const trafficCampaignModel = {
   updateOne: vi.fn()
 };
 
+const trafficCreativeModel = {
+  findById: vi.fn(),
+  updateOne: vi.fn()
+};
+
+const trafficAudienceModel = {
+  findById: vi.fn(),
+  updateOne: vi.fn()
+};
+
+const trafficPixelModel = {
+  findById: vi.fn(),
+  updateOne: vi.fn()
+};
+
+const trafficConversionEventModel = {
+  findById: vi.fn(),
+  updateOne: vi.fn()
+};
+
 const launchModel = {
   findById: vi.fn()
 };
@@ -17,6 +37,22 @@ const auditService = {
 
 vi.mock("../src/models/traffic-campaign.model.js", () => ({
   TrafficCampaign: trafficCampaignModel
+}));
+
+vi.mock("../src/models/traffic-creative.model.js", () => ({
+  TrafficCreative: trafficCreativeModel
+}));
+
+vi.mock("../src/models/traffic-audience.model.js", () => ({
+  TrafficAudience: trafficAudienceModel
+}));
+
+vi.mock("../src/models/traffic-pixel.model.js", () => ({
+  TrafficPixel: trafficPixelModel
+}));
+
+vi.mock("../src/models/traffic-conversion-event.model.js", () => ({
+  TrafficConversionEvent: trafficConversionEventModel
 }));
 
 vi.mock("../src/models/launch.model.js", () => ({
@@ -148,6 +184,10 @@ describe("trafficCampaignService", () => {
         status: "PLANNED",
         budget: 500,
         externalCampaignId: null,
+        creativeIds: [],
+        audienceIds: [],
+        pixelIds: [],
+        conversionEventIds: [],
         history: [],
         active: true
       })
@@ -165,6 +205,7 @@ describe("trafficCampaignService", () => {
       expect.objectContaining({
         $set: expect.objectContaining({
           objective: "Gerar leads qualificados",
+          channel: "GOOGLE",
           periodEnd: new Date("2026-08-20T00:00:00.000Z"),
           status: "ACTIVE",
           updatedBy: "user-2"
@@ -195,6 +236,10 @@ describe("trafficCampaignService", () => {
           status: "ACTIVE",
           budget: null,
           externalCampaignId: null,
+          creativeIds: [],
+          audienceIds: [],
+          pixelIds: [],
+          conversionEventIds: [],
           history: [],
           active: true
         }
@@ -229,6 +274,10 @@ describe("trafficCampaignService", () => {
         status: "PAUSED",
         budget: null,
         externalCampaignId: null,
+        creativeIds: [],
+        audienceIds: [],
+        pixelIds: [],
+        conversionEventIds: [],
         history: [],
         active: true
       })
@@ -254,6 +303,72 @@ describe("trafficCampaignService", () => {
         fromStatus: "PAUSED",
         toStatus: "CANCELED"
       })
+    );
+  });
+
+  it("creates a traffic campaign with validated operational relationships", async () => {
+    launchModel.findById.mockResolvedValueOnce({
+      id: "launch-1",
+      active: true
+    });
+    trafficCreativeModel.findById.mockResolvedValue({
+      id: "creative-1",
+      launchId: "launch-1",
+      active: true
+    });
+    trafficAudienceModel.findById.mockResolvedValue({
+      id: "audience-1",
+      launchId: "launch-1",
+      active: true,
+      campaignIds: []
+    });
+    trafficPixelModel.findById.mockResolvedValue({
+      id: "pixel-1",
+      launchId: "launch-1",
+      active: true,
+      campaignIds: []
+    });
+    trafficConversionEventModel.findById.mockResolvedValue({
+      id: "event-1",
+      launchId: "launch-1",
+      active: true,
+      campaignIds: []
+    });
+    trafficCampaignModel.create.mockImplementation(async (payload) => ({
+      id: "campaign-relationships",
+      createdAt: new Date("2026-07-12T12:00:00.000Z"),
+      updatedAt: new Date("2026-07-12T12:00:00.000Z"),
+      ...payload
+    }));
+
+    const result = await trafficCampaignService.create("user-5", {
+      launchId: "launch-1",
+      name: "Campanha vinculada",
+      objective: "Gerar leads",
+      channel: "META",
+      periodStart: "2026-08-01T00:00:00.000Z",
+      periodEnd: "2026-08-15T23:59:59.000Z",
+      status: "PLANNED",
+      creativeIds: ["creative-1"],
+      audienceIds: ["audience-1"],
+      pixelIds: ["pixel-1"],
+      conversionEventIds: ["event-1"]
+    });
+
+    expect(result.relationships).toEqual({
+      creativeIds: ["creative-1"],
+      audienceIds: ["audience-1"],
+      pixelIds: ["pixel-1"],
+      conversionEventIds: ["event-1"]
+    });
+    expect(trafficCreativeModel.updateOne).toHaveBeenCalledWith(
+      { _id: "creative-1" },
+      {
+        $set: {
+          campaignId: "campaign-relationships",
+          updatedBy: "user-5"
+        }
+      }
     );
   });
 });

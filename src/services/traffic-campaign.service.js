@@ -1,7 +1,11 @@
 import { randomUUID } from "node:crypto";
 
 import { Launch } from "../models/launch.model.js";
+import { TrafficAudience } from "../models/traffic-audience.model.js";
 import { TrafficCampaign } from "../models/traffic-campaign.model.js";
+import { TrafficConversionEvent } from "../models/traffic-conversion-event.model.js";
+import { TrafficCreative } from "../models/traffic-creative.model.js";
+import { TrafficPixel } from "../models/traffic-pixel.model.js";
 import { auditService } from "./audit.service.js";
 
 function normalizeDate(value) {
@@ -14,6 +18,10 @@ function normalizeOptionalString(value) {
 
 function normalizeUpper(value) {
   return value.trim().toUpperCase();
+}
+
+function uniqueStrings(values = []) {
+  return [...new Set(values.map((value) => value.trim()).filter(Boolean))];
 }
 
 function ensureValidPeriod(periodStart, periodEnd) {
@@ -53,6 +61,12 @@ function toPublicTrafficCampaign(campaign) {
     status: campaign.status,
     budget: campaign.budget ?? null,
     externalCampaignId: campaign.externalCampaignId ?? null,
+    relationships: {
+      creativeIds: [...(campaign.creativeIds ?? [])],
+      audienceIds: [...(campaign.audienceIds ?? [])],
+      pixelIds: [...(campaign.pixelIds ?? [])],
+      conversionEventIds: [...(campaign.conversionEventIds ?? [])]
+    },
     history: campaign.history.map((entry) => toPublicHistoryEntry(entry)),
     active: campaign.active,
     deactivatedAt: campaign.deactivatedAt ?? null,
@@ -74,6 +88,188 @@ async function ensureLaunchExists(launchId) {
   }
 
   return launch;
+}
+
+async function resolveCreativesOrThrow(creativeIds = [], launchId) {
+  const creatives = [];
+
+  for (const creativeId of creativeIds) {
+    const creative = await TrafficCreative.findById(creativeId);
+
+    if (!creative || !creative.active) {
+      throw {
+        statusCode: 404,
+        message: "Traffic creative not found"
+      };
+    }
+
+    if (creative.launchId !== launchId) {
+      throw {
+        statusCode: 409,
+        message: "Traffic creative must belong to the campaign launch"
+      };
+    }
+
+    creatives.push(creative);
+  }
+
+  return creatives;
+}
+
+async function resolveAudiencesOrThrow(audienceIds = [], launchId) {
+  const audiences = [];
+
+  for (const audienceId of audienceIds) {
+    const audience = await TrafficAudience.findById(audienceId);
+
+    if (!audience || !audience.active) {
+      throw {
+        statusCode: 404,
+        message: "Traffic audience not found"
+      };
+    }
+
+    if (audience.launchId !== launchId) {
+      throw {
+        statusCode: 409,
+        message: "Traffic audience must belong to the campaign launch"
+      };
+    }
+
+    audiences.push(audience);
+  }
+
+  return audiences;
+}
+
+async function resolvePixelsOrThrow(pixelIds = [], launchId) {
+  const pixels = [];
+
+  for (const pixelId of pixelIds) {
+    const pixel = await TrafficPixel.findById(pixelId);
+
+    if (!pixel || !pixel.active) {
+      throw {
+        statusCode: 404,
+        message: "Traffic pixel not found"
+      };
+    }
+
+    if (pixel.launchId !== launchId) {
+      throw {
+        statusCode: 409,
+        message: "Traffic pixel must belong to the campaign launch"
+      };
+    }
+
+    pixels.push(pixel);
+  }
+
+  return pixels;
+}
+
+async function resolveConversionEventsOrThrow(conversionEventIds = [], launchId) {
+  const conversionEvents = [];
+
+  for (const conversionEventId of conversionEventIds) {
+    const conversionEvent = await TrafficConversionEvent.findById(conversionEventId);
+
+    if (!conversionEvent || !conversionEvent.active) {
+      throw {
+        statusCode: 404,
+        message: "Traffic conversion event not found"
+      };
+    }
+
+    if (conversionEvent.launchId !== launchId) {
+      throw {
+        statusCode: 409,
+        message: "Traffic conversion event must belong to the campaign launch"
+      };
+    }
+
+    conversionEvents.push(conversionEvent);
+  }
+
+  return conversionEvents;
+}
+
+async function syncCreativeRelationships(previousIds, nextIds, campaignId, authenticatedUserId) {
+  const previousSet = new Set(previousIds);
+  const nextSet = new Set(nextIds);
+
+  for (const creativeId of previousIds) {
+    if (!nextSet.has(creativeId)) {
+      await TrafficCreative.updateOne(
+        { _id: creativeId, campaignId },
+        {
+          $set: {
+            campaignId: null,
+            updatedBy: authenticatedUserId
+          }
+        }
+      );
+    }
+  }
+
+  for (const creativeId of nextIds) {
+    if (!previousSet.has(creativeId)) {
+      await TrafficCreative.updateOne(
+        { _id: creativeId },
+        {
+          $set: {
+            campaignId,
+            updatedBy: authenticatedUserId
+          }
+        }
+      );
+    }
+  }
+}
+
+async function syncArrayRelationships(model, previousIds, nextIds, campaignId, authenticatedUserId) {
+  const affectedIds = [...new Set([...previousIds, ...nextIds])];
+
+  for (const entityId of affectedIds) {
+    const entity = await model.findById(entityId);
+
+    if (!entity || entity.active === false) {
+      continue;
+    }
+
+    const currentCampaignIds = [...(entity.campaignIds ?? [])];
+    const nextCampaignIds = currentCampaignIds.filter((currentCampaignId) => currentCampaignId !== campaignId);
+
+    if (nextIds.includes(entityId)) {
+      nextCampaignIds.push(campaignId);
+    }
+
+    await model.updateOne(
+      { _id: entityId },
+      {
+        $set: {
+          campaignIds: [...new Set(nextCampaignIds)],
+          updatedBy: authenticatedUserId
+        }
+      }
+    );
+  }
+}
+
+async function resolveRelationshipsOrThrow(data, launchId) {
+  const relationships = {
+    creativeIds: uniqueStrings(data.creativeIds),
+    audienceIds: uniqueStrings(data.audienceIds),
+    pixelIds: uniqueStrings(data.pixelIds),
+    conversionEventIds: uniqueStrings(data.conversionEventIds)
+  };
+
+  await resolveCreativesOrThrow(relationships.creativeIds, launchId);
+  await resolveAudiencesOrThrow(relationships.audienceIds, launchId);
+  await resolvePixelsOrThrow(relationships.pixelIds, launchId);
+  await resolveConversionEventsOrThrow(relationships.conversionEventIds, launchId);
+
+  return relationships;
 }
 
 function createHistoryEntry({ action, campaign = {}, updates = {}, actedBy, reason = null }) {
@@ -100,6 +296,8 @@ class TrafficCampaignService {
     const periodEnd = normalizeDate(data.periodEnd);
     ensureValidPeriod(periodStart, periodEnd);
 
+    const relationships = await resolveRelationshipsOrThrow(data, data.launchId);
+
     const campaignPayload = {
       launchId: data.launchId,
       name: data.name.trim(),
@@ -110,6 +308,7 @@ class TrafficCampaignService {
       status: normalizeUpper(data.status),
       budget: data.budget ?? null,
       externalCampaignId: normalizeOptionalString(data.externalCampaignId),
+      ...relationships,
       active: true,
       deactivatedAt: null,
       createdBy: authenticatedUserId,
@@ -125,6 +324,11 @@ class TrafficCampaignService {
       ...campaignPayload,
       history: [historyEntry]
     });
+
+    await syncCreativeRelationships([], relationships.creativeIds, campaign.id, authenticatedUserId);
+    await syncArrayRelationships(TrafficAudience, [], relationships.audienceIds, campaign.id, authenticatedUserId);
+    await syncArrayRelationships(TrafficPixel, [], relationships.pixelIds, campaign.id, authenticatedUserId);
+    await syncArrayRelationships(TrafficConversionEvent, [], relationships.conversionEventIds, campaign.id, authenticatedUserId);
 
     await auditService.record({
       actorUserId: authenticatedUserId,
@@ -179,14 +383,38 @@ class TrafficCampaignService {
       };
     }
 
+    const relationships =
+      data.creativeIds !== undefined ||
+      data.audienceIds !== undefined ||
+      data.pixelIds !== undefined ||
+      data.conversionEventIds !== undefined
+        ? await resolveRelationshipsOrThrow(
+            {
+              creativeIds: data.creativeIds ?? campaign.creativeIds ?? [],
+              audienceIds: data.audienceIds ?? campaign.audienceIds ?? [],
+              pixelIds: data.pixelIds ?? campaign.pixelIds ?? [],
+              conversionEventIds: data.conversionEventIds ?? campaign.conversionEventIds ?? []
+            },
+            campaign.launchId
+          )
+        : {
+            creativeIds: [...(campaign.creativeIds ?? [])],
+            audienceIds: [...(campaign.audienceIds ?? [])],
+            pixelIds: [...(campaign.pixelIds ?? [])],
+            conversionEventIds: [...(campaign.conversionEventIds ?? [])]
+          };
+
     const updates = {
+      name: data.name?.trim() ?? campaign.name,
       objective: data.objective?.trim() ?? campaign.objective,
+      channel: data.channel ? normalizeUpper(data.channel) : campaign.channel,
       periodStart: data.periodStart ? normalizeDate(data.periodStart) : campaign.periodStart,
       periodEnd: data.periodEnd ? normalizeDate(data.periodEnd) : campaign.periodEnd,
       status: data.status ? normalizeUpper(data.status) : campaign.status,
       budget: data.budget !== undefined ? data.budget : campaign.budget ?? null,
       externalCampaignId:
         data.externalCampaignId !== undefined ? normalizeOptionalString(data.externalCampaignId) : campaign.externalCampaignId ?? null,
+      ...relationships,
       updatedBy: authenticatedUserId
     };
 
@@ -209,6 +437,17 @@ class TrafficCampaignService {
           history: nextHistory
         }
       }
+    );
+
+    await syncCreativeRelationships(campaign.creativeIds ?? [], relationships.creativeIds, campaignId, authenticatedUserId);
+    await syncArrayRelationships(TrafficAudience, campaign.audienceIds ?? [], relationships.audienceIds, campaignId, authenticatedUserId);
+    await syncArrayRelationships(TrafficPixel, campaign.pixelIds ?? [], relationships.pixelIds, campaignId, authenticatedUserId);
+    await syncArrayRelationships(
+      TrafficConversionEvent,
+      campaign.conversionEventIds ?? [],
+      relationships.conversionEventIds,
+      campaignId,
+      authenticatedUserId
     );
 
     await auditService.record({
