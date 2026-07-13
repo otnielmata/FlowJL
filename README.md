@@ -185,6 +185,7 @@ src
 - `GET /api/v1/editorial-calendar`
 - `PUT /api/v1/editorial-calendar/:itemId`
 - `POST /api/v1/launches`
+- `GET /api/v1/launches`
 - `GET /api/v1/launches/:launchId`
 - `POST /api/v1/launches/:launchId/market-researches`
 - `POST /api/v1/launches/:launchId/copywritings/generate`
@@ -345,7 +346,9 @@ A documentação fica disponível em:
 - A busca global do dashboard pode ser consultada em `GET /api/v1/dashboards/search?q=...`, exige `DASHBOARD_OVERVIEW_READ`, agrega resultados de lançamentos, estratégias derivadas, conteúdos, atividades, eventos, usuários e campanhas, e filtra o retorno conforme os módulos acessíveis ao papel autenticado.
 - O calendário editorial pode ser gerenciado via `POST`, `GET` e `PUT /api/v1/editorial-calendar`, exige conteúdo base válido com contexto de lançamento, organiza a consulta por período, data, hora e canal em UTC, sincroniza o agendamento com o conteúdo quando aplicável e registra auditoria nas alterações.
 - O cadastro de lançamentos via `POST /api/v1/launches` exige `LAUNCH_CREATE`, persiste marcos operacionais em UTC e rejeita duplicidade ativa com a mesma combinação de nome, produto e período.
-- A consulta de lançamentos via `GET /api/v1/launches/:launchId` exige `LAUNCH_READ` e retorna o histórico versionado das pesquisas de mercado já associadas.
+- A listagem de lançamentos via `GET /api/v1/launches` exige `LAUNCH_READ` e retorna visão pronta para tabela e cards com status, datas principais, responsável, progresso agregado, estratégia e campanhas relacionadas.
+- A consulta de lançamentos via `GET /api/v1/launches/:launchId` exige `LAUNCH_READ` e agora retorna um detalhe executivo com resumo, etapas, cronograma, estratégia, conteúdos, campanhas, aprovações, indicadores, arquivos e histórico, além de timeline operacional construída a partir das fases e marcos do lançamento.
+- O módulo de lançamentos passa a aceitar metas e datas por fase no cadastro, valida coerência cronológica entre aquecimento, CPLs e carrinho, e usa esses dados para consolidar progresso e indicadores visuais para o front-end da `FJ-69`.
 - A geração de pesquisa de mercado via `POST /api/v1/launches/:launchId/market-researches` exige `MARKET_RESEARCH_CREATE`, depende de um lançamento existente, marca o resultado para revisão humana e não expõe detalhes internos do mecanismo de geração.
 - O registro de pesquisa de concorrentes via `POST /api/v1/launches/:launchId/competitor-researches` exige `COMPETITOR_RESEARCH_CREATE`, agrupa múltiplas evidências por concorrente e a consulta do lançamento devolve esse material organizado por canal e data.
 - O avatar do público pode ser cadastrado e evoluído via `POST` e `PUT /api/v1/launches/:launchId/avatars`, preserva histórico versionado e registra auditoria de alteração.

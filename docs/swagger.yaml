@@ -3496,10 +3496,40 @@ paths:
           description: Acesso negado
         '409':
           description: Lancamento ativo duplicado para o mesmo produto e periodo
+    get:
+      tags: [Launches]
+      summary: Lista lancamentos com dados para tabela e cards
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: status
+          required: false
+          schema:
+            type: string
+            enum: [PLANNING, WARMUP, PRE_LAUNCH, OPEN_CART, IN_PROGRESS, COMPLETED, PAUSED, ARCHIVED]
+        - in: query
+          name: responsibleUserId
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: search
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lancamentos retornados com status, datas principais, progresso e responsavel
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
   /api/v1/launches/{launchId}:
     get:
       tags: [Launches]
-      summary: Consulta um lancamento com seu historico estrategico
+      summary: Consulta um lancamento com timeline e detalhes operacionais
       security:
         - bearerAuth: []
       parameters:

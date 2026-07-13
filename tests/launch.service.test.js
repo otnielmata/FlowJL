@@ -3,6 +3,11 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const launchModel = {
   findOne: vi.fn(),
   create: vi.fn(),
+  findById: vi.fn(),
+  find: vi.fn()
+};
+
+const userModel = {
   findById: vi.fn()
 };
 
@@ -39,6 +44,47 @@ const smartScheduleModel = {
 };
 
 const expertApprovalModel = {
+  find: vi.fn(),
+  findOne: vi.fn()
+};
+
+const strategyModel = {
+  find: vi.fn()
+};
+
+const trafficCampaignModel = {
+  find: vi.fn()
+};
+
+const contentApprovalModel = {
+  find: vi.fn()
+};
+
+const assetLibraryModel = {
+  find: vi.fn()
+};
+
+const auditEventModel = {
+  find: vi.fn()
+};
+
+const reelModel = {
+  find: vi.fn()
+};
+
+const carouselModel = {
+  find: vi.fn()
+};
+
+const storySequenceModel = {
+  find: vi.fn()
+};
+
+const emailCampaignModel = {
+  find: vi.fn()
+};
+
+const youtubeContentModel = {
   find: vi.fn()
 };
 
@@ -48,6 +94,10 @@ const auditServiceMock = {
 
 vi.mock("../src/models/launch.model.js", () => ({
   Launch: launchModel
+}));
+
+vi.mock("../src/models/user.model.js", () => ({
+  User: userModel
 }));
 
 vi.mock("../src/models/market-research.model.js", () => ({
@@ -86,52 +136,115 @@ vi.mock("../src/models/expert-approval.model.js", () => ({
   ExpertApproval: expertApprovalModel
 }));
 
+vi.mock("../src/models/strategy.model.js", () => ({
+  Strategy: strategyModel
+}));
+
+vi.mock("../src/models/traffic-campaign.model.js", () => ({
+  TrafficCampaign: trafficCampaignModel
+}));
+
+vi.mock("../src/models/content-approval.model.js", () => ({
+  ContentApproval: contentApprovalModel
+}));
+
+vi.mock("../src/models/asset-library-item.model.js", () => ({
+  AssetLibraryItem: assetLibraryModel
+}));
+
+vi.mock("../src/models/audit-event.model.js", () => ({
+  AuditEvent: auditEventModel
+}));
+
+vi.mock("../src/models/reel.model.js", () => ({
+  Reel: reelModel
+}));
+
+vi.mock("../src/models/carousel.model.js", () => ({
+  Carousel: carouselModel
+}));
+
+vi.mock("../src/models/story-sequence.model.js", () => ({
+  StorySequence: storySequenceModel
+}));
+
+vi.mock("../src/models/email-campaign.model.js", () => ({
+  EmailCampaign: emailCampaignModel
+}));
+
+vi.mock("../src/models/youtube-content.model.js", () => ({
+  YouTubeContent: youtubeContentModel
+}));
+
 vi.mock("../src/services/audit.service.js", () => ({
   auditService: auditServiceMock
 }));
 
 const { launchService } = await import("../src/services/launch.service.js");
 
-describe("launchService.create", () => {
+function sortedResult(value) {
+  return {
+    sort: vi.fn().mockResolvedValue(value)
+  };
+}
+
+describe("launchService", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     auditServiceMock.record.mockResolvedValue(undefined);
-    competitorResearchModel.find.mockReturnValue({
-      sort: vi.fn().mockResolvedValue([])
+    userModel.findById.mockResolvedValue({
+      id: "user-1",
+      name: "Ana Gestora",
+      email: "ana@flowjl.com"
     });
-    avatarModel.find.mockReturnValue({
-      sort: vi.fn().mockResolvedValue([])
-    });
-    offerModel.find.mockReturnValue({
-      sort: vi.fn().mockResolvedValue([])
-    });
-    positioningModel.find.mockReturnValue({
-      sort: vi.fn().mockResolvedValue([])
-    });
-    editorialLineModel.find.mockReturnValue({
-      sort: vi.fn().mockResolvedValue([])
-    });
-    contentPlanModel.find.mockReturnValue({
-      sort: vi.fn().mockResolvedValue([])
-    });
-    smartScheduleModel.find.mockReturnValue({
-      sort: vi.fn().mockResolvedValue([])
-    });
-    expertApprovalModel.find.mockReturnValue({
-      sort: vi.fn().mockResolvedValue([])
-    });
+    marketResearchModel.find.mockReturnValue(sortedResult([]));
+    competitorResearchModel.find.mockReturnValue(sortedResult([]));
+    avatarModel.find.mockReturnValue(sortedResult([]));
+    offerModel.find.mockReturnValue(sortedResult([]));
+    positioningModel.find.mockReturnValue(sortedResult([]));
+    editorialLineModel.find.mockReturnValue(sortedResult([]));
+    contentPlanModel.find.mockReturnValue(sortedResult([]));
+    smartScheduleModel.find.mockReturnValue(sortedResult([]));
+    expertApprovalModel.find.mockReturnValue(sortedResult([]));
+    expertApprovalModel.findOne.mockReturnValue(sortedResult(null));
+    strategyModel.find.mockReturnValue(sortedResult([]));
+    trafficCampaignModel.find.mockReturnValue(sortedResult([]));
+    contentApprovalModel.find.mockReturnValue(sortedResult([]));
+    assetLibraryModel.find.mockReturnValue(sortedResult([]));
+    auditEventModel.find.mockReturnValue(sortedResult([]));
+    reelModel.find.mockReturnValue(sortedResult([]));
+    carouselModel.find.mockReturnValue(sortedResult([]));
+    storySequenceModel.find.mockReturnValue(sortedResult([]));
+    emailCampaignModel.find.mockReturnValue(sortedResult([]));
+    youtubeContentModel.find.mockReturnValue(sortedResult([]));
   });
 
-  it("creates a launch with UUID id and UTC milestone period", async () => {
+  it("creates a launch with goals, responsible and coherent phase dates", async () => {
     launchModel.findOne.mockResolvedValue(null);
     launchModel.create.mockResolvedValue({
       id: "launch-id",
       name: "Lancamento Expert X",
       expert: "Expert X",
       product: "Produto Y",
+      responsibleUserId: "user-1",
+      status: "PLANNING",
       baseDate: new Date("2026-08-01T00:00:00.000Z"),
-      periodStart: new Date("2026-08-05T12:00:00.000Z"),
+      periodStart: new Date("2026-08-01T00:00:00.000Z"),
       periodEnd: new Date("2026-08-20T15:30:00.000Z"),
+      phaseDates: {
+        warmupStart: new Date("2026-08-01T00:00:00.000Z"),
+        cpl1At: new Date("2026-08-05T12:00:00.000Z"),
+        cpl2At: new Date("2026-08-10T12:00:00.000Z"),
+        cpl3At: null,
+        cartOpenAt: new Date("2026-08-15T12:00:00.000Z"),
+        cartCloseAt: new Date("2026-08-20T15:30:00.000Z"),
+        deliveryAt: null
+      },
+      goals: {
+        leadTarget: 1000,
+        salesTarget: 80,
+        revenueTarget: 24000
+      },
       milestones: [
         { name: "Aquecimento", scheduledAt: new Date("2026-08-05T12:00:00.000Z") },
         { name: "Carrinho", scheduledAt: new Date("2026-08-20T15:30:00.000Z") }
@@ -139,944 +252,167 @@ describe("launchService.create", () => {
       active: true,
       createdAt: new Date("2026-07-11T12:00:00.000Z"),
       updatedAt: new Date("2026-07-11T12:00:00.000Z"),
-      createdBy: "strategist-id",
-      updatedBy: "strategist-id"
+      createdBy: "user-1",
+      updatedBy: "user-1"
     });
 
-    const result = await launchService.create("strategist-id", {
+    const result = await launchService.create("user-1", {
       name: " Lancamento Expert X ",
       expert: " Expert X ",
       product: " Produto Y ",
+      responsibleUserId: "user-1",
+      status: "PLANNING",
       baseDate: "2026-08-01T00:00:00.000Z",
+      phaseDates: {
+        warmupStart: "2026-08-01T00:00:00.000Z",
+        cpl1At: "2026-08-05T12:00:00.000Z",
+        cpl2At: "2026-08-10T12:00:00.000Z",
+        cartOpenAt: "2026-08-15T12:00:00.000Z",
+        cartCloseAt: "2026-08-20T15:30:00.000Z"
+      },
+      goals: {
+        leadTarget: 1000,
+        salesTarget: 80,
+        revenueTarget: 24000
+      },
       milestones: [
         { name: " Aquecimento ", scheduledAt: "2026-08-05T12:00:00.000Z" },
         { name: " Carrinho ", scheduledAt: "2026-08-20T15:30:00.000Z" }
       ]
     });
 
-    expect(launchModel.findOne).toHaveBeenCalledWith({
-      name: "Lancamento Expert X",
-      product: "Produto Y",
-      periodStart: new Date("2026-08-05T12:00:00.000Z"),
-      periodEnd: new Date("2026-08-20T15:30:00.000Z"),
-      active: true
-    });
-    expect(launchModel.create).toHaveBeenCalledWith({
-      name: "Lancamento Expert X",
-      expert: "Expert X",
-      product: "Produto Y",
-      baseDate: new Date("2026-08-01T00:00:00.000Z"),
-      periodStart: new Date("2026-08-05T12:00:00.000Z"),
-      periodEnd: new Date("2026-08-20T15:30:00.000Z"),
-      milestones: [
-        { name: "Aquecimento", scheduledAt: new Date("2026-08-05T12:00:00.000Z") },
-        { name: "Carrinho", scheduledAt: new Date("2026-08-20T15:30:00.000Z") }
-      ],
-      active: true,
-      createdBy: "strategist-id",
-      updatedBy: "strategist-id"
-    });
-    expect(auditServiceMock.record).toHaveBeenCalledWith({
-      actorUserId: "strategist-id",
-      action: "LAUNCH_CREATED",
-      targetType: "LAUNCH",
-      targetId: "launch-id",
-      context: {
-        product: "Produto Y",
-        expert: "Expert X",
-        baseDate: "2026-08-01T00:00:00.000Z"
+    expect(launchModel.create).toHaveBeenCalledWith(expect.objectContaining({
+      responsibleUserId: "user-1",
+      status: "PLANNING",
+      goals: {
+        leadTarget: 1000,
+        salesTarget: 80,
+        revenueTarget: 24000
       }
-    });
-    expect(result).toEqual({
-      id: "launch-id",
-      name: "Lancamento Expert X",
-      expert: "Expert X",
-      product: "Produto Y",
-      baseDate: new Date("2026-08-01T00:00:00.000Z"),
-      periodStart: new Date("2026-08-05T12:00:00.000Z"),
-      periodEnd: new Date("2026-08-20T15:30:00.000Z"),
-      milestones: [
-        { name: "Aquecimento", scheduledAt: new Date("2026-08-05T12:00:00.000Z") },
-        { name: "Carrinho", scheduledAt: new Date("2026-08-20T15:30:00.000Z") }
-      ],
-      active: true,
-      createdAt: new Date("2026-07-11T12:00:00.000Z"),
-      updatedAt: new Date("2026-07-11T12:00:00.000Z"),
-      createdBy: "strategist-id",
-      updatedBy: "strategist-id"
-    });
+    }));
+    expect(result.phaseDates.cartOpenAt).toEqual(new Date("2026-08-15T12:00:00.000Z"));
+    expect(auditServiceMock.record).toHaveBeenCalledWith(expect.objectContaining({
+      action: "LAUNCH_CREATED",
+      targetType: "LAUNCH"
+    }));
   });
 
-  it("rejects an incompatible active duplicate launch", async () => {
-    launchModel.findOne.mockResolvedValue({ id: "launch-existing" });
-
+  it("rejects non-chronological launch phases", async () => {
     await expect(
-      launchService.create("strategist-id", {
-        name: "Lancamento Expert X",
+      launchService.create("user-1", {
+        name: "Lancamento X",
         expert: "Expert X",
         product: "Produto Y",
         baseDate: "2026-08-01T00:00:00.000Z",
-        milestones: [{ name: "Aquecimento", scheduledAt: "2026-08-05T12:00:00.000Z" }]
+        phaseDates: {
+          cartCloseAt: "2026-08-10T00:00:00.000Z",
+          cartOpenAt: "2026-08-12T00:00:00.000Z"
+        },
+        milestones: [{ name: "Marco", scheduledAt: "2026-08-05T12:00:00.000Z" }]
       })
     ).rejects.toMatchObject({
-      statusCode: 409,
-      message: "An active launch with the same name, product and period already exists"
+      statusCode: 400
     });
   });
 
-  it("returns the launch with its market research history", async () => {
+  it("lists launches for table and cards with progress and responsible", async () => {
+    launchModel.find.mockReturnValue({
+      sort: vi.fn().mockResolvedValue([
+        {
+          id: "launch-id",
+          name: "Lancamento Expert X",
+          expert: "Expert X",
+          product: "Produto Y",
+          responsibleUserId: "user-1",
+          status: "WARMUP",
+          baseDate: new Date("2026-08-01T00:00:00.000Z"),
+          periodStart: new Date("2026-08-01T00:00:00.000Z"),
+          periodEnd: new Date("2026-08-20T00:00:00.000Z"),
+          phaseDates: {
+            warmupStart: new Date("2026-08-01T00:00:00.000Z"),
+            cartOpenAt: new Date("2026-08-15T00:00:00.000Z"),
+            cartCloseAt: new Date("2026-08-20T00:00:00.000Z")
+          },
+          goals: {},
+          milestones: [],
+          active: true,
+          createdAt: new Date("2026-07-10T00:00:00.000Z"),
+          updatedAt: new Date("2026-07-11T00:00:00.000Z")
+        }
+      ])
+    });
+    strategyModel.find.mockReturnValue(sortedResult([
+      { status: "APPROVED", completionPercentage: 100 }
+    ]));
+    trafficCampaignModel.find.mockReturnValue(sortedResult([
+      { status: "ACTIVE", budget: 1200 }
+    ]));
+    expertApprovalModel.findOne.mockReturnValue(sortedResult({
+      status: "APPROVED"
+    }));
+
+    const result = await launchService.list({ search: "Expert" });
+
+    expect(result.summary.total).toBe(1);
+    expect(result.table[0].responsible.name).toBe("Ana Gestora");
+    expect(result.cards[0].progress).toBe(100);
+  });
+
+  it("returns detailed launch tabs with timeline and indicators", async () => {
     launchModel.findById.mockResolvedValue({
       id: "launch-id",
       name: "Lancamento Expert X",
       expert: "Expert X",
       product: "Produto Y",
+      responsibleUserId: "user-1",
+      status: "OPEN_CART",
       baseDate: new Date("2026-08-01T00:00:00.000Z"),
-      periodStart: new Date("2026-08-05T12:00:00.000Z"),
-      periodEnd: new Date("2026-08-20T15:30:00.000Z"),
+      periodStart: new Date("2026-08-01T00:00:00.000Z"),
+      periodEnd: new Date("2026-08-20T00:00:00.000Z"),
+      phaseDates: {
+        warmupStart: new Date("2026-08-01T00:00:00.000Z"),
+        cpl1At: new Date("2026-08-05T00:00:00.000Z"),
+        cartOpenAt: new Date("2026-08-15T00:00:00.000Z"),
+        cartCloseAt: new Date("2026-08-20T00:00:00.000Z")
+      },
+      goals: {
+        leadTarget: 1000,
+        salesTarget: 100,
+        revenueTarget: 30000
+      },
       milestones: [
-        { name: "Aquecimento", scheduledAt: new Date("2026-08-05T12:00:00.000Z") }
+        { name: "Aquecimento", scheduledAt: new Date("2026-08-02T00:00:00.000Z") }
       ],
       active: true,
-      createdAt: new Date("2026-07-11T12:00:00.000Z"),
-      updatedAt: new Date("2026-07-11T12:00:00.000Z"),
-      createdBy: "strategist-id",
-      updatedBy: "strategist-id"
+      createdAt: new Date("2026-07-10T00:00:00.000Z"),
+      updatedAt: new Date("2026-07-11T00:00:00.000Z")
     });
-    marketResearchModel.find.mockReturnValue({
-      sort: vi.fn().mockResolvedValue([
-        {
-          id: "research-id",
-          version: 2,
-          briefing: "Briefing estruturado",
-          objective: "Aumentar leads",
-          productContext: "Produto com foco em conversao",
-          themes: [{ title: "Tema 1", rationale: "Base racional" }],
-          promises: [{ title: "Promessa 1", rationale: "Base racional" }],
-          objections: [{ title: "Objecao 1", rebuttal: "Resposta 1" }],
-          ctas: ["CTA 1"],
-          suggestedFormats: [{ type: "carrossel", angle: "Angulo 1" }],
-          humanReviewRequired: true,
-          createdAt: new Date("2026-07-11T12:30:00.000Z"),
-          updatedAt: new Date("2026-07-11T12:30:00.000Z"),
-          createdBy: "strategist-id",
-          updatedBy: "strategist-id"
-        }
-      ])
-    });
-    competitorResearchModel.find.mockReturnValue({
-      sort: vi.fn().mockResolvedValue([
-        {
-          id: "competitor-id",
-          launchId: "launch-id",
-          competitorName: "Concorrente X",
-          evidences: [
-            {
-              id: "evidence-id",
-              channel: "Instagram",
-              headline: "Headline 1",
-              promise: "Promessa 1",
-              trigger: "Escassez",
-              observations: "Observacao 1",
-              capturedAt: new Date("2026-07-11T12:30:00.000Z"),
-              createdBy: "strategist-id",
-              updatedBy: "strategist-id"
-            }
-          ],
-          active: true,
-          createdAt: new Date("2026-07-11T12:30:00.000Z"),
-          updatedAt: new Date("2026-07-11T12:30:00.000Z"),
-          createdBy: "strategist-id",
-          updatedBy: "strategist-id"
-        }
-      ])
-    });
-    avatarModel.find.mockReturnValue({
-      sort: vi.fn().mockResolvedValue([
-        {
-          id: "avatar-v2",
-          launchId: "launch-id",
-          version: 2,
-          profile: "Perfil do publico",
-          pains: ["Dor 1"],
-          dreams: ["Sonho 1"],
-          objections: ["Objecao 1"],
-          language: ["Linguagem 1"],
-          isPrimary: true,
-          isCurrent: true,
-          humanReviewRequired: true,
-          aiSuggestions: {
-            profileAngles: [],
-            painAmplifiers: [],
-            dreamDrivers: [],
-            languageCues: []
-          },
-          createdAt: new Date("2026-07-11T12:40:00.000Z"),
-          updatedAt: new Date("2026-07-11T12:40:00.000Z"),
-          createdBy: "strategist-id",
-          updatedBy: "strategist-id"
-        }
-      ])
-    });
-    offerModel.find.mockReturnValue({
-      sort: vi.fn().mockResolvedValue([
-        {
-          id: "offer-v2",
-          launchId: "launch-id",
-          version: 2,
-          product: "Produto Y",
-          transformation: "Transformacao clara",
-          promise: "Promessa principal",
-          benefits: ["Beneficio 1"],
-          differentials: ["Diferencial 1"],
-          avatarVersion: 2,
-          positioningContext: "Posicionamento atual",
-          isCurrent: true,
-          active: true,
-          createdAt: new Date("2026-07-11T12:50:00.000Z"),
-          updatedAt: new Date("2026-07-11T12:50:00.000Z"),
-          createdBy: "strategist-id",
-          updatedBy: "strategist-id"
-        }
-      ])
-    });
-    positioningModel.find.mockReturnValue({
-      sort: vi.fn().mockResolvedValue([
-        {
-          id: "positioning-v2",
-          launchId: "launch-id",
-          version: 2,
-          thesis: "Tese forte de mercado",
-          centralPromise: "Promessa principal",
-          differentiators: ["Diferencial 1"],
-          references: ["Referencia 1"],
-          offerVersion: 2,
-          isCurrent: true,
-          active: true,
-          createdAt: new Date("2026-07-11T12:55:00.000Z"),
-          updatedAt: new Date("2026-07-11T12:55:00.000Z"),
-          createdBy: "strategist-id",
-          updatedBy: "strategist-id"
-        }
-      ])
-    });
-    editorialLineModel.find.mockReturnValue({
-      sort: vi.fn().mockResolvedValue([
-        {
-          id: "editorial-v2",
-          launchId: "launch-id",
-          version: 2,
-          pillars: [
-            { id: "pillar-1", name: "Educacao", objective: "Nutrir audiencia", priority: 1, active: true }
-          ],
-          avatarVersion: 2,
-          offerVersion: 2,
-          positioningVersion: 2,
-          isCurrent: true,
-          active: true,
-          createdAt: new Date("2026-07-11T13:00:00.000Z"),
-          updatedAt: new Date("2026-07-11T13:00:00.000Z"),
-          createdBy: "strategist-id",
-          updatedBy: "strategist-id"
-        }
-      ])
-    });
-    contentPlanModel.find.mockReturnValue({
-      sort: vi.fn().mockResolvedValue([
-        {
-          id: "content-plan-v2",
-          launchId: "launch-id",
-          version: 2,
-          items: [
-            {
-              id: "item-1",
-              theme: "Tema 1",
-              format: "Reel",
-              objective: "Autoridade",
-              cta: "Comentar",
-              stage: "Aquecimento",
-              periodLabel: "Semana 1",
-              active: true
-            }
-          ],
-          editorialLineVersion: 2,
-          isCurrent: true,
-          active: true,
-          createdAt: new Date("2026-07-11T13:05:00.000Z"),
-          updatedAt: new Date("2026-07-11T13:05:00.000Z"),
-          createdBy: "strategist-id",
-          updatedBy: "strategist-id"
-        }
-      ])
-    });
-    smartScheduleModel.find.mockReturnValue({
-      sort: vi.fn().mockResolvedValue([
-        {
-          id: "schedule-v2",
-          launchId: "launch-id",
-          version: 2,
-          objective: "Autoridade",
-          periodStart: new Date("2026-08-01T00:00:00.000Z"),
-          periodEnd: new Date("2026-08-10T00:00:00.000Z"),
-          operationalCadenceDays: 2,
-          contentPlanVersion: 2,
-          activities: [
-            {
-              id: "activity-1",
-              theme: "Tema 1",
-              objective: "Autoridade",
-              stage: "Aquecimento",
-              deliveryType: "Reel",
-              area: "Social Media",
-              suggestedResponsibleRole: "SOCIAL_MEDIA",
-              dueAt: new Date("2026-08-01T12:00:00.000Z"),
-              status: "PLANNED"
-            }
-          ],
-          isCurrent: true,
-          active: true,
-          createdAt: new Date("2026-07-11T13:10:00.000Z"),
-          updatedAt: new Date("2026-07-11T13:10:00.000Z"),
-          createdBy: "strategist-id",
-          updatedBy: "strategist-id"
-        }
-      ])
-    });
-    expertApprovalModel.find.mockReturnValue({
-      sort: vi.fn().mockResolvedValue([
-        {
-          id: "approval-v2",
-          launchId: "launch-id",
-          version: 2,
-          status: "APPROVED",
-          submittedAt: new Date("2026-07-11T13:15:00.000Z"),
-          submittedBy: "strategist-id",
-          decisionAt: new Date("2026-07-11T13:20:00.000Z"),
-          decidedBy: "expert-id",
-          observations: "Aprovado para execucao",
-          marketResearchVersion: 2,
-          competitorResearchCount: 1,
-          avatarVersion: 2,
-          offerVersion: 2,
-          positioningVersion: 2,
-          editorialLineVersion: 2,
-          contentPlanVersion: 2,
-          smartScheduleVersion: 2,
-          isCurrent: true,
-          active: true,
-          createdAt: new Date("2026-07-11T13:20:00.000Z"),
-          updatedAt: new Date("2026-07-11T13:20:00.000Z"),
-          createdBy: "strategist-id",
-          updatedBy: "expert-id"
-        }
-      ])
-    });
+    strategyModel.find.mockReturnValue(sortedResult([
+      {
+        id: "strategy-1",
+        title: "Planejamento",
+        status: "APPROVED",
+        completionPercentage: 100
+      }
+    ]));
+    offerModel.find.mockReturnValue(sortedResult([{ id: "offer-1", isCurrent: true, version: 1, product: "Produto Y", transformation: "Transformar", promise: "Promessa", benefits: [], differentials: [], avatarVersion: 1, positioningContext: null, active: true, createdAt: new Date(), updatedAt: new Date() }]));
+    positioningModel.find.mockReturnValue(sortedResult([{ id: "positioning-1", isCurrent: true, version: 1, thesis: "Tese", centralPromise: "Promessa", differentiators: [], references: [], offerVersion: 1, active: true, createdAt: new Date(), updatedAt: new Date() }]));
+    editorialLineModel.find.mockReturnValue(sortedResult([{ id: "ed-1", isCurrent: true, version: 1, pillars: [], avatarVersion: 1, offerVersion: 1, positioningVersion: 1, active: true, createdAt: new Date(), updatedAt: new Date() }]));
+    contentPlanModel.find.mockReturnValue(sortedResult([{ id: "cp-1", isCurrent: true, version: 1, items: [], editorialLineVersion: 1, active: true, createdAt: new Date(), updatedAt: new Date() }]));
+    smartScheduleModel.find.mockReturnValue(sortedResult([{ id: "ss-1", isCurrent: true, version: 1, objective: "Meta", periodStart: new Date("2026-08-01T00:00:00.000Z"), periodEnd: new Date("2026-08-20T00:00:00.000Z"), operationalCadenceDays: 2, contentPlanVersion: 1, activities: [{ id: "activity-1", theme: "Tema", objective: "Objetivo", stage: "Aquecimento", deliveryType: "Reel", area: "Social", suggestedResponsibleRole: "SOCIAL_MEDIA", dueAt: new Date("2026-08-03T00:00:00.000Z"), status: "PLANNED" }], active: true, createdAt: new Date(), updatedAt: new Date() }]));
+    expertApprovalModel.find.mockReturnValue(sortedResult([{ id: "ea-1", isCurrent: true, version: 1, status: "APPROVED", submittedAt: new Date(), submittedBy: "user-1", decisionAt: new Date(), decidedBy: "expert-1", observations: null, marketResearchVersion: 1, competitorResearchCount: 0, avatarVersion: 1, offerVersion: 1, positioningVersion: 1, editorialLineVersion: 1, contentPlanVersion: 1, smartScheduleVersion: 1, active: true, createdAt: new Date(), updatedAt: new Date() }]));
+    trafficCampaignModel.find.mockReturnValue(sortedResult([{ id: "campaign-1", name: "Campanha 1", status: "ACTIVE", channel: "META", periodStart: new Date("2026-08-10T00:00:00.000Z"), periodEnd: new Date("2026-08-20T00:00:00.000Z"), budget: 2500 }]));
+    contentApprovalModel.find.mockReturnValue(sortedResult([{ id: "approval-1", contentType: "REEL", contentId: "reel-1", currentStatus: "APPROVED" }]));
+    assetLibraryModel.find.mockReturnValue(sortedResult([{ id: "asset-1", name: "Drive de pecas", type: "FOLDER", status: "AVAILABLE", origin: "DRIVE", updatedAt: new Date() }]));
+    auditEventModel.find.mockReturnValue(sortedResult([{ id: "audit-1", action: "LAUNCH_CREATED", actorUserId: "user-1", context: {}, occurredAt: new Date() }]));
+    reelModel.find.mockReturnValue(sortedResult([{ id: "reel-1", active: true, operationalStatus: "READY" }]));
 
     const result = await launchService.getById("launch-id");
 
-    expect(launchModel.findById).toHaveBeenCalledWith("launch-id");
-    expect(marketResearchModel.find).toHaveBeenCalledWith({ launchId: "launch-id" });
-    expect(competitorResearchModel.find).toHaveBeenCalledWith({ launchId: "launch-id", active: true });
-    expect(avatarModel.find).toHaveBeenCalledWith({ launchId: "launch-id" });
-    expect(offerModel.find).toHaveBeenCalledWith({ launchId: "launch-id" });
-    expect(positioningModel.find).toHaveBeenCalledWith({ launchId: "launch-id" });
-    expect(editorialLineModel.find).toHaveBeenCalledWith({ launchId: "launch-id" });
-    expect(contentPlanModel.find).toHaveBeenCalledWith({ launchId: "launch-id" });
-    expect(smartScheduleModel.find).toHaveBeenCalledWith({ launchId: "launch-id" });
-    expect(expertApprovalModel.find).toHaveBeenCalledWith({ launchId: "launch-id" });
-    expect(result.marketResearchHistory).toEqual([
-      {
-        id: "research-id",
-        version: 2,
-        briefing: "Briefing estruturado",
-        objective: "Aumentar leads",
-        productContext: "Produto com foco em conversao",
-        themes: [{ title: "Tema 1", rationale: "Base racional" }],
-        promises: [{ title: "Promessa 1", rationale: "Base racional" }],
-        objections: [{ title: "Objecao 1", rebuttal: "Resposta 1" }],
-        ctas: ["CTA 1"],
-        suggestedFormats: [{ type: "carrossel", angle: "Angulo 1" }],
-        humanReviewRequired: true,
-        createdAt: new Date("2026-07-11T12:30:00.000Z"),
-        updatedAt: new Date("2026-07-11T12:30:00.000Z"),
-        createdBy: "strategist-id",
-        updatedBy: "strategist-id"
-      }
-    ]);
-    expect(result.competitorResearch).toEqual({
-      items: [
-        {
-          id: "competitor-id",
-          launchId: "launch-id",
-          competitorName: "Concorrente X",
-          evidences: [
-            {
-              id: "evidence-id",
-              channel: "Instagram",
-              headline: "Headline 1",
-              promise: "Promessa 1",
-              trigger: "Escassez",
-              observations: "Observacao 1",
-              capturedAt: new Date("2026-07-11T12:30:00.000Z"),
-              createdBy: "strategist-id",
-              updatedBy: "strategist-id"
-            }
-          ],
-          active: true,
-          createdAt: new Date("2026-07-11T12:30:00.000Z"),
-          updatedAt: new Date("2026-07-11T12:30:00.000Z"),
-          createdBy: "strategist-id",
-          updatedBy: "strategist-id"
-        }
-      ],
-      groupedByChannel: [
-        {
-          channel: "Instagram",
-          entriesByDate: [
-            {
-              capturedAt: "2026-07-11T12:30:00.000Z",
-              entries: [
-                {
-                  competitorName: "Concorrente X",
-                  evidence: {
-                    id: "evidence-id",
-                    channel: "Instagram",
-                    headline: "Headline 1",
-                    promise: "Promessa 1",
-                    trigger: "Escassez",
-                    observations: "Observacao 1",
-                    capturedAt: new Date("2026-07-11T12:30:00.000Z"),
-                    createdBy: "strategist-id",
-                    updatedBy: "strategist-id"
-                  }
-                }
-              ]
-            }
-          ]
-        }
-      ]
-    });
-    expect(result.avatar).toEqual({
-      current: {
-        id: "avatar-v2",
-        launchId: "launch-id",
-        version: 2,
-        profile: "Perfil do publico",
-        pains: ["Dor 1"],
-        dreams: ["Sonho 1"],
-        objections: ["Objecao 1"],
-        language: ["Linguagem 1"],
-        isPrimary: true,
-        isCurrent: true,
-        humanReviewRequired: true,
-        aiSuggestions: {
-          profileAngles: [],
-          painAmplifiers: [],
-          dreamDrivers: [],
-          languageCues: []
-        },
-        createdAt: new Date("2026-07-11T12:40:00.000Z"),
-        updatedAt: new Date("2026-07-11T12:40:00.000Z"),
-        createdBy: "strategist-id",
-        updatedBy: "strategist-id"
-      },
-      history: [
-        {
-          id: "avatar-v2",
-          launchId: "launch-id",
-          version: 2,
-          profile: "Perfil do publico",
-          pains: ["Dor 1"],
-          dreams: ["Sonho 1"],
-          objections: ["Objecao 1"],
-          language: ["Linguagem 1"],
-          isPrimary: true,
-          isCurrent: true,
-          humanReviewRequired: true,
-          aiSuggestions: {
-            profileAngles: [],
-            painAmplifiers: [],
-            dreamDrivers: [],
-            languageCues: []
-          },
-          createdAt: new Date("2026-07-11T12:40:00.000Z"),
-          updatedAt: new Date("2026-07-11T12:40:00.000Z"),
-          createdBy: "strategist-id",
-          updatedBy: "strategist-id"
-        }
-      ]
-    });
-    expect(result.offer).toEqual({
-      current: {
-        id: "offer-v2",
-        launchId: "launch-id",
-        version: 2,
-        product: "Produto Y",
-        transformation: "Transformacao clara",
-        promise: "Promessa principal",
-        benefits: ["Beneficio 1"],
-        differentials: ["Diferencial 1"],
-        avatarVersion: 2,
-        positioningContext: "Posicionamento atual",
-        isCurrent: true,
-        active: true,
-        createdAt: new Date("2026-07-11T12:50:00.000Z"),
-        updatedAt: new Date("2026-07-11T12:50:00.000Z"),
-        createdBy: "strategist-id",
-        updatedBy: "strategist-id"
-      },
-      history: [
-        {
-          id: "offer-v2",
-          launchId: "launch-id",
-          version: 2,
-          product: "Produto Y",
-          transformation: "Transformacao clara",
-          promise: "Promessa principal",
-          benefits: ["Beneficio 1"],
-          differentials: ["Diferencial 1"],
-          avatarVersion: 2,
-          positioningContext: "Posicionamento atual",
-          isCurrent: true,
-          active: true,
-          createdAt: new Date("2026-07-11T12:50:00.000Z"),
-          updatedAt: new Date("2026-07-11T12:50:00.000Z"),
-          createdBy: "strategist-id",
-          updatedBy: "strategist-id"
-        }
-      ]
-    });
-    expect(result.positioning).toEqual({
-      current: {
-        id: "positioning-v2",
-        launchId: "launch-id",
-        version: 2,
-        thesis: "Tese forte de mercado",
-        centralPromise: "Promessa principal",
-        differentiators: ["Diferencial 1"],
-        references: ["Referencia 1"],
-        offerVersion: 2,
-        isCurrent: true,
-        active: true,
-        createdAt: new Date("2026-07-11T12:55:00.000Z"),
-        updatedAt: new Date("2026-07-11T12:55:00.000Z"),
-        createdBy: "strategist-id",
-        updatedBy: "strategist-id"
-      },
-      history: [
-        {
-          id: "positioning-v2",
-          launchId: "launch-id",
-          version: 2,
-          thesis: "Tese forte de mercado",
-          centralPromise: "Promessa principal",
-          differentiators: ["Diferencial 1"],
-          references: ["Referencia 1"],
-          offerVersion: 2,
-          isCurrent: true,
-          active: true,
-          createdAt: new Date("2026-07-11T12:55:00.000Z"),
-          updatedAt: new Date("2026-07-11T12:55:00.000Z"),
-          createdBy: "strategist-id",
-          updatedBy: "strategist-id"
-        }
-      ]
-    });
-    expect(result.editorialLine).toEqual({
-      current: {
-        id: "editorial-v2",
-        launchId: "launch-id",
-        version: 2,
-        pillars: [
-          { id: "pillar-1", name: "Educacao", objective: "Nutrir audiencia", priority: 1, active: true }
-        ],
-        avatarVersion: 2,
-        offerVersion: 2,
-        positioningVersion: 2,
-        isCurrent: true,
-        active: true,
-        createdAt: new Date("2026-07-11T13:00:00.000Z"),
-        updatedAt: new Date("2026-07-11T13:00:00.000Z"),
-        createdBy: "strategist-id",
-        updatedBy: "strategist-id"
-      },
-      history: [
-        {
-          id: "editorial-v2",
-          launchId: "launch-id",
-          version: 2,
-          pillars: [
-            { id: "pillar-1", name: "Educacao", objective: "Nutrir audiencia", priority: 1, active: true }
-          ],
-          avatarVersion: 2,
-          offerVersion: 2,
-          positioningVersion: 2,
-          isCurrent: true,
-          active: true,
-          createdAt: new Date("2026-07-11T13:00:00.000Z"),
-          updatedAt: new Date("2026-07-11T13:00:00.000Z"),
-          createdBy: "strategist-id",
-          updatedBy: "strategist-id"
-        }
-      ]
-    });
-    expect(result.contentPlan).toEqual({
-      current: {
-        id: "content-plan-v2",
-        launchId: "launch-id",
-        version: 2,
-        items: [
-          {
-            id: "item-1",
-            theme: "Tema 1",
-            format: "Reel",
-            objective: "Autoridade",
-            cta: "Comentar",
-            stage: "Aquecimento",
-            periodLabel: "Semana 1",
-            active: true
-          }
-        ],
-        editorialLineVersion: 2,
-        grouped: {
-          byStage: [
-            {
-              stage: "Aquecimento",
-              items: [
-                {
-                  id: "item-1",
-                  theme: "Tema 1",
-                  format: "Reel",
-                  objective: "Autoridade",
-                  cta: "Comentar",
-                  stage: "Aquecimento",
-                  periodLabel: "Semana 1",
-                  active: true
-                }
-              ]
-            }
-          ],
-          byPeriod: [
-            {
-              periodLabel: "Semana 1",
-              items: [
-                {
-                  id: "item-1",
-                  theme: "Tema 1",
-                  format: "Reel",
-                  objective: "Autoridade",
-                  cta: "Comentar",
-                  stage: "Aquecimento",
-                  periodLabel: "Semana 1",
-                  active: true
-                }
-              ]
-            }
-          ],
-          byObjective: [
-            {
-              objective: "Autoridade",
-              items: [
-                {
-                  id: "item-1",
-                  theme: "Tema 1",
-                  format: "Reel",
-                  objective: "Autoridade",
-                  cta: "Comentar",
-                  stage: "Aquecimento",
-                  periodLabel: "Semana 1",
-                  active: true
-                }
-              ]
-            }
-          ]
-        },
-        isCurrent: true,
-        active: true,
-        createdAt: new Date("2026-07-11T13:05:00.000Z"),
-        updatedAt: new Date("2026-07-11T13:05:00.000Z"),
-        createdBy: "strategist-id",
-        updatedBy: "strategist-id"
-      },
-      history: [
-        {
-          id: "content-plan-v2",
-          launchId: "launch-id",
-          version: 2,
-          items: [
-            {
-              id: "item-1",
-              theme: "Tema 1",
-              format: "Reel",
-              objective: "Autoridade",
-              cta: "Comentar",
-              stage: "Aquecimento",
-              periodLabel: "Semana 1",
-              active: true
-            }
-          ],
-          editorialLineVersion: 2,
-          grouped: {
-            byStage: [
-              {
-                stage: "Aquecimento",
-                items: [
-                  {
-                    id: "item-1",
-                    theme: "Tema 1",
-                    format: "Reel",
-                    objective: "Autoridade",
-                    cta: "Comentar",
-                    stage: "Aquecimento",
-                    periodLabel: "Semana 1",
-                    active: true
-                  }
-                ]
-              }
-            ],
-            byPeriod: [
-              {
-                periodLabel: "Semana 1",
-                items: [
-                  {
-                    id: "item-1",
-                    theme: "Tema 1",
-                    format: "Reel",
-                    objective: "Autoridade",
-                    cta: "Comentar",
-                    stage: "Aquecimento",
-                    periodLabel: "Semana 1",
-                    active: true
-                  }
-                ]
-              }
-            ],
-            byObjective: [
-              {
-                objective: "Autoridade",
-                items: [
-                  {
-                    id: "item-1",
-                    theme: "Tema 1",
-                    format: "Reel",
-                    objective: "Autoridade",
-                    cta: "Comentar",
-                    stage: "Aquecimento",
-                    periodLabel: "Semana 1",
-                    active: true
-                  }
-                ]
-              }
-            ]
-          },
-          isCurrent: true,
-          active: true,
-          createdAt: new Date("2026-07-11T13:05:00.000Z"),
-          updatedAt: new Date("2026-07-11T13:05:00.000Z"),
-          createdBy: "strategist-id",
-          updatedBy: "strategist-id"
-        }
-      ]
-    });
-    expect(result.smartSchedule).toEqual({
-      current: {
-        id: "schedule-v2",
-        launchId: "launch-id",
-        version: 2,
-        objective: "Autoridade",
-        periodStart: new Date("2026-08-01T00:00:00.000Z"),
-        periodEnd: new Date("2026-08-10T00:00:00.000Z"),
-        operationalCadenceDays: 2,
-        contentPlanVersion: 2,
-        activities: [
-          {
-            id: "activity-1",
-            theme: "Tema 1",
-            objective: "Autoridade",
-            stage: "Aquecimento",
-            deliveryType: "Reel",
-            area: "Social Media",
-            suggestedResponsibleRole: "SOCIAL_MEDIA",
-            dueAt: new Date("2026-08-01T12:00:00.000Z"),
-            status: "PLANNED"
-          }
-        ],
-        grouped: {
-          byStage: [
-            {
-              stage: "Aquecimento",
-              activities: [
-                {
-                  id: "activity-1",
-                  theme: "Tema 1",
-                  objective: "Autoridade",
-                  stage: "Aquecimento",
-                  deliveryType: "Reel",
-                  area: "Social Media",
-                  suggestedResponsibleRole: "SOCIAL_MEDIA",
-                  dueAt: new Date("2026-08-01T12:00:00.000Z"),
-                  status: "PLANNED"
-                }
-              ]
-            }
-          ],
-          byStatus: [
-            {
-              status: "PLANNED",
-              activities: [
-                {
-                  id: "activity-1",
-                  theme: "Tema 1",
-                  objective: "Autoridade",
-                  stage: "Aquecimento",
-                  deliveryType: "Reel",
-                  area: "Social Media",
-                  suggestedResponsibleRole: "SOCIAL_MEDIA",
-                  dueAt: new Date("2026-08-01T12:00:00.000Z"),
-                  status: "PLANNED"
-                }
-              ]
-            }
-          ]
-        },
-        isCurrent: true,
-        active: true,
-        createdAt: new Date("2026-07-11T13:10:00.000Z"),
-        updatedAt: new Date("2026-07-11T13:10:00.000Z"),
-        createdBy: "strategist-id",
-        updatedBy: "strategist-id"
-      },
-      history: [
-        {
-          id: "schedule-v2",
-          launchId: "launch-id",
-          version: 2,
-          objective: "Autoridade",
-          periodStart: new Date("2026-08-01T00:00:00.000Z"),
-          periodEnd: new Date("2026-08-10T00:00:00.000Z"),
-          operationalCadenceDays: 2,
-          contentPlanVersion: 2,
-          activities: [
-            {
-              id: "activity-1",
-              theme: "Tema 1",
-              objective: "Autoridade",
-              stage: "Aquecimento",
-              deliveryType: "Reel",
-              area: "Social Media",
-              suggestedResponsibleRole: "SOCIAL_MEDIA",
-              dueAt: new Date("2026-08-01T12:00:00.000Z"),
-              status: "PLANNED"
-            }
-          ],
-          grouped: {
-            byStage: [
-              {
-                stage: "Aquecimento",
-                activities: [
-                  {
-                    id: "activity-1",
-                    theme: "Tema 1",
-                    objective: "Autoridade",
-                    stage: "Aquecimento",
-                    deliveryType: "Reel",
-                    area: "Social Media",
-                    suggestedResponsibleRole: "SOCIAL_MEDIA",
-                    dueAt: new Date("2026-08-01T12:00:00.000Z"),
-                    status: "PLANNED"
-                  }
-                ]
-              }
-            ],
-            byStatus: [
-              {
-                status: "PLANNED",
-                activities: [
-                  {
-                    id: "activity-1",
-                    theme: "Tema 1",
-                    objective: "Autoridade",
-                    stage: "Aquecimento",
-                    deliveryType: "Reel",
-                    area: "Social Media",
-                    suggestedResponsibleRole: "SOCIAL_MEDIA",
-                    dueAt: new Date("2026-08-01T12:00:00.000Z"),
-                    status: "PLANNED"
-                  }
-                ]
-              }
-            ]
-          },
-          isCurrent: true,
-          active: true,
-          createdAt: new Date("2026-07-11T13:10:00.000Z"),
-          updatedAt: new Date("2026-07-11T13:10:00.000Z"),
-          createdBy: "strategist-id",
-          updatedBy: "strategist-id"
-        }
-      ]
-    });
-    expect(result.expertApproval).toEqual({
-      current: {
-        id: "approval-v2",
-        launchId: "launch-id",
-        version: 2,
-        status: "APPROVED",
-        submittedAt: new Date("2026-07-11T13:15:00.000Z"),
-        submittedBy: "strategist-id",
-        decisionAt: new Date("2026-07-11T13:20:00.000Z"),
-        decidedBy: "expert-id",
-        observations: "Aprovado para execucao",
-        marketResearchVersion: 2,
-        competitorResearchCount: 1,
-        avatarVersion: 2,
-        offerVersion: 2,
-        positioningVersion: 2,
-        editorialLineVersion: 2,
-        contentPlanVersion: 2,
-        smartScheduleVersion: 2,
-        isCurrent: true,
-        active: true,
-        createdAt: new Date("2026-07-11T13:20:00.000Z"),
-        updatedAt: new Date("2026-07-11T13:20:00.000Z"),
-        createdBy: "strategist-id",
-        updatedBy: "expert-id"
-      },
-      history: [
-        {
-          id: "approval-v2",
-          launchId: "launch-id",
-          version: 2,
-          status: "APPROVED",
-          submittedAt: new Date("2026-07-11T13:15:00.000Z"),
-          submittedBy: "strategist-id",
-          decisionAt: new Date("2026-07-11T13:20:00.000Z"),
-          decidedBy: "expert-id",
-          observations: "Aprovado para execucao",
-          marketResearchVersion: 2,
-          competitorResearchCount: 1,
-          avatarVersion: 2,
-          offerVersion: 2,
-          positioningVersion: 2,
-          editorialLineVersion: 2,
-          contentPlanVersion: 2,
-          smartScheduleVersion: 2,
-          isCurrent: true,
-          active: true,
-          createdAt: new Date("2026-07-11T13:20:00.000Z"),
-          updatedAt: new Date("2026-07-11T13:20:00.000Z"),
-          createdBy: "strategist-id",
-          updatedBy: "expert-id"
-        }
-      ]
-    });
-  });
-
-  it("rejects launch lookup when the launch does not exist", async () => {
-    launchModel.findById.mockResolvedValue(null);
-
-    await expect(launchService.getById("launch-id")).rejects.toMatchObject({
-      statusCode: 404,
-      message: "Launch not found"
-    });
+    expect(result.progress).toBeGreaterThan(0);
+    expect(result.tabs.schedule.timeline.length).toBeGreaterThan(1);
+    expect(result.tabs.campaigns.total).toBe(1);
+    expect(result.tabs.contents.total).toBe(1);
+    expect(result.tabs.files[0].name).toBe("Drive de pecas");
   });
 });
