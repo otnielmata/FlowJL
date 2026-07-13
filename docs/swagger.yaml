@@ -9,6 +9,7 @@ tags:
   - name: Health
   - name: AI Brand Materials
   - name: AI Historical Contents
+  - name: AI Metric Insights
   - name: AI Schedules
   - name: Assets
   - name: Audit
@@ -271,6 +272,53 @@ paths:
           description: Conteudo historico nao encontrado
         '409':
           description: Conteudo historico ja inativo
+  /api/v1/ai-metric-insights:
+    post:
+      tags: [AI Metric Insights]
+      summary: Gera sugestoes de melhoria com base em metricas historicas
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AiMetricInsightRequest'
+      responses:
+        '201':
+          description: Sugestoes estruturadas geradas com base auditavel e revisao humana
+        '400':
+          description: Dados invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento nao encontrado
+        '422':
+          description: Base historica insuficiente para sugerir melhorias
+  /api/v1/ai-metric-insights/{insightId}:
+    get:
+      tags: [AI Metric Insights]
+      summary: Consulta sugestao gerada com sua base historica segura
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: insightId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Sugestao retornada sem detalhes internos de processamento
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Sugestao nao encontrada
   /api/v1/ai-schedules:
     post:
       tags: [AI Schedules]
@@ -4896,6 +4944,63 @@ components:
           type: integer
           minimum: 1
           maximum: 20
+    AiMetricInsightRequest:
+      type: object
+      required: [objective]
+      properties:
+        launchId:
+          type: string
+          format: uuid
+        objective:
+          type: string
+          minLength: 3
+          maxLength: 180
+        focusArea:
+          type: string
+          enum: [GENERAL, TRAFFIC, CONTENT, CONVERSION, REVENUE]
+        periodStart:
+          type: string
+          format: date-time
+        periodEnd:
+          type: string
+          format: date-time
+        tags:
+          type: array
+          items:
+            type: string
+    AiMetricInsightSuggestion:
+      type: object
+      properties:
+        title:
+          type: string
+        category:
+          type: string
+        priority:
+          type: string
+          enum: [LOW, MEDIUM, HIGH]
+        recommendation:
+          type: string
+        justification:
+          type: string
+        humanReviewRequired:
+          type: boolean
+        evidenceRefs:
+          type: array
+          items:
+            type: object
+            properties:
+              sourceType:
+                type: string
+                enum: [TRAFFIC_SNAPSHOT, HISTORICAL_CONTENT, AGGREGATED_METRIC]
+              sourceId:
+                type: string
+                nullable: true
+              label:
+                type: string
+              metric:
+                type: string
+              value:
+                type: number
     GenerateAiScheduleRequest:
       type: object
       required: [objective, briefing]
