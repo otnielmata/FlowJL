@@ -115,6 +115,18 @@ const corePermissions = [
     module: "settings"
   },
   {
+    code: "SETTINGS_PERSONAL_READ",
+    name: "Consultar configuracoes pessoais",
+    description: "Permite consultar perfil, preferencias, tema e notificacoes do proprio usuario.",
+    module: "settings"
+  },
+  {
+    code: "SETTINGS_PERSONAL_UPDATE",
+    name: "Atualizar configuracoes pessoais",
+    description: "Permite atualizar perfil, preferencias, tema e notificacoes do proprio usuario.",
+    module: "settings"
+  },
+  {
     code: "LAUNCH_CREATE",
     name: "Cadastrar lancamentos",
     description: "Permite cadastrar novos lancamentos da operacao.",
