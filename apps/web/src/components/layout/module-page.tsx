@@ -581,6 +581,6 @@ export function ModulePage({ path }: { path: string }) {
   );
 }
 
-function getCurrentUser(userId: string) {
+function getCurrentUser(userId: string | null) {
   return (mockUsers.find((user) => user.id === userId) ?? mockUsers[0]) as AppUser;
 }

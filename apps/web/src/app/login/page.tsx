@@ -1,22 +1,97 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowRight, LockKeyhole, Sparkles } from "lucide-react";
-import Link from "next/link";
+import Image from "next/image";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useEffect } from "react";
+import { useForm, useWatch } from "react-hook-form";
+import { z } from "zod";
+import { toast } from "sonner";
 
 import { mockUsers } from "@/mocks/flow-data";
 import { useAuthStore } from "@/stores/auth-store";
 
+const loginSchema = z.object({
+  userId: z.string().min(1, "Selecione um perfil para entrar."),
+  email: z.email("Informe um email valido."),
+  password: z.string().min(6, "A senha simulada precisa ter pelo menos 6 caracteres."),
+});
+
+type LoginForm = z.infer<typeof loginSchema>;
+
 export default function LoginPage() {
+  return (
+    <Suspense fallback={<LoginPageFallback />}>
+      <LoginPageContent />
+    </Suspense>
+  );
+}
+
+function LoginPageContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const nextPath = searchParams.get("next") || "/dashboard";
   const currentUserId = useAuthStore((state) => state.currentUserId);
+  const hydrated = useAuthStore((state) => state.hydrated);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const login = useAuthStore((state) => state.login);
+  const logout = useAuthStore((state) => state.logout);
   const setCurrentUserId = useAuthStore((state) => state.setCurrentUserId);
+
+  const form = useForm<LoginForm>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      userId: currentUserId ?? mockUsers[0].id,
+      email: "demo@flowjl.com",
+      password: "flowjl123",
+    },
+  });
+  const selectedUserId = useWatch({
+    control: form.control,
+    name: "userId",
+  });
+
+  useEffect(() => {
+    if (!hydrated) {
+      return;
+    }
+
+    if (isAuthenticated) {
+      router.replace(nextPath === "/login" ? "/dashboard" : nextPath);
+    }
+  }, [hydrated, isAuthenticated, nextPath, router]);
+
+  function handleSubmit(values: LoginForm) {
+    login(values.userId);
+    toast.success("Acesso liberado ao workspace Flow JL.");
+    router.push(nextPath === "/login" ? "/dashboard" : nextPath);
+  }
+
+  function handleSelectUser(userId: string) {
+    setCurrentUserId(userId);
+    form.setValue("userId", userId, { shouldValidate: true, shouldDirty: true });
+  }
 
   return (
     <main className="flex min-h-screen items-center justify-center px-4 py-10">
       <div className="grid w-full max-w-6xl gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-        <section className="glass rounded-[2rem] border p-8 shadow-[0_30px_80px_rgba(22,32,51,0.12)] lg:p-12">
+        <section className="glass brand-grid relative rounded-[2rem] border p-8 shadow-[0_30px_80px_rgba(22,32,51,0.12)] lg:p-12">
+          <span className="brand-orb left-[-30px] top-[-24px] h-36 w-36 bg-[color:var(--primary)]/20" />
+          <span className="brand-orb bottom-[-40px] right-[-10px] h-32 w-32 bg-cyan-400/16" />
+
           <div className="inline-flex items-center gap-2 rounded-full border border-white/50 bg-white/65 px-4 py-2 text-sm font-medium text-[color:var(--accent-foreground)] shadow-sm dark:bg-white/8">
             <Sparkles className="h-4 w-4" />
             Flow JL Workspace
+          </div>
+          <div className="mt-6 flex items-center gap-4">
+            <div className="overflow-hidden rounded-[1.75rem] shadow-[0_28px_50px_rgba(109,40,217,0.2)]">
+              <Image src="/brand/jl-logo.jpeg" alt="Logo JL" width={82} height={82} className="h-20 w-20 object-cover" />
+            </div>
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[color:var(--muted-foreground)]">Identidade visual</p>
+              <p className="mt-1 font-display text-2xl font-semibold">JL. como assinatura principal</p>
+            </div>
           </div>
           <h1 className="mt-6 max-w-xl font-display text-4xl font-semibold tracking-tight text-balance sm:text-5xl">
             Operação completa para lançamentos digitais em uma visão clara e conectada.
@@ -25,6 +100,18 @@ export default function LoginPage() {
             Centralize dashboard executivo, cronogramas, mídia paga, aprovações, produção e inteligência artificial
             em uma interface pensada para squads de alta cadência.
           </p>
+
+          <div className="mt-8 flex flex-wrap gap-3">
+            {[
+              ["Roxo elétrico", "Base de destaque e ações principais"],
+              ["Grafite limpo", "Superfície sólida para leitura e foco"],
+              ["Verde-lima", "Acento de aprovação e energia da marca"],
+            ].map(([title, description]) => (
+              <div key={title} className="rounded-full border bg-white/60 px-4 py-2 text-sm dark:bg-white/6">
+                <span className="font-semibold">{title}</span> · {description}
+              </div>
+            ))}
+          </div>
 
           <div className="mt-10 grid gap-4 sm:grid-cols-3">
             {[
@@ -41,51 +128,116 @@ export default function LoginPage() {
         </section>
 
         <section className="glass rounded-[2rem] border p-8 shadow-[0_30px_80px_rgba(22,32,51,0.12)] lg:p-10">
-          <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-[color:var(--primary)]/12 text-[color:var(--primary)]">
+          <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-[color:var(--primary)]/14 text-[color:var(--primary)]">
             <LockKeyhole className="h-6 w-6" />
           </div>
           <h2 className="mt-6 font-display text-2xl font-semibold">Entrar no ambiente Flow JL</h2>
           <p className="mt-2 text-sm leading-6 text-[color:var(--muted-foreground)]">
-            Escolha um perfil para simular permissões e navegar pelo produto completo do front-end.
+            O acesso principal acontece por aqui. Entre com um perfil simulado para liberar os modulos internos da plataforma.
           </p>
 
-          <div className="mt-8 space-y-3">
-            {mockUsers.map((user) => {
-              const selected = currentUserId === user.id;
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="mt-8 space-y-5">
+            <div className="space-y-3">
+              {mockUsers.map((user) => {
+                const selected = selectedUserId === user.id;
 
-              return (
-                <button
-                  key={user.id}
-                  type="button"
-                  onClick={() => setCurrentUserId(user.id)}
-                  className={`w-full rounded-3xl border p-4 text-left transition ${
-                    selected
-                      ? "border-[color:var(--primary)] bg-[color:var(--primary)]/8 shadow-sm"
-                      : "bg-white/55 hover:border-[color:var(--primary)]/30 hover:bg-white dark:bg-white/5 dark:hover:bg-white/8"
-                  }`}
-                >
-                  <div className="flex items-center justify-between gap-4">
-                    <div>
-                      <p className="font-semibold">{user.name}</p>
-                      <p className="text-sm text-[color:var(--muted-foreground)]">{user.roleLabel}</p>
+                return (
+                  <button
+                    key={user.id}
+                    type="button"
+                    onClick={() => handleSelectUser(user.id)}
+                    className={`w-full rounded-3xl border p-4 text-left transition ${
+                      selected
+                        ? "border-[color:var(--primary)] bg-[color:var(--primary)]/8 shadow-sm"
+                        : "bg-white/55 hover:border-[color:var(--primary)]/30 hover:bg-white dark:bg-white/5 dark:hover:bg-white/8"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-4">
+                      <div>
+                        <p className="font-semibold">{user.name}</p>
+                        <p className="text-sm text-[color:var(--muted-foreground)]">{user.roleLabel}</p>
+                      </div>
+                      <span className="rounded-full bg-[color:var(--secondary)] px-3 py-1 text-xs font-medium text-[color:var(--secondary-foreground)]">
+                        {user.focus}
+                      </span>
                     </div>
-                    <span className="rounded-full bg-[color:var(--secondary)] px-3 py-1 text-xs font-medium text-[color:var(--secondary-foreground)]">
-                      {user.focus}
-                    </span>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
+                  </button>
+                );
+              })}
+            </div>
 
-          <Link
-            href="/dashboard"
-            className="mt-8 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[color:var(--primary)] px-5 py-3 font-medium text-[color:var(--primary-foreground)] transition hover:opacity-90"
-          >
-            Acessar plataforma
-            <ArrowRight className="h-4 w-4" />
-          </Link>
+            <div className="grid gap-4">
+              <label className="space-y-2">
+                <span className="text-sm font-medium">Email</span>
+                <input
+                  type="email"
+                  {...form.register("email")}
+                  className="w-full rounded-2xl border bg-white/65 px-4 py-3 outline-none transition focus:border-[color:var(--primary)] dark:bg-white/6"
+                  placeholder="demo@flowjl.com"
+                />
+                {form.formState.errors.email && (
+                  <p className="text-sm text-[color:var(--danger)]">{form.formState.errors.email.message}</p>
+                )}
+              </label>
+
+              <label className="space-y-2">
+                <span className="text-sm font-medium">Senha simulada</span>
+                <input
+                  type="password"
+                  {...form.register("password")}
+                  className="w-full rounded-2xl border bg-white/65 px-4 py-3 outline-none transition focus:border-[color:var(--primary)] dark:bg-white/6"
+                  placeholder="flowjl123"
+                />
+                {form.formState.errors.password && (
+                  <p className="text-sm text-[color:var(--danger)]">{form.formState.errors.password.message}</p>
+                )}
+              </label>
+            </div>
+
+            <div className="rounded-3xl border bg-white/55 p-4 text-sm leading-6 text-[color:var(--muted-foreground)] dark:bg-white/5">
+              Use qualquer perfil acima com o email <strong>demo@flowjl.com</strong> e a senha <strong>flowjl123</strong> para
+              validar o acesso ao sistema.
+            </div>
+
+            <button
+              type="submit"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[color:var(--primary)] px-5 py-3 font-medium text-[color:var(--primary-foreground)] transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
+              disabled={form.formState.isSubmitting || !hydrated}
+            >
+              Acessar plataforma
+              <ArrowRight className="h-4 w-4" />
+            </button>
+
+            {isAuthenticated && (
+              <button
+                type="button"
+                onClick={() => {
+                  logout();
+                  toast.success("Sessao encerrada com sucesso.");
+                }}
+                className="inline-flex w-full items-center justify-center rounded-2xl border bg-white/65 px-5 py-3 font-medium transition hover:bg-white dark:bg-white/6"
+              >
+                Encerrar sessao atual
+              </button>
+            )}
+          </form>
         </section>
+      </div>
+    </main>
+  );
+}
+
+function LoginPageFallback() {
+  return (
+    <main className="flex min-h-screen items-center justify-center px-4 py-10">
+      <div className="glass w-full max-w-md rounded-[2rem] border p-8 text-center shadow-[0_30px_80px_rgba(22,32,51,0.12)]">
+        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-[color:var(--primary)]/12 text-[color:var(--primary)]">
+          <LockKeyhole className="h-6 w-6" />
+        </div>
+        <h1 className="mt-5 font-display text-2xl font-semibold">Carregando acesso</h1>
+        <p className="mt-3 text-sm leading-6 text-[color:var(--muted-foreground)]">
+          Estamos preparando a entrada segura no ambiente Flow JL.
+        </p>
       </div>
     </main>
   );

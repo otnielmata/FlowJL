@@ -10,6 +10,7 @@ import {
   Compass,
   LayoutDashboard,
   LogIn,
+  LogOut,
   Megaphone,
   Menu,
   MoonStar,
@@ -21,6 +22,7 @@ import {
   SunMedium,
   Workflow,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
@@ -50,6 +52,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const currentUserId = useAuthStore((state) => state.currentUserId);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const logout = useAuthStore((state) => state.logout);
   const setCurrentUserId = useAuthStore((state) => state.setCurrentUserId);
   const sidebarCollapsed = useUiStore((state) => state.sidebarCollapsed);
   const setSidebarCollapsed = useUiStore((state) => state.setSidebarCollapsed);
@@ -75,6 +79,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [setCommandOpen]);
 
+  function handleLogout() {
+    logout();
+    router.push("/login");
+  }
+
   return (
     <div className="flex min-h-screen">
       <aside
@@ -84,13 +93,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         )}
       >
         <div className="flex items-center gap-3 rounded-3xl px-3 py-2">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[color:var(--primary)] text-[color:var(--primary-foreground)] shadow-lg shadow-[color:var(--primary)]/20">
-            <Sparkles className="h-5 w-5" />
+          <div className="overflow-hidden rounded-2xl shadow-[0_20px_40px_rgba(109,40,217,0.22)]">
+            <Image src="/brand/jl-logo.jpeg" alt="Logo JL" width={48} height={48} className="h-12 w-12 object-cover" />
           </div>
           {!sidebarCollapsed && (
             <div>
               <p className="font-display text-lg font-semibold">Flow JL</p>
-              <p className="text-sm text-[color:var(--muted-foreground)]">Front-end operacional</p>
+              <p className="text-sm text-[color:var(--muted-foreground)]">Workspace operacional JL</p>
             </div>
           )}
         </div>
@@ -142,7 +151,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
       <div className="flex min-h-screen flex-1 flex-col">
         <header className="sticky top-0 z-30 px-4 pb-4 pt-4 sm:px-6 lg:px-8">
-          <div className="glass flex flex-col gap-4 rounded-[2rem] border px-4 py-4 shadow-[0_18px_50px_rgba(10,21,38,0.08)] sm:px-6">
+          <div className="glass brand-grid flex flex-col gap-4 rounded-[2rem] border px-4 py-4 shadow-[0_18px_50px_rgba(10,21,38,0.08)] sm:px-6">
+            <span className="brand-orb right-[-32px] top-[-24px] h-28 w-28 bg-[color:var(--primary)]/22" />
+            <span className="brand-orb bottom-[-30px] left-[22%] h-24 w-24 bg-[color:var(--accent)]/16" />
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <p className="text-sm text-[color:var(--muted-foreground)]">Operação Flow JL</p>
@@ -225,13 +236,26 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 </select>
               </label>
 
-              <Link
-                href="/login"
-                className="inline-flex items-center gap-2 rounded-2xl border bg-white/65 px-4 py-2 text-sm font-medium hover:bg-white dark:bg-white/6"
-              >
-                <LogIn className="h-4 w-4" />
-                Trocar perfil
-              </Link>
+              <div className="flex items-center gap-2">
+                <Link
+                  href="/login"
+                  className="inline-flex items-center gap-2 rounded-2xl border bg-white/65 px-4 py-2 text-sm font-medium hover:bg-white dark:bg-white/6"
+                >
+                  <LogIn className="h-4 w-4" />
+                  Trocar perfil
+                </Link>
+
+                {isAuthenticated && (
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    className="inline-flex items-center gap-2 rounded-2xl border bg-white/65 px-4 py-2 text-sm font-medium hover:bg-white dark:bg-white/6"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    Sair
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </header>
