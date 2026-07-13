@@ -1,8 +1,12 @@
 import { randomUUID } from "node:crypto";
 
+import { ClassSchedule } from "../models/class-schedule.model.js";
 import { Launch } from "../models/launch.model.js";
+import { LiveEvent } from "../models/live-event.model.js";
+import { OperationalChecklist } from "../models/operational-checklist.model.js";
 import {
   OperationalSchedule,
+  operationalScheduleRecurrenceFrequencies,
   operationalSchedulePriorities,
   operationalScheduleStatuses,
   operationalScheduleViews
@@ -21,6 +25,64 @@ function normalizeNullableString(value) {
 
 function normalizeStringArray(values = []) {
   return values.map((value) => value.trim());
+}
+
+function normalizeRecurrence(recurrence = {}, current = {}) {
+  const frequency = recurrence.frequency ?? current.frequency ?? "NONE";
+
+  if (!operationalScheduleRecurrenceFrequencies.includes(frequency)) {
+    throw {
+      statusCode: 400,
+      message: "Unsupported recurrence frequency"
+    };
+  }
+
+  return {
+    frequency,
+    interval: recurrence.interval ?? current.interval ?? 1,
+    count: recurrence.count ?? current.count ?? null,
+    until: recurrence.until !== undefined ? normalizeDate(recurrence.until) : current.until ?? null
+  };
+}
+
+function normalizeReminder(reminder = {}, current = {}) {
+  return {
+    enabled: reminder.enabled ?? current.enabled ?? false,
+    remindAt: reminder.remindAt !== undefined ? normalizeDate(reminder.remindAt) : current.remindAt ?? null,
+    channel: reminder.channel !== undefined ? normalizeNullableString(reminder.channel) : current.channel ?? null
+  };
+}
+
+function normalizeRelationships(relationships = {}, current = {}) {
+  return {
+    checklistId: relationships.checklistId !== undefined ? relationships.checklistId : current.checklistId ?? null,
+    classScheduleId: relationships.classScheduleId !== undefined ? relationships.classScheduleId : current.classScheduleId ?? null,
+    liveEventId: relationships.liveEventId !== undefined ? relationships.liveEventId : current.liveEventId ?? null,
+    relatedLink: relationships.relatedLink !== undefined ? normalizeNullableString(relationships.relatedLink) : current.relatedLink ?? null
+  };
+}
+
+function normalizeAttendance(attendance = {}, current = {}) {
+  const present = attendance.present ?? current.present ?? false;
+
+  return {
+    present,
+    checkedBy: present ? attendance.checkedBy ?? current.checkedBy ?? null : null,
+    checkedAt: present ? attendance.checkedAt ?? current.checkedAt ?? new Date() : null
+  };
+}
+
+function buildExecutionHistoryEntry(actionType, actorUserId, message, metadata = {}, fromStatus = null, toStatus = null) {
+  return {
+    id: randomUUID(),
+    actionType,
+    fromStatus,
+    toStatus,
+    actorUserId,
+    message,
+    metadata,
+    createdAt: new Date()
+  };
 }
 
 function normalizeChecklistItem(item, authenticatedUserId, now = new Date()) {
@@ -110,6 +172,19 @@ function cloneComments(comments = []) {
   }));
 }
 
+function cloneExecutionHistory(history = []) {
+  return history.map((entry) => ({
+    id: entry.id,
+    actionType: entry.actionType,
+    fromStatus: entry.fromStatus ?? null,
+    toStatus: entry.toStatus ?? null,
+    actorUserId: entry.actorUserId ?? null,
+    message: entry.message,
+    metadata: entry.metadata ?? {},
+    createdAt: entry.createdAt
+  }));
+}
+
 function buildStatusLabel(status) {
   return status
     .split("_")
@@ -147,13 +222,39 @@ function toPublicOperationalSchedule(schedule, dependencies = [], conflictIndex 
     attachments: cloneAttachments(schedule.attachments),
     comments: cloneComments(schedule.comments),
     tags: [...(schedule.tags ?? [])],
+    recurrence: {
+      frequency: schedule.recurrence?.frequency ?? "NONE",
+      interval: schedule.recurrence?.interval ?? 1,
+      count: schedule.recurrence?.count ?? null,
+      until: schedule.recurrence?.until ?? null
+    },
+    reminder: {
+      enabled: schedule.reminder?.enabled ?? false,
+      remindAt: schedule.reminder?.remindAt ?? null,
+      channel: schedule.reminder?.channel ?? null
+    },
+    relationships: {
+      checklistId: schedule.relationships?.checklistId ?? null,
+      classScheduleId: schedule.relationships?.classScheduleId ?? null,
+      liveEventId: schedule.relationships?.liveEventId ?? null,
+      relatedLink: schedule.relationships?.relatedLink ?? null
+    },
+    attendance: {
+      present: schedule.attendance?.present ?? false,
+      checkedBy: schedule.attendance?.checkedBy ?? null,
+      checkedAt: schedule.attendance?.checkedAt ?? null
+    },
+    executionHistory: cloneExecutionHistory(schedule.executionHistory),
     indicators: {
       delayed,
       hasConflict: overlappingIds.length > 0,
       conflictCount: overlappingIds.length,
-      completionRate: schedule.checklist.length === 0 ? 0 : Math.round((schedule.checklist.filter((item) => item.completed).length / schedule.checklist.length) * 100)
+      completionRate: schedule.checklist.length === 0 ? 0 : Math.round((schedule.checklist.filter((item) => item.completed).length / schedule.checklist.length) * 100),
+      reminderEnabled: schedule.reminder?.enabled ?? false,
+      hasRecurrence: (schedule.recurrence?.frequency ?? "NONE") !== "NONE",
+      attendanceMarked: schedule.attendance?.present ?? false
     },
-    state: delayed ? "DELAYED" : overlappingIds.length > 0 ? "CONFLICT" : "HEALTHY",
+    state: delayed ? "DELAYED" : overlappingIds.length > 0 ? "CONFLICT" : schedule.status === "BLOCKED" ? "PENDING" : "HEALTHY",
     active: schedule.active,
     createdAt: schedule.createdAt,
     updatedAt: schedule.updatedAt,
@@ -249,6 +350,41 @@ async function ensureLaunchExists(launchId) {
   }
 }
 
+async function ensureRelatedContexts(launchId, relationships) {
+  if (relationships.classScheduleId) {
+    const classSchedule = await ClassSchedule.findById(relationships.classScheduleId);
+
+    if (!classSchedule || !classSchedule.active || classSchedule.launchId !== launchId) {
+      throw {
+        statusCode: 404,
+        message: "Class schedule relationship not found"
+      };
+    }
+  }
+
+  if (relationships.liveEventId) {
+    const liveEvent = await LiveEvent.findById(relationships.liveEventId);
+
+    if (!liveEvent || !liveEvent.active || liveEvent.launchId !== launchId) {
+      throw {
+        statusCode: 404,
+        message: "Live event relationship not found"
+      };
+    }
+  }
+
+  if (relationships.checklistId) {
+    const checklist = await OperationalChecklist.findById(relationships.checklistId);
+
+    if (!checklist || !checklist.active) {
+      throw {
+        statusCode: 404,
+        message: "Operational checklist relationship not found"
+      };
+    }
+  }
+}
+
 function validateScheduleDates(startsAt, dueAt) {
   if (startsAt.getTime() > dueAt.getTime()) {
     throw {
@@ -320,6 +456,10 @@ class OperationalScheduleService {
 
     const dependencies = await resolveDependencies(data.launchId, data.dependencyIds ?? []);
     enforceDependencyWindow(startsAt, dependencies);
+    const recurrence = normalizeRecurrence(data.recurrence);
+    const reminder = normalizeReminder(data.reminder);
+    const relationships = normalizeRelationships(data.relationships);
+    await ensureRelatedContexts(data.launchId, relationships);
 
     const schedule = await OperationalSchedule.create({
       launchId: data.launchId,
@@ -338,6 +478,20 @@ class OperationalScheduleService {
       attachments: (data.attachments ?? []).map((attachment) => normalizeAttachment(attachment)),
       comments: (data.comments ?? []).map((comment) => normalizeComment(comment)),
       tags: normalizeStringArray(data.tags),
+      recurrence,
+      reminder,
+      relationships,
+      attendance: {
+        present: false,
+        checkedBy: null,
+        checkedAt: null
+      },
+      executionHistory: [
+        buildExecutionHistoryEntry("CREATED", authenticatedUserId, "Atividade operacional criada.", {
+          title: data.title.trim(),
+          responsible: data.responsible.trim()
+        }, null, data.status)
+      ],
       active: true,
       createdBy: authenticatedUserId,
       updatedBy: authenticatedUserId
@@ -353,7 +507,10 @@ class OperationalScheduleService {
         status: schedule.status,
         responsible: schedule.responsible,
         startsAt: schedule.startsAt,
-        dueAt: schedule.dueAt
+        dueAt: schedule.dueAt,
+        recurrence: schedule.recurrence,
+        reminder: schedule.reminder,
+        relationships: schedule.relationships
       }
     });
 
@@ -486,6 +643,12 @@ class OperationalScheduleService {
     const dependencyIds = data.dependencyIds ?? schedule.dependencyIds ?? [];
     const dependencies = await resolveDependencies(schedule.launchId, dependencyIds, [schedule.id]);
     enforceDependencyWindow(startsAt, dependencies);
+    const recurrence = data.recurrence ? normalizeRecurrence(data.recurrence, schedule.recurrence ?? {}) : schedule.recurrence ?? normalizeRecurrence();
+    const reminder = data.reminder ? normalizeReminder(data.reminder, schedule.reminder ?? {}) : schedule.reminder ?? normalizeReminder();
+    const relationships = data.relationships
+      ? normalizeRelationships(data.relationships, schedule.relationships ?? {})
+      : schedule.relationships ?? normalizeRelationships();
+    await ensureRelatedContexts(schedule.launchId, relationships);
 
     const updates = {
       title: data.title?.trim() ?? schedule.title,
@@ -503,6 +666,24 @@ class OperationalScheduleService {
       attachments: data.attachments ? data.attachments.map((attachment) => normalizeAttachment(attachment)) : schedule.attachments,
       comments: data.comments ? data.comments.map((comment) => normalizeComment(comment)) : schedule.comments,
       tags: data.tags ? normalizeStringArray(data.tags) : schedule.tags,
+      recurrence,
+      reminder,
+      relationships,
+      attendance: schedule.attendance ?? normalizeAttendance(),
+      executionHistory: [
+        ...(schedule.executionHistory ?? []),
+        buildExecutionHistoryEntry(
+          "UPDATED",
+          authenticatedUserId,
+          "Atividade operacional atualizada.",
+          {
+            title: data.title?.trim() ?? schedule.title,
+            checklistCompleted: (data.checklist ? data.checklist.filter((item) => item.completed).length : schedule.checklist.filter((item) => item.completed).length)
+          },
+          schedule.status,
+          data.status ?? schedule.status
+        )
+      ],
       updatedBy: authenticatedUserId
     };
 
@@ -625,6 +806,86 @@ class OperationalScheduleService {
       confirmations,
       ...refreshed
     };
+  }
+
+  async recordExecution(authenticatedUserId, activityId, data) {
+    const schedule = await OperationalSchedule.findById(activityId);
+
+    if (!schedule || !schedule.active) {
+      throw {
+        statusCode: 404,
+        message: "Operational schedule activity not found"
+      };
+    }
+
+    const checklist = data.checklist ? data.checklist.map((item) => normalizeChecklistItem(item, authenticatedUserId)) : schedule.checklist;
+    const attendance = data.attendance
+      ? normalizeAttendance(
+          {
+            ...data.attendance,
+            checkedBy: authenticatedUserId
+          },
+          schedule.attendance ?? {}
+        )
+      : schedule.attendance ?? normalizeAttendance();
+    const nextStatus = data.status ?? schedule.status;
+    const executionHistory = [
+      ...(schedule.executionHistory ?? []),
+      buildExecutionHistoryEntry(
+        data.complete ? "COMPLETED" : attendance.present ? "ATTENDANCE_MARKED" : "EXECUTION_RECORDED",
+        authenticatedUserId,
+        data.complete ? "Atividade operacional concluida." : "Execucao operacional atualizada.",
+        {
+          attendanceMarked: attendance.present,
+          checklistCompleted: checklist.filter((item) => item.completed).length,
+          checklistTotal: checklist.length
+        },
+        schedule.status,
+        nextStatus
+      )
+    ];
+
+    const updates = {
+      checklist,
+      attendance,
+      status: nextStatus,
+      executionHistory,
+      updatedBy: authenticatedUserId
+    };
+
+    await OperationalSchedule.updateOne(
+      { _id: activityId },
+      {
+        $set: updates
+      }
+    );
+
+    await auditService.record({
+      actorUserId: authenticatedUserId,
+      action: "OPERATIONAL_SCHEDULE_EXECUTION_RECORDED",
+      targetType: "OPERATIONAL_SCHEDULE",
+      targetId: schedule.id,
+      context: {
+        launchId: schedule.launchId,
+        previousStatus: schedule.status,
+        status: nextStatus,
+        attendanceMarked: attendance.present,
+        checklistCompleted: checklist.filter((item) => item.completed).length,
+        checklistTotal: checklist.length
+      }
+    });
+
+    const dependencies = await resolveDependencies(schedule.launchId, schedule.dependencyIds ?? [], [schedule.id]);
+
+    return toPublicOperationalSchedule(
+      {
+        ...schedule.toObject(),
+        ...updates,
+        id: schedule.id,
+        updatedAt: new Date()
+      },
+      dependencies
+    );
   }
 }
 

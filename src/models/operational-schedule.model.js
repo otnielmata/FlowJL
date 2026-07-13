@@ -7,6 +7,149 @@ export const operationalScheduleAreas = ["OPERATIONS", "CONTENT", "SOCIAL_MEDIA"
 export const operationalSchedulePriorities = ["LOW", "MEDIUM", "HIGH", "CRITICAL"];
 export const operationalScheduleStatuses = ["BACKLOG", "PLANNED", "IN_PROGRESS", "IN_REVIEW", "BLOCKED", "DONE", "CANCELED"];
 export const operationalScheduleTypes = ["TASK", "MEETING", "APPROVAL", "DELIVERY", "PUBLISHING", "AUTOMATION"];
+export const operationalScheduleRecurrenceFrequencies = ["NONE", "DAILY", "WEEKLY", "MONTHLY"];
+
+const recurrenceSchema = new mongoose.Schema(
+  {
+    frequency: {
+      type: String,
+      enum: operationalScheduleRecurrenceFrequencies,
+      default: "NONE"
+    },
+    interval: {
+      type: Number,
+      default: 1,
+      min: 1
+    },
+    count: {
+      type: Number,
+      default: null,
+      min: 1
+    },
+    until: {
+      type: Date,
+      default: null
+    }
+  },
+  {
+    _id: false,
+    versionKey: false
+  }
+);
+
+const reminderSchema = new mongoose.Schema(
+  {
+    enabled: {
+      type: Boolean,
+      default: false
+    },
+    remindAt: {
+      type: Date,
+      default: null
+    },
+    channel: {
+      type: String,
+      default: null,
+      trim: true
+    }
+  },
+  {
+    _id: false,
+    versionKey: false
+  }
+);
+
+const relationshipsSchema = new mongoose.Schema(
+  {
+    checklistId: {
+      type: String,
+      default: null
+    },
+    classScheduleId: {
+      type: String,
+      default: null
+    },
+    liveEventId: {
+      type: String,
+      default: null
+    },
+    relatedLink: {
+      type: String,
+      default: null,
+      trim: true
+    }
+  },
+  {
+    _id: false,
+    versionKey: false
+  }
+);
+
+const attendanceSchema = new mongoose.Schema(
+  {
+    present: {
+      type: Boolean,
+      default: false
+    },
+    checkedBy: {
+      type: String,
+      default: null
+    },
+    checkedAt: {
+      type: Date,
+      default: null
+    }
+  },
+  {
+    _id: false,
+    versionKey: false
+  }
+);
+
+const executionHistorySchema = new mongoose.Schema(
+  {
+    id: {
+      type: String,
+      default: randomUUID
+    },
+    actionType: {
+      type: String,
+      required: true,
+      trim: true
+    },
+    fromStatus: {
+      type: String,
+      default: null,
+      trim: true
+    },
+    toStatus: {
+      type: String,
+      default: null,
+      trim: true
+    },
+    actorUserId: {
+      type: String,
+      default: null
+    },
+    message: {
+      type: String,
+      required: true,
+      trim: true
+    },
+    metadata: {
+      type: mongoose.Schema.Types.Mixed,
+      default: {}
+    },
+    createdAt: {
+      type: Date,
+      default: () => new Date()
+    }
+  },
+  {
+    _id: false,
+    versionKey: false
+  }
+);
 
 const checklistItemSchema = new mongoose.Schema(
   {
@@ -182,6 +325,26 @@ const operationalScheduleSchema = new mongoose.Schema(
     },
     tags: {
       type: [String],
+      default: []
+    },
+    recurrence: {
+      type: recurrenceSchema,
+      default: () => ({})
+    },
+    reminder: {
+      type: reminderSchema,
+      default: () => ({})
+    },
+    relationships: {
+      type: relationshipsSchema,
+      default: () => ({})
+    },
+    attendance: {
+      type: attendanceSchema,
+      default: () => ({})
+    },
+    executionHistory: {
+      type: [executionHistorySchema],
       default: []
     },
     active: {
