@@ -7,6 +7,7 @@ servers:
   - url: http://localhost:3000
 tags:
   - name: Health
+  - name: AI Brand Materials
   - name: AI Schedules
   - name: Assets
   - name: Audit
@@ -46,6 +47,89 @@ paths:
       responses:
         '200':
           description: API disponivel
+  /api/v1/ai-brand-materials:
+    post:
+      tags: [AI Brand Materials]
+      summary: Persiste material gerado por IA para edicao humana
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AiBrandMaterialRequest'
+      responses:
+        '201':
+          description: Material salvo como versao revisavel
+        '400':
+          description: Dados invalidos ou contexto divergente
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento nao encontrado
+    get:
+      tags: [AI Brand Materials]
+      summary: Lista materiais gerados por IA
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: launchId
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: materialType
+          required: false
+          schema:
+            type: string
+            enum: [SCRIPT, COPY, EMAIL]
+        - in: query
+          name: reviewStatus
+          required: false
+          schema:
+            type: string
+            enum: [PENDING_REVIEW, APPROVED, REJECTED]
+        - in: query
+          name: active
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Materiais retornados sem prompts ou fontes sensiveis
+        '400':
+          description: Filtros invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+  /api/v1/ai-brand-materials/{materialId}:
+    get:
+      tags: [AI Brand Materials]
+      summary: Consulta material gerado por IA
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: materialId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Material consultado com contexto seguro e status de revisao
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Material nao encontrado
   /api/v1/ai-schedules:
     post:
       tags: [AI Schedules]
@@ -2785,6 +2869,36 @@ paths:
           description: Acesso negado
         '404':
           description: Lancamento nao encontrado
+  /api/v1/launches/{launchId}/ai-brand-materials/generate:
+    post:
+      tags: [AI Brand Materials]
+      summary: Gera roteiro, copy ou e-mail no estilo da marca
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: launchId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenerateAiBrandMaterialRequest'
+      responses:
+        '200':
+          description: Proposta retornada para revisao humana
+        '400':
+          description: Briefing, formato ou contexto de marca insuficientes
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento nao encontrado
   /api/v1/launches/{launchId}/competitor-researches:
     post:
       tags: [Launches]
@@ -4454,6 +4568,110 @@ components:
       properties:
         refreshToken:
           type: string
+    GenerateAiBrandMaterialRequest:
+      type: object
+      required: [materialType, objective, briefing]
+      properties:
+        materialType:
+          type: string
+          enum: [SCRIPT, COPY, EMAIL]
+        objective:
+          type: string
+          minLength: 8
+          maxLength: 180
+        briefing:
+          type: string
+          minLength: 30
+          maxLength: 5000
+    AiBrandMaterialSection:
+      type: object
+      required: [label, content]
+      properties:
+        label:
+          type: string
+          minLength: 3
+          maxLength: 80
+        content:
+          type: string
+          minLength: 8
+          maxLength: 3000
+    AiBrandMaterialSourceContext:
+      type: object
+      required: [launchId, launchName, product, expert, avatarVersion, editorialLineVersion, positioningVersion, offerVersion, editorialPillars, languageCues, brandSignals]
+      properties:
+        launchId:
+          type: string
+          format: uuid
+        launchName:
+          type: string
+        product:
+          type: string
+        expert:
+          type: string
+        avatarVersion:
+          type: integer
+          nullable: true
+        editorialLineVersion:
+          type: integer
+          nullable: true
+        positioningVersion:
+          type: integer
+          nullable: true
+        offerVersion:
+          type: integer
+          nullable: true
+        editorialPillars:
+          type: array
+          items:
+            type: string
+        languageCues:
+          type: array
+          items:
+            type: string
+        brandSignals:
+          type: array
+          items:
+            type: string
+    AiBrandMaterialRequest:
+      type: object
+      required: [launchId, materialType, objective, briefing, title, hook, sections, cta, sourceContext]
+      properties:
+        launchId:
+          type: string
+          format: uuid
+        materialType:
+          type: string
+          enum: [SCRIPT, COPY, EMAIL]
+        objective:
+          type: string
+          minLength: 8
+          maxLength: 180
+        briefing:
+          type: string
+          minLength: 30
+          maxLength: 5000
+        title:
+          type: string
+          minLength: 3
+          maxLength: 240
+        hook:
+          type: string
+          minLength: 8
+          maxLength: 800
+        sections:
+          type: array
+          items:
+            $ref: '#/components/schemas/AiBrandMaterialSection'
+        cta:
+          type: string
+          minLength: 3
+          maxLength: 240
+        reviewNotes:
+          type: array
+          items:
+            type: string
+        sourceContext:
+          $ref: '#/components/schemas/AiBrandMaterialSourceContext'
     GenerateAiScheduleRequest:
       type: object
       required: [objective, briefing]
