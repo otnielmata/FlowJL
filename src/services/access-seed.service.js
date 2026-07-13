@@ -727,6 +727,24 @@ const corePermissions = [
     module: "traffic"
   },
   {
+    code: "REPORTS_READ",
+    name: "Consultar relatorios consolidados",
+    description: "Permite consultar relatorios executivos e operacionais com filtros, tabelas e graficos.",
+    module: "reports"
+  },
+  {
+    code: "REPORTS_EXPORT",
+    name: "Exportar relatorios consolidados",
+    description: "Permite exportar ou imprimir visoes analiticas do modulo de relatorios.",
+    module: "reports"
+  },
+  {
+    code: "REPORTS_SAVE_VIEW",
+    name: "Salvar visoes de relatorios",
+    description: "Permite salvar filtros uteis e dashboards personalizados no modulo de relatorios.",
+    module: "reports"
+  },
+  {
     code: "CLASS_SCHEDULE_CREATE",
     name: "Cadastrar aulas agendadas",
     description: "Permite cadastrar aulas vinculadas a operacao de um lancamento.",

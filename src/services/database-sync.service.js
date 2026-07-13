@@ -40,6 +40,7 @@ import "../models/positioning.model.js";
 import "../models/profile.model.js";
 import "../models/production-checklist.model.js";
 import "../models/publication.model.js";
+import "../models/report-view.model.js";
 import "../models/reel.model.js";
 import "../models/role.model.js";
 import "../models/smart-schedule.model.js";
