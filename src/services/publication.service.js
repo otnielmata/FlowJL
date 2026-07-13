@@ -59,6 +59,36 @@ function normalizeString(value) {
   return value?.trim() ?? null;
 }
 
+function normalizeUniqueArray(values = []) {
+  return [...new Set(values.map((value) => value.trim()).filter(Boolean))];
+}
+
+function normalizePreview(preview = {}, fallback = {}) {
+  return {
+    headline: normalizeString(preview.headline) ?? fallback.headline ?? null,
+    caption: normalizeString(preview.caption) ?? fallback.caption ?? null,
+    callToAction: normalizeString(preview.callToAction) ?? fallback.callToAction ?? null,
+    visualFormat: normalizeString(preview.visualFormat) ?? fallback.visualFormat ?? null,
+    thumbnailUrl: normalizeString(preview.thumbnailUrl) ?? fallback.thumbnailUrl ?? null,
+    hashtags: normalizeUniqueArray(preview.hashtags ?? fallback.hashtags ?? [])
+  };
+}
+
+function normalizeMetrics(metrics = {}, currentMetrics = {}) {
+  const hasNewMetrics = Object.keys(metrics).length > 0;
+
+  return {
+    publishedUrl: normalizeString(metrics.publishedUrl) ?? currentMetrics.publishedUrl ?? null,
+    reach: metrics.reach ?? currentMetrics.reach ?? 0,
+    likes: metrics.likes ?? currentMetrics.likes ?? 0,
+    comments: metrics.comments ?? currentMetrics.comments ?? 0,
+    shares: metrics.shares ?? currentMetrics.shares ?? 0,
+    saves: metrics.saves ?? currentMetrics.saves ?? 0,
+    recordedAt: hasNewMetrics ? new Date() : currentMetrics.recordedAt ?? null,
+    recordedBy: metrics.recordedBy ?? currentMetrics.recordedBy ?? null
+  };
+}
+
 function toPublicContent(contentType, content, handler) {
   return {
     id: content.id,
@@ -66,6 +96,72 @@ function toPublicContent(contentType, content, handler) {
     launchId: content.launchId ?? null,
     title: content[handler.titleField],
     status: content[handler.statusField] ?? null
+  };
+}
+
+function extractPreviewFromContent(contentType, content, channel) {
+  if (contentType === "REEL") {
+    return {
+      headline: content.theme,
+      caption: content.caption ?? content.hook ?? null,
+      callToAction: content.cta ?? null,
+      visualFormat: channel.includes("TIKTOK") ? "VERTICAL_VIDEO" : "SHORT_VIDEO",
+      thumbnailUrl: null,
+      hashtags: []
+    };
+  }
+
+  if (contentType === "CAROUSEL") {
+    return {
+      headline: content.theme,
+      caption: content.cards?.[0]?.message ?? null,
+      callToAction: content.cta ?? null,
+      visualFormat: "CAROUSEL",
+      thumbnailUrl: null,
+      hashtags: []
+    };
+  }
+
+  if (contentType === "STORY_SEQUENCE") {
+    return {
+      headline: content.theme,
+      caption: content.blocks?.map((block) => block.text).join(" / ") ?? null,
+      callToAction: content.cta ?? null,
+      visualFormat: "STORIES",
+      thumbnailUrl: null,
+      hashtags: []
+    };
+  }
+
+  if (contentType === "EMAIL_CAMPAIGN") {
+    return {
+      headline: content.subject,
+      caption: content.body ?? content.objective ?? null,
+      callToAction: content.cta ?? null,
+      visualFormat: "EMAIL",
+      thumbnailUrl: null,
+      hashtags: []
+    };
+  }
+
+  return {
+    headline: content.theme,
+    caption: content.script ?? content.objective ?? null,
+    callToAction: content.cta ?? null,
+    visualFormat: channel.includes("SHORTS") ? "SHORT_VIDEO" : "LONG_VIDEO",
+    thumbnailUrl: null,
+    hashtags: []
+  };
+}
+
+function buildHistoryEntry(actionType, actorUserId, message, metadata = {}) {
+  return {
+    id: randomUUID(),
+    actionType,
+    actorUserId,
+    message,
+    metadata,
+    createdAt: new Date()
   };
 }
 
@@ -81,6 +177,28 @@ function toPublicPublication(publication, content, approvalStatus) {
     status: publication.status,
     issueReason: publication.issueReason ?? null,
     publishedAt: publication.publishedAt ?? null,
+    approvalRequestedAt: publication.approvalRequestedAt ?? null,
+    preview: publication.preview ?? normalizePreview(),
+    metrics:
+      publication.metrics ??
+      {
+        publishedUrl: null,
+        reach: 0,
+        likes: 0,
+        comments: 0,
+        shares: 0,
+        saves: 0,
+        recordedAt: null,
+        recordedBy: null
+      },
+    history: (publication.history ?? []).map((entry) => ({
+      id: entry.id,
+      actionType: entry.actionType,
+      actorUserId: entry.actorUserId ?? null,
+      message: entry.message,
+      metadata: entry.metadata ?? {},
+      createdAt: entry.createdAt
+    })),
     active: publication.active,
     approvalStatus,
     content,
@@ -222,6 +340,19 @@ class PublicationService {
     const status = data.status ? normalizeStatus(data.status) : "PLANNED";
     const publishAt = normalizeDate(data.publishAt);
     const publishedAt = status === "PUBLISHED" ? publishAt : null;
+    const preview = normalizePreview(data.preview, extractPreviewFromContent(contentType, content, data.channel.trim()));
+    const history = [
+      buildHistoryEntry(
+        "PUBLICATION_CREATED",
+        authenticatedUserId,
+        status === "PLANNED" ? "Publicacao planejada." : "Publicacao criada com status operacional.",
+        {
+          channel: data.channel.trim(),
+          status,
+          publishAt
+        }
+      )
+    ];
 
     const publication = await Publication.create({
       launchId: content.launchId,
@@ -233,6 +364,19 @@ class PublicationService {
       status,
       issueReason: normalizeString(data.issueReason),
       publishedAt,
+      approvalRequestedAt: data.approvalRequestedAt ? normalizeDate(data.approvalRequestedAt) : null,
+      preview,
+      metrics: {
+        publishedUrl: null,
+        reach: 0,
+        likes: 0,
+        comments: 0,
+        shares: 0,
+        saves: 0,
+        recordedAt: null,
+        recordedBy: null
+      },
+      history,
       active: true,
       createdBy: authenticatedUserId,
       updatedBy: authenticatedUserId
@@ -343,6 +487,19 @@ class PublicationService {
       status: nextStatus,
       issueReason: data.issueReason !== undefined ? normalizeString(data.issueReason) : publication.issueReason,
       publishedAt: nextStatus === "PUBLISHED" ? publishAt : publication.publishedAt,
+      approvalRequestedAt: data.approvalRequestedAt !== undefined ? normalizeDate(data.approvalRequestedAt) : publication.approvalRequestedAt,
+      preview: data.preview
+        ? normalizePreview(data.preview, extractPreviewFromContent(publication.contentType, content, data.channel?.trim() ?? publication.channel))
+        : publication.preview ?? normalizePreview({}, extractPreviewFromContent(publication.contentType, content, publication.channel)),
+      history: [
+        ...(publication.history ?? []),
+        buildHistoryEntry("PUBLICATION_UPDATED", authenticatedUserId, "Publicacao atualizada.", {
+          previousStatus: publication.status,
+          status: nextStatus,
+          publishAt,
+          responsible: data.responsible?.trim() ?? publication.responsible
+        })
+      ],
       updatedBy: authenticatedUserId
     };
 
@@ -391,6 +548,96 @@ class PublicationService {
       },
       toPublicContent(publication.contentType, content, handler),
       approvalStatus
+    );
+  }
+
+  async findByContent(contentType, contentId) {
+    return Publication.findOne({
+      contentType: normalizeStatus(contentType),
+      contentId,
+      active: true
+    });
+  }
+
+  async recordMetrics(authenticatedUserId, publicationId, metrics) {
+    const publication = await Publication.findById(publicationId);
+
+    if (!publication || !publication.active) {
+      throw {
+        statusCode: 404,
+        message: "Publication not found"
+      };
+    }
+
+    if (publication.status !== "PUBLISHED") {
+      throw {
+        statusCode: 409,
+        message: "Only published items can receive performance metrics"
+      };
+    }
+
+    const { handler, content } = await resolveContentOrThrow(publication.contentType, publication.contentId);
+    const nextMetrics = normalizeMetrics(
+      {
+        ...metrics,
+        recordedBy: authenticatedUserId
+      },
+      publication.metrics ?? {}
+    );
+    const updates = {
+      metrics: nextMetrics,
+      history: [
+        ...(publication.history ?? []),
+        buildHistoryEntry("PUBLICATION_METRICS_RECORDED", authenticatedUserId, "Desempenho da publicacao registrado.", {
+          publishedUrl: nextMetrics.publishedUrl,
+          reach: nextMetrics.reach,
+          likes: nextMetrics.likes,
+          comments: nextMetrics.comments,
+          shares: nextMetrics.shares,
+          saves: nextMetrics.saves
+        })
+      ],
+      updatedBy: authenticatedUserId
+    };
+
+    await Publication.updateOne(
+      { _id: publicationId },
+      {
+        $set: updates
+      }
+    );
+
+    await auditService.record({
+      actorUserId: authenticatedUserId,
+      action: "PUBLICATION_METRICS_RECORDED",
+      targetType: "PUBLICATION",
+      targetId: publication.id,
+      context: {
+        launchId: publication.launchId,
+        contentType: publication.contentType,
+        contentId: publication.contentId,
+        publishedUrl: nextMetrics.publishedUrl,
+        reach: nextMetrics.reach,
+        likes: nextMetrics.likes,
+        comments: nextMetrics.comments,
+        shares: nextMetrics.shares,
+        saves: nextMetrics.saves
+      }
+    });
+
+    const approval = await ContentApproval.findOne({
+      contentType: publication.contentType,
+      contentId: publication.contentId,
+      active: true
+    });
+
+    return toPublicPublication(
+      {
+        ...publication.toObject(),
+        ...updates
+      },
+      toPublicContent(publication.contentType, content, handler),
+      approval?.currentStatus ?? "CREATED"
     );
   }
 }

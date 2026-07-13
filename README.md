@@ -140,6 +140,9 @@ src
 - `POST /api/v1/publications`
 - `GET /api/v1/publications`
 - `PUT /api/v1/publications/:publicationId`
+- `GET /api/v1/social-media`
+- `POST /api/v1/social-media/publications`
+- `PUT /api/v1/social-media/publications/:publicationId/performance`
 - `POST /api/v1/production-checklists`
 - `GET /api/v1/production-checklists`
 - `PUT /api/v1/production-checklists/:checklistId`

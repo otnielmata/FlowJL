@@ -469,6 +469,24 @@ const corePermissions = [
     module: "content"
   },
   {
+    code: "SOCIAL_MEDIA_READ",
+    name: "Consultar painel de social media",
+    description: "Permite visualizar calendario editorial, grade semanal, feed visual e buckets operacionais das publicacoes.",
+    module: "social-media"
+  },
+  {
+    code: "SOCIAL_MEDIA_SCHEDULE",
+    name: "Planejar publicacao social",
+    description: "Permite definir rede, data, hora, preview e fluxo operacional de publicacoes de redes sociais.",
+    module: "social-media"
+  },
+  {
+    code: "SOCIAL_MEDIA_METRICS_UPDATE",
+    name: "Registrar desempenho social",
+    description: "Permite registrar URL publicada e metricas simuladas de desempenho de publicacoes concluidas.",
+    module: "social-media"
+  },
+  {
     code: "PRODUCTION_CHECKLIST_CREATE",
     name: "Executar checklist de producao",
     description: "Permite iniciar checklists de producao para conteudos aprovados.",
