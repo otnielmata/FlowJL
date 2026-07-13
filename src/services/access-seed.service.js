@@ -211,6 +211,12 @@ const corePermissions = [
     module: "strategy"
   },
   {
+    code: "DASHBOARD_OVERVIEW_READ",
+    name: "Consultar dashboard executivo",
+    description: "Permite consultar o shell operacional, indicadores, notificacoes e busca global do dashboard.",
+    module: "dashboard"
+  },
+  {
     code: "CONTENT_IDEA_CREATE",
     name: "Cadastrar ideias de conteudo",
     description: "Permite registrar ideias reaproveitaveis para futuras pecas de conteudo.",

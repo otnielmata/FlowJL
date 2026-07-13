@@ -166,7 +166,12 @@ src
 - `POST /api/v1/youtube-contents`
 - `PUT /api/v1/youtube-contents/:contentId`
 - `DELETE /api/v1/youtube-contents/:contentId`
+- `GET /api/v1/dashboards/overview`
 - `GET /api/v1/dashboards/strategist`
+- `GET /api/v1/dashboards/notifications`
+- `PATCH /api/v1/dashboards/notifications/read-all`
+- `PATCH /api/v1/dashboards/notifications/:notificationId/read`
+- `GET /api/v1/dashboards/search`
 - `POST /api/v1/editorial-calendar`
 - `GET /api/v1/editorial-calendar`
 - `PUT /api/v1/editorial-calendar/:itemId`
@@ -324,6 +329,9 @@ A documentação fica disponível em:
 - A biblioteca de ativos pode ser gerenciada via `POST`, `GET` e `DELETE /api/v1/assets`, permite ativos globais ou vinculados a lançamentos, suporta busca por tipo, tag, lançamento e status, retorna UUID e datas em UTC e preserva histórico por exclusão lógica.
 - Os conteúdos de YouTube podem ser gerenciados via `POST`, `PUT` e `DELETE /api/v1/youtube-contents`, exigem lançamento e linha editorial vigente, mantêm pauta, roteiro, responsável e status rastreável, retornam horários de gravação/publicação em UTC e preservam histórico por exclusão lógica.
 - O dashboard da estrategista pode ser consultado em `GET /api/v1/dashboards/strategist`, aceita filtro opcional por `launchId`, consolida progresso, pendências, atrasos e status por etapa a partir do estado atual dos módulos estratégicos, e exige a permissão `STRATEGIST_DASHBOARD_READ`.
+- O dashboard executivo pode ser consultado em `GET /api/v1/dashboards/overview`, usa a permissão `DASHBOARD_OVERVIEW_READ`, devolve shell do front com sidebar, topbar, temas, cards, gráficos, alertas, equipe, atividades recentes e contadores por módulo para apoiar a experiência da `FJ-67`.
+- A central de notificações do dashboard pode ser consultada em `GET /api/v1/dashboards/notifications`, permite marcar um item como lido em `PATCH /api/v1/dashboards/notifications/:notificationId/read` e marcar tudo como lido em `PATCH /api/v1/dashboards/notifications/read-all`, preservando o estado de leitura por usuário autenticado.
+- A busca global do dashboard pode ser consultada em `GET /api/v1/dashboards/search?q=...`, exige `DASHBOARD_OVERVIEW_READ`, agrega resultados de lançamentos, estratégias derivadas, conteúdos, atividades, eventos, usuários e campanhas, e filtra o retorno conforme os módulos acessíveis ao papel autenticado.
 - O calendário editorial pode ser gerenciado via `POST`, `GET` e `PUT /api/v1/editorial-calendar`, exige conteúdo base válido com contexto de lançamento, organiza a consulta por período, data, hora e canal em UTC, sincroniza o agendamento com o conteúdo quando aplicável e registra auditoria nas alterações.
 - O cadastro de lançamentos via `POST /api/v1/launches` exige `LAUNCH_CREATE`, persiste marcos operacionais em UTC e rejeita duplicidade ativa com a mesma combinação de nome, produto e período.
 - A consulta de lançamentos via `GET /api/v1/launches/:launchId` exige `LAUNCH_READ` e retorna o histórico versionado das pesquisas de mercado já associadas.
