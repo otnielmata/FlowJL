@@ -31,6 +31,7 @@ describe("app", () => {
     expect(response.body.modules).toContain("youtube-contents");
     expect(response.body.modules).toContain("copywritings");
     expect(response.body.modules).toContain("content-approvals");
+    expect(response.body.modules).toContain("content-productions");
     expect(response.body.modules).toContain("content-statuses");
     expect(response.body.modules).toContain("discord-operations");
     expect(response.body.modules).toContain("assets");

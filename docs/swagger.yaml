@@ -1672,6 +1672,153 @@ paths:
           description: Conteudo nao encontrado
         '409':
           description: Ordem de aprovacao invalida para a peca
+  /api/v1/content-productions:
+    post:
+      tags: [Content Productions]
+      summary: Cadastra uma peca de conteudo multicanal com editor estruturado
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateContentProductionRequest'
+      responses:
+        '201':
+          description: Peca cadastrada com sucesso
+        '400':
+          description: Dados invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Lancamento nao encontrado
+    get:
+      tags: [Content Productions]
+      summary: Lista pecas por formato, canal, status e lancamento
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: launchId
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: format
+          required: false
+          schema:
+            type: string
+            enum: [REEL, CAROUSEL, STORIES, EMAIL, YOUTUBE, ADS, LANDING_PAGE]
+        - in: query
+          name: channel
+          required: false
+          schema:
+            type: string
+            enum: [INSTAGRAM, FACEBOOK, YOUTUBE, EMAIL, WHATSAPP, LINKEDIN, BLOG, META_ADS]
+        - in: query
+          name: status
+          required: false
+          schema:
+            type: string
+            enum: [DRAFT, IN_REVIEW, APPROVED, REJECTED, SCHEDULED, PUBLISHED]
+      responses:
+        '200':
+          description: Conteudos retornados com aprovador e dados de publicacao
+        '400':
+          description: Filtros invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+  /api/v1/content-productions/{contentId}:
+    get:
+      tags: [Content Productions]
+      summary: Consulta o detalhe de uma peca com versoes, comparacao e historico
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: contentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Detalhe retornado com versoes e comparacao
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Conteudo nao encontrado
+    put:
+      tags: [Content Productions]
+      summary: Atualiza a peca, validando editor e gerando nova versao quando aplicavel
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: contentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateContentProductionRequest'
+      responses:
+        '200':
+          description: Conteudo atualizado com sucesso
+        '400':
+          description: Dados invalidos
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Conteudo nao encontrado
+        '409':
+          description: Transicao de status invalida
+  /api/v1/content-productions/{contentId}/actions:
+    post:
+      tags: [Content Productions]
+      summary: Executa acoes de IA e aprovacao mantendo historico comparavel
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: contentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContentProductionActionRequest'
+      responses:
+        '200':
+          description: Acao aplicada com historico e comparacao atualizados
+        '400':
+          description: Dados invalidos ou motivo ausente para reprovacao
+        '401':
+          description: JWT ausente ou invalido
+        '403':
+          description: Acesso negado
+        '404':
+          description: Conteudo nao encontrado
+        '409':
+          description: Fluxo de aprovacao ou status invalido
   /api/v1/content-statuses/{contentType}/{contentId}:
     post:
       tags: [Content Statuses]
@@ -7111,6 +7258,166 @@ components:
         publishAt:
           type: string
           format: date-time
+    ContentProductionAttachmentRequest:
+      type: object
+      required: [name, url]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          minLength: 2
+          maxLength: 180
+        url:
+          type: string
+          format: uri
+        mediaType:
+          type: string
+          minLength: 2
+          maxLength: 120
+    ContentProductionReferenceRequest:
+      type: object
+      required: [label, url]
+      properties:
+        id:
+          type: string
+          format: uuid
+        label:
+          type: string
+          minLength: 2
+          maxLength: 120
+        url:
+          type: string
+          format: uri
+    ContentProductionPublicationRequest:
+      type: object
+      properties:
+        publishAt:
+          type: string
+          format: date-time
+        publishedAt:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [NOT_SCHEDULED, SCHEDULED, PUBLISHED]
+    CreateContentProductionRequest:
+      type: object
+      required: [launchId, title, body, objective, format, channel, responsible, status, actorName]
+      properties:
+        launchId:
+          type: string
+          format: uuid
+        title:
+          type: string
+          minLength: 3
+          maxLength: 180
+        summary:
+          type: string
+          maxLength: 500
+        body:
+          type: string
+          minLength: 10
+          maxLength: 12000
+        objective:
+          type: string
+          minLength: 3
+          maxLength: 180
+        format:
+          type: string
+          enum: [REEL, CAROUSEL, STORIES, EMAIL, YOUTUBE, ADS, LANDING_PAGE]
+        channel:
+          type: string
+          enum: [INSTAGRAM, FACEBOOK, YOUTUBE, EMAIL, WHATSAPP, LINKEDIN, BLOG, META_ADS]
+        responsible:
+          type: string
+          minLength: 2
+          maxLength: 120
+        status:
+          type: string
+          enum: [DRAFT, IN_REVIEW, APPROVED, REJECTED, SCHEDULED, PUBLISHED]
+        attachments:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContentProductionAttachmentRequest'
+        references:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContentProductionReferenceRequest'
+        publication:
+          $ref: '#/components/schemas/ContentProductionPublicationRequest'
+        actorName:
+          type: string
+          minLength: 2
+          maxLength: 120
+    UpdateContentProductionRequest:
+      type: object
+      required: [actorName]
+      properties:
+        title:
+          type: string
+          minLength: 3
+          maxLength: 180
+        summary:
+          type: string
+          maxLength: 500
+        body:
+          type: string
+          minLength: 10
+          maxLength: 12000
+        objective:
+          type: string
+          minLength: 3
+          maxLength: 180
+        format:
+          type: string
+          enum: [REEL, CAROUSEL, STORIES, EMAIL, YOUTUBE, ADS, LANDING_PAGE]
+        channel:
+          type: string
+          enum: [INSTAGRAM, FACEBOOK, YOUTUBE, EMAIL, WHATSAPP, LINKEDIN, BLOG, META_ADS]
+        responsible:
+          type: string
+          minLength: 2
+          maxLength: 120
+        status:
+          type: string
+          enum: [DRAFT, IN_REVIEW, APPROVED, REJECTED, SCHEDULED, PUBLISHED]
+        attachments:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContentProductionAttachmentRequest'
+        references:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContentProductionReferenceRequest'
+        publication:
+          $ref: '#/components/schemas/ContentProductionPublicationRequest'
+        actorName:
+          type: string
+          minLength: 2
+          maxLength: 120
+    ContentProductionActionRequest:
+      type: object
+      required: [actionType, actorName]
+      properties:
+        actionType:
+          type: string
+          enum: [REWRITE, SUMMARIZE, VARIATION, ADAPT_CHANNEL, SEND_APPROVAL, APPROVE, REJECT]
+        targetChannel:
+          type: string
+          enum: [INSTAGRAM, FACEBOOK, YOUTUBE, EMAIL, WHATSAPP, LINKEDIN, BLOG, META_ADS]
+        approverUserId:
+          type: string
+        approverName:
+          type: string
+        reason:
+          type: string
+          maxLength: 500
+        actorName:
+          type: string
+          minLength: 2
+          maxLength: 120
     CreateReelRequest:
       type: object
       required: [sourceType, theme, objective, hook, cta, operationalStatus]
