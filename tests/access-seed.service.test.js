@@ -38,6 +38,9 @@ describe("accessSeedService.ensureCoreAccessSeed", () => {
 
   it("upserts permissions and the admin role with the initial matrix", async () => {
     const permissionCodes = [
+      "AI_ASSISTANT_ACTION",
+      "AI_ASSISTANT_READ",
+      "AI_ASSISTANT_WRITE",
       "AUDIT_READ",
       "AUTH_LOGIN",
       "PERMISSION_READ",

@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 
+import "../models/ai-assistant-conversation.model.js";
 import "../models/ai-brand-material.model.js";
 import "../models/ai-historical-content.model.js";
 import "../models/ai-metric-insight.model.js";
