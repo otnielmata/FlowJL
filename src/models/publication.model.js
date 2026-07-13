@@ -2,6 +2,123 @@ import { randomUUID } from "node:crypto";
 
 import mongoose from "mongoose";
 
+const publicationPreviewSchema = new mongoose.Schema(
+  {
+    headline: {
+      type: String,
+      default: null,
+      trim: true
+    },
+    caption: {
+      type: String,
+      default: null,
+      trim: true
+    },
+    callToAction: {
+      type: String,
+      default: null,
+      trim: true
+    },
+    visualFormat: {
+      type: String,
+      default: null,
+      trim: true
+    },
+    thumbnailUrl: {
+      type: String,
+      default: null,
+      trim: true
+    },
+    hashtags: {
+      type: [String],
+      default: []
+    }
+  },
+  {
+    _id: false
+  }
+);
+
+const publicationMetricsSchema = new mongoose.Schema(
+  {
+    publishedUrl: {
+      type: String,
+      default: null,
+      trim: true
+    },
+    reach: {
+      type: Number,
+      default: 0,
+      min: 0
+    },
+    likes: {
+      type: Number,
+      default: 0,
+      min: 0
+    },
+    comments: {
+      type: Number,
+      default: 0,
+      min: 0
+    },
+    shares: {
+      type: Number,
+      default: 0,
+      min: 0
+    },
+    saves: {
+      type: Number,
+      default: 0,
+      min: 0
+    },
+    recordedAt: {
+      type: Date,
+      default: null
+    },
+    recordedBy: {
+      type: String,
+      default: null
+    }
+  },
+  {
+    _id: false
+  }
+);
+
+const publicationHistoryEntrySchema = new mongoose.Schema(
+  {
+    id: {
+      type: String,
+      default: () => randomUUID()
+    },
+    actionType: {
+      type: String,
+      required: true,
+      trim: true
+    },
+    actorUserId: {
+      type: String,
+      default: null
+    },
+    message: {
+      type: String,
+      required: true,
+      trim: true
+    },
+    metadata: {
+      type: mongoose.Schema.Types.Mixed,
+      default: {}
+    },
+    createdAt: {
+      type: Date,
+      default: () => new Date()
+    }
+  },
+  {
+    _id: false
+  }
+);
+
 const publicationSchema = new mongoose.Schema(
   {
     _id: {
@@ -53,6 +170,22 @@ const publicationSchema = new mongoose.Schema(
     publishedAt: {
       type: Date,
       default: null
+    },
+    approvalRequestedAt: {
+      type: Date,
+      default: null
+    },
+    preview: {
+      type: publicationPreviewSchema,
+      default: () => ({})
+    },
+    metrics: {
+      type: publicationMetricsSchema,
+      default: () => ({})
+    },
+    history: {
+      type: [publicationHistoryEntrySchema],
+      default: []
     },
     active: {
       type: Boolean,
