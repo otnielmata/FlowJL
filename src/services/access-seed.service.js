@@ -7,6 +7,24 @@ const seedAuditTargetId = "core-access-seed";
 
 const corePermissions = [
   {
+    code: "AI_ASSISTANT_READ",
+    name: "Consultar assistente interno",
+    description: "Permite consultar conversas, historico, referencias e avisos do assistente interno.",
+    module: "ai"
+  },
+  {
+    code: "AI_ASSISTANT_WRITE",
+    name: "Interagir com assistente interno",
+    description: "Permite iniciar conversas, enviar mensagens e anexar contexto ao assistente interno.",
+    module: "ai"
+  },
+  {
+    code: "AI_ASSISTANT_ACTION",
+    name: "Executar acoes do assistente interno",
+    description: "Permite reaproveitar respostas da IA como conteudo, aprovacao ou tarefa operacional.",
+    module: "ai"
+  },
+  {
     code: "AUTH_LOGIN",
     name: "Autenticar usuario",
     description: "Permite autenticar usuarios ativos no fluxo inicial.",

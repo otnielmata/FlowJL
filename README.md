@@ -56,6 +56,11 @@ src
 - `GET /api/v1/audits`
 - `GET /api/v1/platform-settings`
 - `PUT /api/v1/platform-settings/:key`
+- `POST /api/v1/ai-assistant/conversations`
+- `GET /api/v1/ai-assistant/conversations`
+- `GET /api/v1/ai-assistant/conversations/:conversationId`
+- `POST /api/v1/ai-assistant/conversations/:conversationId/messages`
+- `POST /api/v1/ai-assistant/messages/:messageId/actions`
 - `POST /api/v1/launches/:launchId/ai-brand-materials/generate`
 - `POST /api/v1/ai-brand-materials`
 - `GET /api/v1/ai-brand-materials`
