@@ -202,7 +202,7 @@ function LoginPageContent() {
             <button
               type="submit"
               className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[color:var(--primary)] px-5 py-3 font-medium text-[color:var(--primary-foreground)] transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
-              disabled={form.formState.isSubmitting || !hydrated}
+              disabled={form.formState.isSubmitting}
             >
               Acessar plataforma
               <ArrowRight className="h-4 w-4" />
