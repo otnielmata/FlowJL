@@ -167,6 +167,8 @@ export const mockUsers: AppUser[] = [
   {
     id: "u-admin",
     name: "Júlia Lima",
+    email: "julia@flowjl.com",
+    password: "flowjl123",
     role: "admin",
     roleLabel: "Administrador",
     focus: "Visão global",
@@ -174,6 +176,8 @@ export const mockUsers: AppUser[] = [
   {
     id: "u-strategy",
     name: "Renato Alves",
+    email: "renato@flowjl.com",
+    password: "flowjl123",
     role: "strategist",
     roleLabel: "Estratégia Digital",
     focus: "Planejamento",
@@ -181,6 +185,8 @@ export const mockUsers: AppUser[] = [
   {
     id: "u-social",
     name: "Clara Borges",
+    email: "clara@flowjl.com",
+    password: "flowjl123",
     role: "social-media",
     roleLabel: "Social Media",
     focus: "Editorial",
@@ -188,6 +194,8 @@ export const mockUsers: AppUser[] = [
   {
     id: "u-traffic",
     name: "Lucas Freitas",
+    email: "lucas@flowjl.com",
+    password: "flowjl123",
     role: "traffic-manager",
     roleLabel: "Tráfego Pago",
     focus: "Performance",
@@ -195,6 +203,8 @@ export const mockUsers: AppUser[] = [
   {
     id: "u-ops",
     name: "Marina Costa",
+    email: "marina@flowjl.com",
+    password: "flowjl123",
     role: "operations",
     roleLabel: "Operações",
     focus: "Orquestração",
@@ -202,11 +212,17 @@ export const mockUsers: AppUser[] = [
   {
     id: "u-approver",
     name: "Paulo Nunes",
+    email: "paulo@flowjl.com",
+    password: "flowjl123",
     role: "approver",
     roleLabel: "Aprovações",
     focus: "Governança",
   },
 ];
+
+export function findMockUserByEmail(email: string) {
+  return mockUsers.find((user) => user.email.toLowerCase() === email.trim().toLowerCase()) ?? null;
+}
 
 export const navItems: NavItem[] = [
   { label: "Dashboard", href: "/dashboard", icon: "LayoutDashboard", group: "Visão" },

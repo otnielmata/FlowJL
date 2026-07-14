@@ -4,18 +4,17 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowRight, LockKeyhole, Sparkles } from "lucide-react";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useEffect } from "react";
-import { useForm, useWatch } from "react-hook-form";
+import { Suspense } from "react";
+import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { toast } from "sonner";
 
-import { mockUsers } from "@/mocks/flow-data";
+import { findMockUserByEmail } from "@/mocks/flow-data";
 import { useAuthStore } from "@/stores/auth-store";
 
 const loginSchema = z.object({
-  userId: z.string().min(1, "Selecione um perfil para entrar."),
   email: z.email("Informe um email valido."),
-  password: z.string().min(6, "A senha simulada precisa ter pelo menos 6 caracteres."),
+  password: z.string().min(6, "A senha precisa ter pelo menos 6 caracteres."),
 });
 
 type LoginForm = z.infer<typeof loginSchema>;
@@ -32,45 +31,29 @@ function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const nextPath = searchParams.get("next") || "/dashboard";
-  const currentUserId = useAuthStore((state) => state.currentUserId);
-  const hydrated = useAuthStore((state) => state.hydrated);
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const login = useAuthStore((state) => state.login);
-  const logout = useAuthStore((state) => state.logout);
-  const setCurrentUserId = useAuthStore((state) => state.setCurrentUserId);
 
   const form = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      userId: currentUserId ?? mockUsers[0].id,
-      email: "demo@flowjl.com",
-      password: "flowjl123",
+      email: "",
+      password: "",
     },
   });
-  const selectedUserId = useWatch({
-    control: form.control,
-    name: "userId",
-  });
 
-  useEffect(() => {
-    if (!hydrated) {
+  function handleSubmit(values: LoginForm) {
+    const user = findMockUserByEmail(values.email);
+
+    if (!user || user.password !== values.password) {
+      form.setError("email", { message: "Credenciais invalidas para acessar o portal." });
+      form.setError("password", { message: "Revise email e senha informados." });
+      toast.error("Nao foi possivel autenticar o acesso.");
       return;
     }
 
-    if (isAuthenticated) {
-      router.replace(nextPath === "/login" ? "/dashboard" : nextPath);
-    }
-  }, [hydrated, isAuthenticated, nextPath, router]);
-
-  function handleSubmit(values: LoginForm) {
-    login(values.userId);
+    login(user.id);
     toast.success("Acesso liberado ao workspace Flow JL.");
     router.push(nextPath === "/login" ? "/dashboard" : nextPath);
-  }
-
-  function handleSelectUser(userId: string) {
-    setCurrentUserId(userId);
-    form.setValue("userId", userId, { shouldValidate: true, shouldDirty: true });
   }
 
   return (
@@ -133,39 +116,10 @@ function LoginPageContent() {
           </div>
           <h2 className="mt-6 font-display text-2xl font-semibold">Entrar no ambiente Flow JL</h2>
           <p className="mt-2 text-sm leading-6 text-[color:var(--muted-foreground)]">
-            O acesso principal acontece por aqui. Entre com um perfil simulado para liberar os modulos internos da plataforma.
+            Informe seu email e sua senha para acessar o sistema.
           </p>
 
           <form onSubmit={form.handleSubmit(handleSubmit)} className="mt-8 space-y-5">
-            <div className="space-y-3">
-              {mockUsers.map((user) => {
-                const selected = selectedUserId === user.id;
-
-                return (
-                  <button
-                    key={user.id}
-                    type="button"
-                    onClick={() => handleSelectUser(user.id)}
-                    className={`w-full rounded-3xl border p-4 text-left transition ${
-                      selected
-                        ? "border-[color:var(--primary)] bg-[color:var(--primary)]/8 shadow-sm"
-                        : "bg-white/55 hover:border-[color:var(--primary)]/30 hover:bg-white dark:bg-white/5 dark:hover:bg-white/8"
-                    }`}
-                  >
-                    <div className="flex items-center justify-between gap-4">
-                      <div>
-                        <p className="font-semibold">{user.name}</p>
-                        <p className="text-sm text-[color:var(--muted-foreground)]">{user.roleLabel}</p>
-                      </div>
-                      <span className="rounded-full bg-[color:var(--secondary)] px-3 py-1 text-xs font-medium text-[color:var(--secondary-foreground)]">
-                        {user.focus}
-                      </span>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-
             <div className="grid gap-4">
               <label className="space-y-2">
                 <span className="text-sm font-medium">Email</span>
@@ -173,7 +127,8 @@ function LoginPageContent() {
                   type="email"
                   {...form.register("email")}
                   className="w-full rounded-2xl border bg-white/65 px-4 py-3 outline-none transition focus:border-[color:var(--primary)] dark:bg-white/6"
-                  placeholder="demo@flowjl.com"
+                  placeholder="seuemail@empresa.com"
+                  autoComplete="email"
                 />
                 {form.formState.errors.email && (
                   <p className="text-sm text-[color:var(--danger)]">{form.formState.errors.email.message}</p>
@@ -181,12 +136,13 @@ function LoginPageContent() {
               </label>
 
               <label className="space-y-2">
-                <span className="text-sm font-medium">Senha simulada</span>
+                <span className="text-sm font-medium">Senha</span>
                 <input
                   type="password"
                   {...form.register("password")}
                   className="w-full rounded-2xl border bg-white/65 px-4 py-3 outline-none transition focus:border-[color:var(--primary)] dark:bg-white/6"
-                  placeholder="flowjl123"
+                  placeholder="Digite sua senha"
+                  autoComplete="current-password"
                 />
                 {form.formState.errors.password && (
                   <p className="text-sm text-[color:var(--danger)]">{form.formState.errors.password.message}</p>
@@ -195,8 +151,7 @@ function LoginPageContent() {
             </div>
 
             <div className="rounded-3xl border bg-white/55 p-4 text-sm leading-6 text-[color:var(--muted-foreground)] dark:bg-white/5">
-              Use qualquer perfil acima com o email <strong>demo@flowjl.com</strong> e a senha <strong>flowjl123</strong> para
-              validar o acesso ao sistema.
+              Acesso de demonstracao: <strong>julia@flowjl.com</strong> e senha <strong>flowjl123</strong>.
             </div>
 
             <button
@@ -207,19 +162,6 @@ function LoginPageContent() {
               Acessar plataforma
               <ArrowRight className="h-4 w-4" />
             </button>
-
-            {isAuthenticated && (
-              <button
-                type="button"
-                onClick={() => {
-                  logout();
-                  toast.success("Sessao encerrada com sucesso.");
-                }}
-                className="inline-flex w-full items-center justify-center rounded-2xl border bg-white/65 px-5 py-3 font-medium transition hover:bg-white dark:bg-white/6"
-              >
-                Encerrar sessao atual
-              </button>
-            )}
           </form>
         </section>
       </div>
