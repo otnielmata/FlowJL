@@ -11,6 +11,8 @@ export type ExperienceState = "ready" | "loading" | "error" | "empty";
 export type AppUser = {
   id: string;
   name: string;
+  email: string;
+  password: string;
   role: RoleKey;
   roleLabel: string;
   focus: string;

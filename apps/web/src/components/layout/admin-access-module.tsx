@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AlertCircle, BadgeCheck, BriefcaseBusiness, KeyRound, ShieldCheck, UserPlus2, Users2 } from "lucide-react";
-import { useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -17,6 +17,14 @@ const inviteUserSchema = z.object({
   role: z.string().min(1, "Selecione um perfil de acesso."),
 });
 
+const editUserSchema = z.object({
+  name: z.string().min(3, "Informe um nome com pelo menos 3 caracteres."),
+  email: z.email("Informe um email valido."),
+  roleLabel: z.string().min(1, "Selecione um perfil de acesso."),
+  squad: z.string().min(2, "Informe a squad do usuario."),
+  status: z.enum(["Ativo", "Pendente", "Suspenso"]),
+});
+
 const createProfileSchema = z.object({
   name: z.string().min(3, "Defina um nome claro para o perfil."),
   scope: z.string().min(1, "Selecione o escopo principal."),
@@ -24,6 +32,7 @@ const createProfileSchema = z.object({
 });
 
 type InviteUserForm = z.infer<typeof inviteUserSchema>;
+type EditUserForm = z.infer<typeof editUserSchema>;
 type CreateProfileForm = z.infer<typeof createProfileSchema>;
 
 type PortalUser = {
@@ -57,7 +66,7 @@ type RoleCatalog = {
   responsibilities: string[];
 };
 
-const portalUsers: PortalUser[] = [
+const initialPortalUsers: PortalUser[] = [
   {
     id: "user-1",
     name: "Júlia Lima",
@@ -205,9 +214,12 @@ export function AdminAccessModule({ page, path }: { page: PageConfig; path: stri
 }
 
 function UsersAdminModule({ page }: { page: PageConfig }) {
+  const [users, setUsers] = useState(initialPortalUsers);
+  const [selectedUserId, setSelectedUserId] = useState(initialPortalUsers[0]?.id ?? "");
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<PortalUser["status"] | "Todos">("Todos");
-  const form = useForm<InviteUserForm>({
+
+  const inviteForm = useForm<InviteUserForm>({
     resolver: zodResolver(inviteUserSchema),
     defaultValues: {
       name: "",
@@ -216,8 +228,21 @@ function UsersAdminModule({ page }: { page: PageConfig }) {
     },
   });
 
+  const editForm = useForm<EditUserForm>({
+    resolver: zodResolver(editUserSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      roleLabel: roleOptions[0] ?? "Administrador",
+      squad: "",
+      status: "Ativo",
+    },
+  });
+
+  const selectedUser = users.find((user) => user.id === selectedUserId) ?? users[0];
+
   const filteredUsers = useMemo(() => {
-    return portalUsers.filter((user) => {
+    return users.filter((user) => {
       const matchesStatus = statusFilter === "Todos" || user.status === statusFilter;
       const term = search.toLowerCase();
       const matchesSearch =
@@ -226,7 +251,19 @@ function UsersAdminModule({ page }: { page: PageConfig }) {
 
       return matchesStatus && matchesSearch;
     });
-  }, [search, statusFilter]);
+  }, [search, statusFilter, users]);
+
+  useEffect(() => {
+    if (selectedUser) {
+      editForm.reset({
+        name: selectedUser.name,
+        email: selectedUser.email,
+        roleLabel: selectedUser.roleLabel,
+        squad: selectedUser.squad,
+        status: selectedUser.status,
+      });
+    }
+  }, [editForm, selectedUser, users]);
 
   return (
     <section className="page-grid">
@@ -235,9 +272,9 @@ function UsersAdminModule({ page }: { page: PageConfig }) {
         icon={<Users2 className="h-5 w-5" />}
         eyebrow="Acesso administrativo"
         title="Controle de usuários do portal"
-        description="Gerencie convites, acompanhe acessos recentes, suspenda perfis e mantenha a governança do portal Flow JL centralizada no administrador."
+        description="Gerencie convites, acompanhe acessos recentes, edite cadastros e mantenha a governança do portal Flow JL centralizada no administrador."
         highlights={[
-          "Entrada principal pelo login com perfis simulados",
+          "Entrada principal pelo login com credenciais simuladas",
           "Monitoramento de status ativo, pendente e suspenso",
           "Pronto para evoluir com API real de identidade",
         ]}
@@ -248,9 +285,7 @@ function UsersAdminModule({ page }: { page: PageConfig }) {
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <h3 className="font-display text-xl font-semibold">Base de acessos</h3>
-              <p className="mt-1 text-sm text-[color:var(--muted-foreground)]">
-                Visualize quem tem acesso ao portal, em qual squad atua e o ultimo movimento registrado.
-              </p>
+              <p className="mt-1 text-sm text-[color:var(--muted-foreground)]">Visualize, selecione e edite os cadastros do portal.</p>
             </div>
             <div className="rounded-2xl bg-[color:var(--secondary)] px-4 py-2 text-sm font-medium text-[color:var(--secondary-foreground)]">
               {filteredUsers.length} usuarios visiveis
@@ -292,10 +327,15 @@ function UsersAdminModule({ page }: { page: PageConfig }) {
               </thead>
               <tbody>
                 {filteredUsers.map((user) => (
-                  <tr key={user.id} className="border-t">
+                  <tr
+                    key={user.id}
+                    className={cn("border-t transition", selectedUserId === user.id && "bg-[color:var(--primary)]/5")}
+                  >
                     <td className="py-4 pr-4">
-                      <p className="font-medium">{user.name}</p>
-                      <p className="mt-1 text-xs text-[color:var(--muted-foreground)]">{user.email}</p>
+                      <button type="button" onClick={() => setSelectedUserId(user.id)} className="text-left">
+                        <p className="font-medium">{user.name}</p>
+                        <p className="mt-1 text-xs text-[color:var(--muted-foreground)]">{user.email}</p>
+                      </button>
                     </td>
                     <td className="py-4 pr-4">{user.roleLabel}</td>
                     <td className="py-4 pr-4">{user.squad}</td>
@@ -323,6 +363,97 @@ function UsersAdminModule({ page }: { page: PageConfig }) {
           <div className="glass rounded-[2rem] border p-6">
             <div className="flex items-center gap-3">
               <div className="rounded-2xl bg-[color:var(--primary)]/12 p-3 text-[color:var(--primary)]">
+                <Users2 className="h-5 w-5" />
+              </div>
+              <div>
+                <h3 className="font-display text-xl font-semibold">Editar usuario selecionado</h3>
+                <p className="text-sm text-[color:var(--muted-foreground)]">Ajuste o cadastro e o status do usuario escolhido.</p>
+              </div>
+            </div>
+
+            {selectedUser ? (
+              <form
+                onSubmit={editForm.handleSubmit((values) => {
+                  setUsers((currentUsers) =>
+                    currentUsers.map((user) =>
+                      user.id === selectedUser.id
+                        ? {
+                            ...user,
+                            name: values.name,
+                            email: values.email,
+                            roleLabel: values.roleLabel,
+                            squad: values.squad,
+                            status: values.status,
+                          }
+                        : user,
+                    ),
+                  );
+                  toast.success(`Cadastro de ${values.name} atualizado com sucesso.`);
+                })}
+                className="mt-6 grid gap-4"
+              >
+                <Field label="Nome" error={editForm.formState.errors.name?.message}>
+                  <input
+                    {...editForm.register("name")}
+                    className="rounded-2xl border bg-white/70 px-4 py-3 text-sm dark:bg-white/6"
+                    placeholder="Nome do usuario"
+                  />
+                </Field>
+                <Field label="Email" error={editForm.formState.errors.email?.message}>
+                  <input
+                    type="email"
+                    {...editForm.register("email")}
+                    className="rounded-2xl border bg-white/70 px-4 py-3 text-sm dark:bg-white/6"
+                    placeholder="email@flowjl.com"
+                  />
+                </Field>
+                <Field label="Perfil de acesso" error={editForm.formState.errors.roleLabel?.message}>
+                  <select
+                    {...editForm.register("roleLabel")}
+                    className="rounded-2xl border bg-white/70 px-4 py-3 text-sm dark:bg-white/6"
+                  >
+                    {roleOptions.map((role) => (
+                      <option key={role} value={role}>
+                        {role}
+                      </option>
+                    ))}
+                  </select>
+                </Field>
+                <Field label="Squad" error={editForm.formState.errors.squad?.message}>
+                  <input
+                    {...editForm.register("squad")}
+                    className="rounded-2xl border bg-white/70 px-4 py-3 text-sm dark:bg-white/6"
+                    placeholder="Ex: Diretoria"
+                  />
+                </Field>
+                <Field label="Status" error={editForm.formState.errors.status?.message}>
+                  <select
+                    {...editForm.register("status")}
+                    className="rounded-2xl border bg-white/70 px-4 py-3 text-sm dark:bg-white/6"
+                  >
+                    <option value="Ativo">Ativo</option>
+                    <option value="Pendente">Pendente</option>
+                    <option value="Suspenso">Suspenso</option>
+                  </select>
+                </Field>
+
+                <button
+                  type="submit"
+                  className="inline-flex items-center justify-center rounded-2xl bg-[color:var(--primary)] px-5 py-3 font-medium text-[color:var(--primary-foreground)]"
+                >
+                  Salvar alteracoes
+                </button>
+              </form>
+            ) : (
+              <div className="mt-6 rounded-3xl border bg-white/70 p-4 text-sm text-[color:var(--muted-foreground)] dark:bg-white/6">
+                Nenhum usuario selecionado para edicao.
+              </div>
+            )}
+          </div>
+
+          <div className="glass rounded-[2rem] border p-6">
+            <div className="flex items-center gap-3">
+              <div className="rounded-2xl bg-[color:var(--primary)]/12 p-3 text-[color:var(--primary)]">
                 <UserPlus2 className="h-5 w-5" />
               </div>
               <div>
@@ -332,9 +463,21 @@ function UsersAdminModule({ page }: { page: PageConfig }) {
             </div>
 
             <form
-              onSubmit={form.handleSubmit((values) => {
+              onSubmit={inviteForm.handleSubmit((values) => {
+                const newUser: PortalUser = {
+                  id: `user-${values.email.trim().toLowerCase()}`,
+                  name: values.name,
+                  email: values.email,
+                  roleLabel: values.role,
+                  squad: "Nova squad",
+                  status: "Pendente",
+                  lastAccess: "Convite enviado",
+                };
+
+                setUsers((currentUsers) => [newUser, ...currentUsers]);
+                setSelectedUserId(newUser.id);
                 toast.success(`Convite enviado para ${values.name}.`);
-                form.reset({
+                inviteForm.reset({
                   name: "",
                   email: "",
                   role: values.role,
@@ -342,23 +485,26 @@ function UsersAdminModule({ page }: { page: PageConfig }) {
               })}
               className="mt-6 grid gap-4"
             >
-              <Field label="Nome" error={form.formState.errors.name?.message}>
+              <Field label="Nome" error={inviteForm.formState.errors.name?.message}>
                 <input
-                  {...form.register("name")}
+                  {...inviteForm.register("name")}
                   className="rounded-2xl border bg-white/70 px-4 py-3 text-sm dark:bg-white/6"
                   placeholder="Nome do novo usuario"
                 />
               </Field>
-              <Field label="Email" error={form.formState.errors.email?.message}>
+              <Field label="Email" error={inviteForm.formState.errors.email?.message}>
                 <input
                   type="email"
-                  {...form.register("email")}
+                  {...inviteForm.register("email")}
                   className="rounded-2xl border bg-white/70 px-4 py-3 text-sm dark:bg-white/6"
                   placeholder="email@flowjl.com"
                 />
               </Field>
-              <Field label="Perfil de acesso" error={form.formState.errors.role?.message}>
-                <select {...form.register("role")} className="rounded-2xl border bg-white/70 px-4 py-3 text-sm dark:bg-white/6">
+              <Field label="Perfil de acesso" error={inviteForm.formState.errors.role?.message}>
+                <select
+                  {...inviteForm.register("role")}
+                  className="rounded-2xl border bg-white/70 px-4 py-3 text-sm dark:bg-white/6"
+                >
                   {roleOptions.map((role) => (
                     <option key={role} value={role}>
                       {role}
