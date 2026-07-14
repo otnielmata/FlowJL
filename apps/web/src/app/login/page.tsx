@@ -5,15 +5,14 @@ import { ArrowRight, LockKeyhole, Sparkles } from "lucide-react";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect } from "react";
-import { useForm, useWatch } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { toast } from "sonner";
 
-import { mockUsers } from "@/mocks/flow-data";
+import { findMockUserByEmail } from "@/mocks/flow-data";
 import { useAuthStore } from "@/stores/auth-store";
 
 const loginSchema = z.object({
-  userId: z.string().min(1, "Selecione um perfil para entrar."),
   email: z.email("Informe um email valido."),
   password: z.string().min(6, "A senha simulada precisa ter pelo menos 6 caracteres."),
 });
@@ -32,24 +31,17 @@ function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const nextPath = searchParams.get("next") || "/dashboard";
-  const currentUserId = useAuthStore((state) => state.currentUserId);
   const hydrated = useAuthStore((state) => state.hydrated);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const login = useAuthStore((state) => state.login);
   const logout = useAuthStore((state) => state.logout);
-  const setCurrentUserId = useAuthStore((state) => state.setCurrentUserId);
 
   const form = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      userId: currentUserId ?? mockUsers[0].id,
-      email: "demo@flowjl.com",
+      email: "julia@flowjl.com",
       password: "flowjl123",
     },
-  });
-  const selectedUserId = useWatch({
-    control: form.control,
-    name: "userId",
   });
 
   useEffect(() => {
@@ -63,14 +55,18 @@ function LoginPageContent() {
   }, [hydrated, isAuthenticated, nextPath, router]);
 
   function handleSubmit(values: LoginForm) {
-    login(values.userId);
+    const user = findMockUserByEmail(values.email);
+
+    if (!user || user.password !== values.password) {
+      form.setError("email", { message: "Credenciais invalidas para acessar o portal." });
+      form.setError("password", { message: "Revise email e senha informados." });
+      toast.error("Nao foi possivel autenticar o acesso.");
+      return;
+    }
+
+    login(user.id);
     toast.success("Acesso liberado ao workspace Flow JL.");
     router.push(nextPath === "/login" ? "/dashboard" : nextPath);
-  }
-
-  function handleSelectUser(userId: string) {
-    setCurrentUserId(userId);
-    form.setValue("userId", userId, { shouldValidate: true, shouldDirty: true });
   }
 
   return (
@@ -133,39 +129,10 @@ function LoginPageContent() {
           </div>
           <h2 className="mt-6 font-display text-2xl font-semibold">Entrar no ambiente Flow JL</h2>
           <p className="mt-2 text-sm leading-6 text-[color:var(--muted-foreground)]">
-            O acesso principal acontece por aqui. Entre com um perfil simulado para liberar os modulos internos da plataforma.
+            O acesso principal acontece por aqui. Entre com email e senha para liberar o ambiente conforme o perfil autorizado.
           </p>
 
           <form onSubmit={form.handleSubmit(handleSubmit)} className="mt-8 space-y-5">
-            <div className="space-y-3">
-              {mockUsers.map((user) => {
-                const selected = selectedUserId === user.id;
-
-                return (
-                  <button
-                    key={user.id}
-                    type="button"
-                    onClick={() => handleSelectUser(user.id)}
-                    className={`w-full rounded-3xl border p-4 text-left transition ${
-                      selected
-                        ? "border-[color:var(--primary)] bg-[color:var(--primary)]/8 shadow-sm"
-                        : "bg-white/55 hover:border-[color:var(--primary)]/30 hover:bg-white dark:bg-white/5 dark:hover:bg-white/8"
-                    }`}
-                  >
-                    <div className="flex items-center justify-between gap-4">
-                      <div>
-                        <p className="font-semibold">{user.name}</p>
-                        <p className="text-sm text-[color:var(--muted-foreground)]">{user.roleLabel}</p>
-                      </div>
-                      <span className="rounded-full bg-[color:var(--secondary)] px-3 py-1 text-xs font-medium text-[color:var(--secondary-foreground)]">
-                        {user.focus}
-                      </span>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-
             <div className="grid gap-4">
               <label className="space-y-2">
                 <span className="text-sm font-medium">Email</span>
@@ -195,8 +162,8 @@ function LoginPageContent() {
             </div>
 
             <div className="rounded-3xl border bg-white/55 p-4 text-sm leading-6 text-[color:var(--muted-foreground)] dark:bg-white/5">
-              Use qualquer perfil acima com o email <strong>demo@flowjl.com</strong> e a senha <strong>flowjl123</strong> para
-              validar o acesso ao sistema.
+              Acesso simulado ativo para validacao do portal. Exemplo de administrador: <strong>julia@flowjl.com</strong> com
+              a senha <strong>flowjl123</strong>.
             </div>
 
             <button
