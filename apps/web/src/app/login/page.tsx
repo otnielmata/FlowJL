@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowRight, LockKeyhole, Sparkles } from "lucide-react";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useEffect } from "react";
+import { Suspense } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { toast } from "sonner";
@@ -14,7 +14,7 @@ import { useAuthStore } from "@/stores/auth-store";
 
 const loginSchema = z.object({
   email: z.email("Informe um email valido."),
-  password: z.string().min(6, "A senha simulada precisa ter pelo menos 6 caracteres."),
+  password: z.string().min(6, "A senha precisa ter pelo menos 6 caracteres."),
 });
 
 type LoginForm = z.infer<typeof loginSchema>;
@@ -31,28 +31,15 @@ function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const nextPath = searchParams.get("next") || "/dashboard";
-  const hydrated = useAuthStore((state) => state.hydrated);
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const login = useAuthStore((state) => state.login);
-  const logout = useAuthStore((state) => state.logout);
 
   const form = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: "julia@flowjl.com",
-      password: "flowjl123",
+      email: "",
+      password: "",
     },
   });
-
-  useEffect(() => {
-    if (!hydrated) {
-      return;
-    }
-
-    if (isAuthenticated) {
-      router.replace(nextPath === "/login" ? "/dashboard" : nextPath);
-    }
-  }, [hydrated, isAuthenticated, nextPath, router]);
 
   function handleSubmit(values: LoginForm) {
     const user = findMockUserByEmail(values.email);
@@ -129,7 +116,7 @@ function LoginPageContent() {
           </div>
           <h2 className="mt-6 font-display text-2xl font-semibold">Entrar no ambiente Flow JL</h2>
           <p className="mt-2 text-sm leading-6 text-[color:var(--muted-foreground)]">
-            O acesso principal acontece por aqui. Entre com email e senha para liberar o ambiente conforme o perfil autorizado.
+            Informe seu email e sua senha para acessar o sistema.
           </p>
 
           <form onSubmit={form.handleSubmit(handleSubmit)} className="mt-8 space-y-5">
@@ -140,7 +127,8 @@ function LoginPageContent() {
                   type="email"
                   {...form.register("email")}
                   className="w-full rounded-2xl border bg-white/65 px-4 py-3 outline-none transition focus:border-[color:var(--primary)] dark:bg-white/6"
-                  placeholder="demo@flowjl.com"
+                  placeholder="seuemail@empresa.com"
+                  autoComplete="email"
                 />
                 {form.formState.errors.email && (
                   <p className="text-sm text-[color:var(--danger)]">{form.formState.errors.email.message}</p>
@@ -148,12 +136,13 @@ function LoginPageContent() {
               </label>
 
               <label className="space-y-2">
-                <span className="text-sm font-medium">Senha simulada</span>
+                <span className="text-sm font-medium">Senha</span>
                 <input
                   type="password"
                   {...form.register("password")}
                   className="w-full rounded-2xl border bg-white/65 px-4 py-3 outline-none transition focus:border-[color:var(--primary)] dark:bg-white/6"
-                  placeholder="flowjl123"
+                  placeholder="Digite sua senha"
+                  autoComplete="current-password"
                 />
                 {form.formState.errors.password && (
                   <p className="text-sm text-[color:var(--danger)]">{form.formState.errors.password.message}</p>
@@ -162,8 +151,7 @@ function LoginPageContent() {
             </div>
 
             <div className="rounded-3xl border bg-white/55 p-4 text-sm leading-6 text-[color:var(--muted-foreground)] dark:bg-white/5">
-              Acesso simulado ativo para validacao do portal. Exemplo de administrador: <strong>julia@flowjl.com</strong> com
-              a senha <strong>flowjl123</strong>.
+              Acesso de demonstracao: <strong>julia@flowjl.com</strong> e senha <strong>flowjl123</strong>.
             </div>
 
             <button
@@ -174,19 +162,6 @@ function LoginPageContent() {
               Acessar plataforma
               <ArrowRight className="h-4 w-4" />
             </button>
-
-            {isAuthenticated && (
-              <button
-                type="button"
-                onClick={() => {
-                  logout();
-                  toast.success("Sessao encerrada com sucesso.");
-                }}
-                className="inline-flex w-full items-center justify-center rounded-2xl border bg-white/65 px-5 py-3 font-medium transition hover:bg-white dark:bg-white/6"
-              >
-                Encerrar sessao atual
-              </button>
-            )}
           </form>
         </section>
       </div>
