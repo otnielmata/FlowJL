@@ -1,22 +1,14 @@
-import { redirect } from "next/navigation";
-
 import { ModulePage } from "@/components/layout/module-page";
 
 type CatchAllPageProps = {
   params: Promise<{
-    slug?: string[];
+    slug: string[];
   }>;
 };
 
 export default async function CatchAllPage({ params }: CatchAllPageProps) {
   const resolvedParams = await params;
-  const slug = resolvedParams.slug;
-
-  if (!slug || slug.length === 0) {
-    redirect("/login");
-  }
-
-  const path = `/${slug.join("/")}`;
+  const path = `/${resolvedParams.slug.join("/")}`;
 
   return <ModulePage key={path} path={path} />;
 }
