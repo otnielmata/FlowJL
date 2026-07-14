@@ -39,6 +39,7 @@ import {
 import { toast } from "sonner";
 import { z } from "zod";
 
+import { AdminAccessModule } from "@/components/layout/admin-access-module";
 import { userCanAccessPage } from "@/lib/permissions";
 import { cn } from "@/lib/utils";
 import { getPageConfig, mockUsers } from "@/mocks/flow-data";
@@ -260,6 +261,10 @@ export function ModulePage({ path }: { path: string }) {
         description="A interface já contempla o estado vazio para o módulo atual, permitindo evoluir a integração com a API sem perder consistência de experiência."
       />
     );
+  }
+
+  if (path === "/usuarios" || path === "/perfis" || path === "/cargos") {
+    return <AdminAccessModule page={page} path={path} />;
   }
 
   return (

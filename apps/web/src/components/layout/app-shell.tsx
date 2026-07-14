@@ -5,6 +5,7 @@ import {
   BarChart3,
   BadgeCheck,
   Bell,
+  BriefcaseBusiness,
   CalendarRange,
   Clapperboard,
   Compass,
@@ -20,6 +21,8 @@ import {
   Settings2,
   Sparkles,
   SunMedium,
+  ShieldCheck,
+  Users2,
   Workflow,
 } from "lucide-react";
 import Image from "next/image";
@@ -29,7 +32,7 @@ import { useTheme } from "next-themes";
 import { useEffect } from "react";
 
 import { cn } from "@/lib/utils";
-import { mockUsers, navItems, notifications } from "@/mocks/flow-data";
+import { getPageConfig, mockUsers, navItems, notifications } from "@/mocks/flow-data";
 import { useAuthStore } from "@/stores/auth-store";
 import { useUiStore } from "@/stores/ui-store";
 
@@ -46,6 +49,9 @@ const iconMap = {
   Sparkles,
   BarChart3,
   Settings2,
+  Users2,
+  ShieldCheck,
+  BriefcaseBusiness,
 };
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -66,6 +72,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const { theme, setTheme } = useTheme();
 
   const user = mockUsers.find((entry) => entry.id === currentUserId) ?? mockUsers[0];
+  const visibleNavItems = navItems.filter((item) => getPageConfig(item.href).allowedRoles.includes(user.role));
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
@@ -113,7 +120,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </button>
 
         <nav className="scrollbar-thin mt-6 flex-1 space-y-6 overflow-y-auto pr-1">
-          {Array.from(new Set(navItems.map((item) => item.group))).map((group) => (
+          {Array.from(new Set(visibleNavItems.map((item) => item.group))).map((group) => (
             <div key={group}>
               {!sidebarCollapsed && (
                 <p className="px-3 pb-2 text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--muted-foreground)]">
@@ -121,7 +128,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 </p>
               )}
               <div className="space-y-1">
-                {navItems
+                {visibleNavItems
                   .filter((item) => item.group === group)
                   .map((item) => {
                     const Icon = iconMap[item.icon as keyof typeof iconMap] ?? LayoutDashboard;
