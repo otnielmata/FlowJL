@@ -40,6 +40,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 import { AdminAccessModule } from "@/components/layout/admin-access-module";
+import { PlanningModule } from "@/components/layout/planning-module";
 import { userCanAccessPage } from "@/lib/permissions";
 import { cn } from "@/lib/utils";
 import { getPageConfig } from "@/mocks/flow-data";
@@ -267,6 +268,10 @@ export function ModulePage({ path }: { path: string }) {
 
   if (path === "/usuarios" || path === "/perfis" || path === "/cargos") {
     return <AdminAccessModule page={page} path={path} />;
+  }
+
+  if (path === "/estrategias" || path === "/lancamentos" || path === "/cronogramas") {
+    return <PlanningModule page={page} path={path} user={user} />;
   }
 
   return (
