@@ -18,6 +18,13 @@ const passwordRule = z
   .regex(/[A-Z]/, "Inclua pelo menos uma letra maiuscula.")
   .regex(/[0-9]/, "Inclua pelo menos um numero.");
 
+const optionalPasswordRule = z
+  .string()
+  .refine((value) => value === "" || value.length >= 8, "A senha precisa ter pelo menos 8 caracteres.")
+  .refine((value) => value === "" || /[a-z]/.test(value), "Inclua pelo menos uma letra minuscula.")
+  .refine((value) => value === "" || /[A-Z]/.test(value), "Inclua pelo menos uma letra maiuscula.")
+  .refine((value) => value === "" || /[0-9]/.test(value), "Inclua pelo menos um numero.");
+
 const inviteUserSchema = z
   .object({
     name: z.string().min(3, "Informe um nome com pelo menos 3 caracteres."),
@@ -33,18 +40,15 @@ const inviteUserSchema = z
     path: ["passwordConfirmation"],
   });
 
-const editUserSchema = z.object({
-  name: z.string().min(3, "Informe um nome com pelo menos 3 caracteres."),
-  email: z.email("Informe um email valido."),
-  profileName: z.string().min(1, "Selecione um perfil de acesso."),
-  jobTitle: z.string().min(1, "Selecione um cargo."),
-  squad: z.string().min(2, "Informe a squad do usuario."),
-  status: z.enum(["Ativo", "Pendente", "Suspenso"]),
-});
-
-const changePasswordSchema = z
+const editUserSchema = z
   .object({
-    password: passwordRule,
+    name: z.string().min(3, "Informe um nome com pelo menos 3 caracteres."),
+    email: z.email("Informe um email valido."),
+    profileName: z.string().min(1, "Selecione um perfil de acesso."),
+    jobTitle: z.string().min(1, "Selecione um cargo."),
+    squad: z.string().min(2, "Informe a squad do usuario."),
+    status: z.enum(["Ativo", "Pendente", "Suspenso"]),
+    password: optionalPasswordRule,
     passwordConfirmation: z.string(),
   })
   .refine((values) => values.password === values.passwordConfirmation, {
@@ -60,7 +64,6 @@ const createProfileSchema = z.object({
 
 type InviteUserForm = z.infer<typeof inviteUserSchema>;
 type EditUserForm = z.infer<typeof editUserSchema>;
-type ChangePasswordForm = z.infer<typeof changePasswordSchema>;
 type CreateProfileForm = z.infer<typeof createProfileSchema>;
 
 type AccessProfile = {
@@ -226,12 +229,6 @@ function UsersAdminModule({ page }: { page: PageConfig }) {
       jobTitle: jobTitleOptions[0] ?? "Administrador do Portal",
       squad: "",
       status: "Ativo",
-    },
-  });
-
-  const passwordForm = useForm<ChangePasswordForm>({
-    resolver: zodResolver(changePasswordSchema),
-    defaultValues: {
       password: "",
       passwordConfirmation: "",
     },
@@ -262,10 +259,11 @@ function UsersAdminModule({ page }: { page: PageConfig }) {
         jobTitle: selectedUser.jobTitle,
         squad: selectedUser.squad,
         status: selectedUser.status,
+        password: "",
+        passwordConfirmation: "",
       });
-      passwordForm.reset({ password: "", passwordConfirmation: "" });
     }
-  }, [editForm, passwordForm, selectedUser, users]);
+  }, [editForm, selectedUser, users]);
 
   return (
     <section className="page-grid">
@@ -382,7 +380,7 @@ function UsersAdminModule({ page }: { page: PageConfig }) {
                       ? { role: selectedUser.role, roleLabel: selectedUser.roleLabel }
                       : getAccessRole(values.profileName);
 
-                  updateUser(selectedUser.id, {
+                  const updates: Partial<ManagedUser> = {
                     name: values.name,
                     email: values.email.trim().toLowerCase(),
                     profileName: values.profileName,
@@ -391,7 +389,13 @@ function UsersAdminModule({ page }: { page: PageConfig }) {
                     status: values.status,
                     focus: values.squad,
                     ...accessRole,
-                  });
+                  };
+
+                  if (values.password) {
+                    updates.password = values.password;
+                  }
+
+                  updateUser(selectedUser.id, updates);
                   toast.success(`Cadastro de ${values.name} atualizado com sucesso.`);
                 })}
                 className="mt-6 grid gap-4"
@@ -453,6 +457,43 @@ function UsersAdminModule({ page }: { page: PageConfig }) {
                   </select>
                 </Field>
 
+                <div className="mt-2 border-t pt-5">
+                  <div className="flex items-center gap-3">
+                    <div className="rounded-2xl bg-[color:var(--primary)]/12 p-2.5 text-[color:var(--primary)]">
+                      <KeyRound className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <p className="font-semibold">Senha de acesso</p>
+                      <p className="text-xs text-[color:var(--muted-foreground)]">
+                        Preencha somente quando quiser alterar a senha atual.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <Field label="Nova senha (opcional)" error={editForm.formState.errors.password?.message}>
+                  <input
+                    type="password"
+                    {...editForm.register("password")}
+                    className="rounded-2xl border bg-white/70 px-4 py-3 text-sm dark:bg-white/6"
+                    placeholder="Minimo de 8 caracteres"
+                    autoComplete="new-password"
+                  />
+                </Field>
+                <Field label="Confirmar nova senha" error={editForm.formState.errors.passwordConfirmation?.message}>
+                  <input
+                    type="password"
+                    {...editForm.register("passwordConfirmation")}
+                    className="rounded-2xl border bg-white/70 px-4 py-3 text-sm dark:bg-white/6"
+                    placeholder="Repita a nova senha"
+                    autoComplete="new-password"
+                  />
+                </Field>
+
+                <div className="rounded-2xl border bg-white/55 p-4 text-xs leading-5 text-[color:var(--muted-foreground)] dark:bg-white/5">
+                  Para trocar a senha, use no minimo 8 caracteres, com letra maiuscula, minuscula e numero.
+                </div>
+
                 <button
                   type="submit"
                   className="inline-flex items-center justify-center rounded-2xl bg-[color:var(--primary)] px-5 py-3 font-medium text-[color:var(--primary-foreground)]"
@@ -463,66 +504,6 @@ function UsersAdminModule({ page }: { page: PageConfig }) {
             ) : (
               <div className="mt-6 rounded-3xl border bg-white/70 p-4 text-sm text-[color:var(--muted-foreground)] dark:bg-white/6">
                 Nenhum usuario selecionado para edicao.
-              </div>
-            )}
-          </div>
-
-          <div className="glass rounded-[2rem] border p-6">
-            <div className="flex items-center gap-3">
-              <div className="rounded-2xl bg-[color:var(--primary)]/12 p-3 text-[color:var(--primary)]">
-                <KeyRound className="h-5 w-5" />
-              </div>
-              <div>
-                <h3 className="font-display text-xl font-semibold">Alterar senha</h3>
-                <p className="text-sm text-[color:var(--muted-foreground)]">
-                  Redefina a credencial de {selectedUser?.name ?? "um usuario selecionado"}.
-                </p>
-              </div>
-            </div>
-
-            {selectedUser ? (
-              <form
-                onSubmit={passwordForm.handleSubmit((values) => {
-                  updateUser(selectedUser.id, { password: values.password });
-                  passwordForm.reset({ password: "", passwordConfirmation: "" });
-                  toast.success(`Senha de ${selectedUser.name} alterada com sucesso.`);
-                })}
-                className="mt-6 grid gap-4"
-              >
-                <Field label="Nova senha" error={passwordForm.formState.errors.password?.message}>
-                  <input
-                    type="password"
-                    {...passwordForm.register("password")}
-                    className="rounded-2xl border bg-white/70 px-4 py-3 text-sm dark:bg-white/6"
-                    placeholder="Minimo de 8 caracteres"
-                    autoComplete="new-password"
-                  />
-                </Field>
-                <Field label="Confirmar nova senha" error={passwordForm.formState.errors.passwordConfirmation?.message}>
-                  <input
-                    type="password"
-                    {...passwordForm.register("passwordConfirmation")}
-                    className="rounded-2xl border bg-white/70 px-4 py-3 text-sm dark:bg-white/6"
-                    placeholder="Repita a nova senha"
-                    autoComplete="new-password"
-                  />
-                </Field>
-
-                <div className="rounded-2xl border bg-white/55 p-4 text-xs leading-5 text-[color:var(--muted-foreground)] dark:bg-white/5">
-                  Use no minimo 8 caracteres, com letra maiuscula, minuscula e numero.
-                </div>
-
-                <button
-                  type="submit"
-                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[color:var(--primary)] px-5 py-3 font-medium text-[color:var(--primary-foreground)]"
-                >
-                  <KeyRound className="h-4 w-4" />
-                  Atualizar senha
-                </button>
-              </form>
-            ) : (
-              <div className="mt-6 rounded-3xl border bg-white/70 p-4 text-sm text-[color:var(--muted-foreground)] dark:bg-white/6">
-                Selecione um usuario para alterar a senha.
               </div>
             )}
           </div>
