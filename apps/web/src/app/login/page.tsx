@@ -9,8 +9,8 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { toast } from "sonner";
 
-import { findMockUserByEmail } from "@/mocks/flow-data";
 import { useAuthStore } from "@/stores/auth-store";
+import { useUserDirectoryStore } from "@/stores/user-directory-store";
 
 const loginSchema = z.object({
   email: z.email("Informe um email valido."),
@@ -32,6 +32,7 @@ function LoginPageContent() {
   const searchParams = useSearchParams();
   const nextPath = searchParams.get("next") || "/dashboard";
   const login = useAuthStore((state) => state.login);
+  const users = useUserDirectoryStore((state) => state.users);
 
   const form = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
@@ -42,12 +43,19 @@ function LoginPageContent() {
   });
 
   function handleSubmit(values: LoginForm) {
-    const user = findMockUserByEmail(values.email);
+    const normalizedEmail = values.email.trim().toLowerCase();
+    const user = users.find((entry) => entry.email.toLowerCase() === normalizedEmail);
 
     if (!user || user.password !== values.password) {
       form.setError("email", { message: "Credenciais invalidas para acessar o portal." });
       form.setError("password", { message: "Revise email e senha informados." });
       toast.error("Nao foi possivel autenticar o acesso.");
+      return;
+    }
+
+    if (user.status !== "Ativo") {
+      form.setError("email", { message: `Este usuario esta com status ${user.status.toLowerCase()}.` });
+      toast.error("O administrador precisa liberar este acesso antes do login.");
       return;
     }
 
@@ -151,7 +159,7 @@ function LoginPageContent() {
             </div>
 
             <div className="rounded-3xl border bg-white/55 p-4 text-sm leading-6 text-[color:var(--muted-foreground)] dark:bg-white/5">
-              Acesso de demonstracao: <strong>julia@flowjl.com</strong> e senha <strong>flowjl123</strong>.
+              Use as credenciais definidas pelo administrador no cadastro de usuarios.
             </div>
 
             <button

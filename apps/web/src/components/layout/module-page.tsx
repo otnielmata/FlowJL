@@ -42,10 +42,11 @@ import { z } from "zod";
 import { AdminAccessModule } from "@/components/layout/admin-access-module";
 import { userCanAccessPage } from "@/lib/permissions";
 import { cn } from "@/lib/utils";
-import { getPageConfig, mockUsers } from "@/mocks/flow-data";
+import { getPageConfig } from "@/mocks/flow-data";
 import { useAuthStore } from "@/stores/auth-store";
 import { useUiStore } from "@/stores/ui-store";
-import type { AppUser, BoardColumn, BoardTask } from "@/types/flow";
+import { initialManagedUsers, useUserDirectoryStore } from "@/stores/user-directory-store";
+import type { BoardColumn, BoardTask } from "@/types/flow";
 
 const iconMap = {
   LayoutDashboard,
@@ -116,8 +117,9 @@ function EmptyState({ title, description }: { title: string; description: string
 
 export function ModulePage({ path }: { path: string }) {
   const currentUserId = useAuthStore((state) => state.currentUserId);
+  const users = useUserDirectoryStore((state) => state.users);
   const experienceState = useUiStore((state) => state.experienceState);
-  const user = getCurrentUser(currentUserId);
+  const user = users.find((entry) => entry.id === currentUserId) ?? users[0] ?? initialManagedUsers[0];
   const initialPage = getPageConfig(path);
   const [filter, setFilter] = useState("Todos");
   const [search, setSearch] = useState("");
@@ -584,8 +586,4 @@ export function ModulePage({ path }: { path: string }) {
       </div>
     </section>
   );
-}
-
-function getCurrentUser(userId: string | null) {
-  return (mockUsers.find((user) => user.id === userId) ?? mockUsers[0]) as AppUser;
 }
