@@ -41,6 +41,15 @@ export type AccessProfile = {
   }>;
 };
 
+export type JobRole = {
+  id: string;
+  name: string;
+  scope: string;
+  reportsTo: string;
+  headcount: number;
+  responsibilities: string[];
+};
+
 export type NavItem = {
   label: string;
   href: string;

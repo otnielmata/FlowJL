@@ -64,6 +64,7 @@ type UserDirectoryState = {
   addUser: (user: ManagedUser) => void;
   updateUser: (userId: string, updates: Partial<ManagedUser>) => void;
   syncUsersForProfile: (currentName: string, nextName: string, role: ManagedUser["role"], roleLabel: string) => void;
+  syncUsersForJobTitle: (currentName: string, nextName: string) => void;
 };
 
 export const useUserDirectoryStore = create<UserDirectoryState>()(
@@ -79,6 +80,12 @@ export const useUserDirectoryStore = create<UserDirectoryState>()(
         set((state) => ({
           users: state.users.map((user) =>
             user.profileName === currentName ? { ...user, profileName: nextName, role, roleLabel } : user,
+          ),
+        })),
+      syncUsersForJobTitle: (currentName, nextName) =>
+        set((state) => ({
+          users: state.users.map((user) =>
+            user.jobTitle === currentName ? { ...user, jobTitle: nextName } : user,
           ),
         })),
     }),
