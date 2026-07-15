@@ -26,6 +26,21 @@ export type ManagedUser = AppUser & {
   lastAccess: string;
 };
 
+export type ProfilePermission = "Total" | "Edicao" | "Leitura";
+
+export type AccessProfile = {
+  id: string;
+  name: string;
+  focus: string;
+  approvals: string;
+  role: RoleKey;
+  roleLabel: string;
+  modules: Array<{
+    name: string;
+    permission: ProfilePermission;
+  }>;
+};
+
 export type NavItem = {
   label: string;
   href: string;

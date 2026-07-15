@@ -8,8 +8,9 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 import { cn } from "@/lib/utils";
+import { initialAccessProfiles, useProfileDirectoryStore } from "@/stores/profile-directory-store";
 import { useUserDirectoryStore } from "@/stores/user-directory-store";
-import type { ManagedUser, PageConfig, RoleKey } from "@/types/flow";
+import type { AccessProfile, ManagedUser, PageConfig, ProfilePermission, RoleKey } from "@/types/flow";
 
 const passwordRule = z
   .string()
@@ -58,25 +59,14 @@ const editUserSchema = z
 
 const createProfileSchema = z.object({
   name: z.string().min(3, "Defina um nome claro para o perfil."),
-  scope: z.string().min(1, "Selecione o escopo principal."),
-  approvalLimit: z.string().min(1, "Informe o limite de aprovacao."),
+  focus: z.string().min(5, "Descreva o escopo principal do perfil."),
+  approvals: z.string().min(1, "Informe o limite de aprovacao."),
+  role: z.enum(["admin", "strategist", "social-media", "traffic-manager", "operations", "approver"]),
 });
 
 type InviteUserForm = z.infer<typeof inviteUserSchema>;
 type EditUserForm = z.infer<typeof editUserSchema>;
 type CreateProfileForm = z.infer<typeof createProfileSchema>;
-
-type AccessProfile = {
-  id: string;
-  name: string;
-  focus: string;
-  approvals: string;
-  members: number;
-  modules: Array<{
-    name: string;
-    permission: "Total" | "Edicao" | "Leitura";
-  }>;
-};
 
 type RoleCatalog = {
   id: string;
@@ -86,51 +76,6 @@ type RoleCatalog = {
   headcount: number;
   responsibilities: string[];
 };
-
-const accessProfiles: AccessProfile[] = [
-  {
-    id: "profile-admin",
-    name: "Administrador Flow JL",
-    focus: "Controle total da operação e da segurança",
-    approvals: "Sem limite",
-    members: 2,
-    modules: [
-      { name: "Dashboard", permission: "Total" },
-      { name: "Operações", permission: "Total" },
-      { name: "Usuários", permission: "Total" },
-      { name: "Perfis", permission: "Total" },
-      { name: "Configurações", permission: "Total" },
-    ],
-  },
-  {
-    id: "profile-ops",
-    name: "Coordenador Operacional",
-    focus: "Execução, filas críticas e dependências",
-    approvals: "Até R$ 25 mil",
-    members: 4,
-    modules: [
-      { name: "Dashboard", permission: "Leitura" },
-      { name: "Cronogramas", permission: "Edicao" },
-      { name: "Operações", permission: "Total" },
-      { name: "Aprovações", permission: "Edicao" },
-      { name: "Relatórios", permission: "Leitura" },
-    ],
-  },
-  {
-    id: "profile-approval",
-    name: "Aprovador Executivo",
-    focus: "Governança de verba, criativos e marcos",
-    approvals: "Até R$ 80 mil",
-    members: 3,
-    modules: [
-      { name: "Dashboard", permission: "Leitura" },
-      { name: "Aprovações", permission: "Total" },
-      { name: "Relatórios", permission: "Leitura" },
-      { name: "Operações", permission: "Leitura" },
-      { name: "Cronogramas", permission: "Leitura" },
-    ],
-  },
-];
 
 const roleCatalog: RoleCatalog[] = [
   {
@@ -171,20 +116,30 @@ const roleCatalog: RoleCatalog[] = [
   },
 ];
 
-const profileOptions = accessProfiles.map((profile) => profile.name);
 const jobTitleOptions = roleCatalog.map((role) => role.name);
-const scopeOptions = ["Operação completa", "Governança", "Performance", "Conteúdo", "Leitura executiva"];
+const profileRoleOptions: Array<{ value: RoleKey; label: string }> = [
+  { value: "admin", label: "Administrador" },
+  { value: "strategist", label: "Estratégia Digital" },
+  { value: "social-media", label: "Social Media" },
+  { value: "traffic-manager", label: "Tráfego Pago" },
+  { value: "operations", label: "Operações" },
+  { value: "approver", label: "Aprovações" },
+];
 
-function getAccessRole(profileName: string): { role: RoleKey; roleLabel: string } {
-  if (profileName === "Administrador Flow JL") {
-    return { role: "admin", roleLabel: "Administrador" };
-  }
+const defaultProfileModules: AccessProfile["modules"] = [
+  { name: "Dashboard", permission: "Leitura" },
+  { name: "Cronogramas", permission: "Leitura" },
+  { name: "Operações", permission: "Leitura" },
+  { name: "Aprovações", permission: "Leitura" },
+  { name: "Relatórios", permission: "Leitura" },
+];
 
-  if (profileName === "Aprovador Executivo") {
-    return { role: "approver", roleLabel: "Aprovações" };
-  }
+function getAccessRole(profileName: string, profiles: AccessProfile[]): { role: RoleKey; roleLabel: string } {
+  const profile = profiles.find((entry) => entry.name === profileName);
 
-  return { role: "operations", roleLabel: "Operações" };
+  return profile
+    ? { role: profile.role, roleLabel: profile.roleLabel }
+    : { role: "operations", roleLabel: "Operações" };
 }
 
 export function AdminAccessModule({ page, path }: { page: PageConfig; path: string }) {
@@ -203,6 +158,8 @@ function UsersAdminModule({ page }: { page: PageConfig }) {
   const users = useUserDirectoryStore((state) => state.users);
   const addUser = useUserDirectoryStore((state) => state.addUser);
   const updateUser = useUserDirectoryStore((state) => state.updateUser);
+  const profiles = useProfileDirectoryStore((state) => state.profiles);
+  const profileOptions = profiles.map((profile) => profile.name);
   const [selectedUserId, setSelectedUserId] = useState("u-admin");
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<ManagedUser["status"] | "Todos">("Todos");
@@ -378,7 +335,7 @@ function UsersAdminModule({ page }: { page: PageConfig }) {
                   const accessRole =
                     values.profileName === selectedUser.profileName
                       ? { role: selectedUser.role, roleLabel: selectedUser.roleLabel }
-                      : getAccessRole(values.profileName);
+                      : getAccessRole(values.profileName, profiles);
 
                   const updates: Partial<ManagedUser> = {
                     name: values.name,
@@ -528,7 +485,7 @@ function UsersAdminModule({ page }: { page: PageConfig }) {
                   return;
                 }
 
-                const accessRole = getAccessRole(values.profileName);
+                const accessRole = getAccessRole(values.profileName, profiles);
                 const newUser: ManagedUser = {
                   id: `u-${normalizedEmail.replace(/[^a-z0-9]/g, "-")}`,
                   name: values.name,
@@ -647,16 +604,52 @@ function UsersAdminModule({ page }: { page: PageConfig }) {
 }
 
 function ProfilesAdminModule({ page }: { page: PageConfig }) {
-  const [selectedProfileId, setSelectedProfileId] = useState(accessProfiles[0]?.id ?? "");
-  const selectedProfile = accessProfiles.find((profile) => profile.id === selectedProfileId) ?? accessProfiles[0];
-  const form = useForm<CreateProfileForm>({
+  const profiles = useProfileDirectoryStore((state) => state.profiles);
+  const addProfile = useProfileDirectoryStore((state) => state.addProfile);
+  const updateProfile = useProfileDirectoryStore((state) => state.updateProfile);
+  const users = useUserDirectoryStore((state) => state.users);
+  const syncUsersForProfile = useUserDirectoryStore((state) => state.syncUsersForProfile);
+  const [selectedProfileId, setSelectedProfileId] = useState(initialAccessProfiles[0]?.id ?? "");
+  const selectedProfile = profiles.find((profile) => profile.id === selectedProfileId) ?? profiles[0];
+
+  const createForm = useForm<CreateProfileForm>({
     resolver: zodResolver(createProfileSchema),
     defaultValues: {
       name: "",
-      scope: scopeOptions[0] ?? "Operação completa",
-      approvalLimit: "R$ 15 mil",
+      focus: "",
+      approvals: "Até R$ 15 mil",
+      role: "operations",
     },
   });
+
+  const editForm = useForm<CreateProfileForm>({
+    resolver: zodResolver(createProfileSchema),
+    defaultValues: {
+      name: "",
+      focus: "",
+      approvals: "",
+      role: "operations",
+    },
+  });
+
+  useEffect(() => {
+    if (selectedProfile) {
+      editForm.reset({
+        name: selectedProfile.name,
+        focus: selectedProfile.focus,
+        approvals: selectedProfile.approvals,
+        role: selectedProfile.role,
+      });
+    }
+  }, [editForm, selectedProfile, profiles]);
+
+  function getMemberCount(profileName: string) {
+    return users.filter((user) => user.profileName === profileName).length;
+  }
+
+  function getRoleLabel(role: RoleKey) {
+    return profileRoleOptions.find((option) => option.value === role)?.label ?? "Operações";
+  }
 
   return (
     <section className="page-grid">
@@ -667,9 +660,9 @@ function ProfilesAdminModule({ page }: { page: PageConfig }) {
         title="Perfis e permissoes do portal"
         description="Defina o que cada papel pode visualizar, editar ou aprovar dentro da operacao Flow JL, com uma leitura pronta para evolucao com RBAC real."
         highlights={[
-          "Perfis separados por foco operacional e governanca",
-          "Matriz de modulos com niveis de permissao claros",
-          "Base pronta para politicas futuras por squad e aprovacao",
+          "Cadastro e edicao persistentes no portal",
+          "Matriz de modulos com permissoes editaveis",
+          "Usuarios sincronizados quando o perfil muda",
         ]}
       />
 
@@ -687,7 +680,7 @@ function ProfilesAdminModule({ page }: { page: PageConfig }) {
             </div>
 
             <div className="mt-6 space-y-3">
-              {accessProfiles.map((profile) => {
+              {profiles.map((profile) => {
                 const active = profile.id === selectedProfileId;
 
                 return (
@@ -708,7 +701,7 @@ function ProfilesAdminModule({ page }: { page: PageConfig }) {
                         <p className="mt-1 text-sm text-[color:var(--muted-foreground)]">{profile.focus}</p>
                       </div>
                       <span className="rounded-full bg-[color:var(--secondary)] px-3 py-1 text-xs font-medium text-[color:var(--secondary-foreground)]">
-                        {profile.members} membros
+                        {getMemberCount(profile.name)} membros
                       </span>
                     </div>
                   </button>
@@ -718,41 +711,72 @@ function ProfilesAdminModule({ page }: { page: PageConfig }) {
           </div>
 
           <div className="glass rounded-[2rem] border p-6">
-            <h3 className="font-display text-xl font-semibold">Criar novo perfil</h3>
+            <h3 className="font-display text-xl font-semibold">Cadastrar novo perfil</h3>
             <p className="mt-1 text-sm text-[color:var(--muted-foreground)]">
-              Modelo validado para o administrador cadastrar novos perfis de acesso.
+              Defina a finalidade, o papel de acesso e o limite de aprovacao inicial.
             </p>
 
             <form
-              onSubmit={form.handleSubmit((values) => {
-                toast.success(`Perfil ${values.name} preparado para configuracao.`);
-                form.reset({
+              data-testid="create-profile-form"
+              onSubmit={createForm.handleSubmit((values) => {
+                const normalizedName = values.name.trim();
+
+                if (profiles.some((profile) => profile.name.toLowerCase() === normalizedName.toLowerCase())) {
+                  createForm.setError("name", { message: "Ja existe um perfil cadastrado com este nome." });
+                  return;
+                }
+
+                const profile: AccessProfile = {
+                  id: `profile-${normalizedName.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${profiles.length + 1}`,
+                  name: normalizedName,
+                  focus: values.focus,
+                  approvals: values.approvals,
+                  role: values.role,
+                  roleLabel: getRoleLabel(values.role),
+                  modules: defaultProfileModules.map((module) => ({ ...module })),
+                };
+
+                addProfile(profile);
+                setSelectedProfileId(profile.id);
+                toast.success(`Perfil ${profile.name} cadastrado com sucesso.`);
+                createForm.reset({
                   name: "",
-                  scope: values.scope,
-                  approvalLimit: values.approvalLimit,
+                  focus: "",
+                  approvals: "Até R$ 15 mil",
+                  role: values.role,
                 });
               })}
               className="mt-6 grid gap-4"
             >
-              <Field label="Nome do perfil" error={form.formState.errors.name?.message}>
+              <Field label="Nome do perfil" error={createForm.formState.errors.name?.message}>
                 <input
-                  {...form.register("name")}
+                  {...createForm.register("name")}
                   className="rounded-2xl border bg-white/70 px-4 py-3 text-sm dark:bg-white/6"
                   placeholder="Ex: Lider de Growth"
                 />
               </Field>
-              <Field label="Escopo principal" error={form.formState.errors.scope?.message}>
-                <select {...form.register("scope")} className="rounded-2xl border bg-white/70 px-4 py-3 text-sm dark:bg-white/6">
-                  {scopeOptions.map((scope) => (
-                    <option key={scope} value={scope}>
-                      {scope}
+              <Field label="Escopo principal" error={createForm.formState.errors.focus?.message}>
+                <textarea
+                  {...createForm.register("focus")}
+                  className="min-h-24 rounded-2xl border bg-white/70 px-4 py-3 text-sm dark:bg-white/6"
+                  placeholder="Descreva a finalidade e o escopo deste perfil"
+                />
+              </Field>
+              <Field label="Papel de acesso" error={createForm.formState.errors.role?.message}>
+                <select
+                  {...createForm.register("role")}
+                  className="rounded-2xl border bg-white/70 px-4 py-3 text-sm dark:bg-white/6"
+                >
+                  {profileRoleOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
                     </option>
                   ))}
                 </select>
               </Field>
-              <Field label="Limite de aprovacao" error={form.formState.errors.approvalLimit?.message}>
+              <Field label="Limite de aprovacao" error={createForm.formState.errors.approvals?.message}>
                 <input
-                  {...form.register("approvalLimit")}
+                  {...createForm.register("approvals")}
                   className="rounded-2xl border bg-white/70 px-4 py-3 text-sm dark:bg-white/6"
                   placeholder="R$ 15 mil"
                 />
@@ -762,7 +786,7 @@ function ProfilesAdminModule({ page }: { page: PageConfig }) {
                 type="submit"
                 className="inline-flex items-center justify-center rounded-2xl bg-[color:var(--primary)] px-5 py-3 font-medium text-[color:var(--primary-foreground)]"
               >
-                Salvar perfil base
+                Cadastrar perfil
               </button>
             </form>
           </div>
@@ -779,9 +803,89 @@ function ProfilesAdminModule({ page }: { page: PageConfig }) {
             </div>
           </div>
 
+          <form
+            data-testid="edit-profile-form"
+            onSubmit={editForm.handleSubmit((values) => {
+              const nextName = values.name.trim();
+
+              if (
+                profiles.some(
+                  (profile) =>
+                    profile.id !== selectedProfile.id && profile.name.toLowerCase() === nextName.toLowerCase(),
+                )
+              ) {
+                editForm.setError("name", { message: "Ja existe outro perfil cadastrado com este nome." });
+                return;
+              }
+
+              const previousName = selectedProfile.name;
+              const roleLabel = getRoleLabel(values.role);
+
+              updateProfile(selectedProfile.id, {
+                name: nextName,
+                focus: values.focus,
+                approvals: values.approvals,
+                role: values.role,
+                roleLabel,
+              });
+              syncUsersForProfile(previousName, nextName, values.role, roleLabel);
+              toast.success(`Perfil ${nextName} atualizado com sucesso.`);
+            })}
+            className="mt-6 grid gap-4 rounded-3xl border bg-white/55 p-5 dark:bg-white/5 md:grid-cols-2"
+          >
+            <div className="md:col-span-2">
+              <h4 className="font-display text-lg font-semibold">Editar perfil selecionado</h4>
+              <p className="mt-1 text-sm text-[color:var(--muted-foreground)]">
+                As alteracoes de nome e papel sao aplicadas aos usuarios vinculados.
+              </p>
+            </div>
+            <Field label="Nome do perfil" error={editForm.formState.errors.name?.message}>
+              <input
+                data-testid="edit-profile-name"
+                {...editForm.register("name")}
+                className="rounded-2xl border bg-white/70 px-4 py-3 text-sm dark:bg-white/6"
+              />
+            </Field>
+            <Field label="Papel de acesso" error={editForm.formState.errors.role?.message}>
+              <select
+                data-testid="edit-profile-role"
+                {...editForm.register("role")}
+                className="rounded-2xl border bg-white/70 px-4 py-3 text-sm dark:bg-white/6"
+              >
+                {profileRoleOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </Field>
+            <div className="md:col-span-2">
+              <Field label="Escopo principal" error={editForm.formState.errors.focus?.message}>
+                <textarea
+                  data-testid="edit-profile-focus"
+                  {...editForm.register("focus")}
+                  className="min-h-24 rounded-2xl border bg-white/70 px-4 py-3 text-sm dark:bg-white/6"
+                />
+              </Field>
+            </div>
+            <Field label="Limite de aprovacao" error={editForm.formState.errors.approvals?.message}>
+              <input
+                data-testid="edit-profile-approvals"
+                {...editForm.register("approvals")}
+                className="rounded-2xl border bg-white/70 px-4 py-3 text-sm dark:bg-white/6"
+              />
+            </Field>
+            <button
+              type="submit"
+              className="inline-flex items-center justify-center rounded-2xl bg-[color:var(--primary)] px-5 py-3 font-medium text-[color:var(--primary-foreground)]"
+            >
+              Salvar alteracoes do perfil
+            </button>
+          </form>
+
           <div className="mt-6 grid gap-4 md:grid-cols-3">
             {[
-              ["Membros vinculados", `${selectedProfile.members}`],
+              ["Membros vinculados", `${getMemberCount(selectedProfile.name)}`],
               ["Modulos liberados", `${selectedProfile.modules.length}`],
               ["Tipo de controle", "RBAC simulado"],
             ].map(([label, value]) => (
@@ -797,7 +901,7 @@ function ProfilesAdminModule({ page }: { page: PageConfig }) {
               <thead>
                 <tr className="text-[color:var(--muted-foreground)]">
                   <th className="pb-4 pr-4 font-medium">Modulo</th>
-                  <th className="pb-4 pr-4 font-medium">Permissao</th>
+                  <th className="pb-4 pr-4 font-medium">Permissao editavel</th>
                   <th className="pb-4 pr-4 font-medium">Leitura administrativa</th>
                 </tr>
               </thead>
@@ -806,9 +910,24 @@ function ProfilesAdminModule({ page }: { page: PageConfig }) {
                   <tr key={module.name} className="border-t">
                     <td className="py-4 pr-4 font-medium">{module.name}</td>
                     <td className="py-4 pr-4">
-                      <span className="rounded-full bg-[color:var(--secondary)] px-3 py-1 text-xs font-semibold text-[color:var(--secondary-foreground)]">
-                        {module.permission}
-                      </span>
+                      <select
+                        value={module.permission}
+                        onChange={(event) => {
+                          const permission = event.target.value as ProfilePermission;
+                          updateProfile(selectedProfile.id, {
+                            modules: selectedProfile.modules.map((entry) =>
+                              entry.name === module.name ? { ...entry, permission } : entry,
+                            ),
+                          });
+                          toast.success(`Permissao de ${module.name} atualizada para ${permission}.`);
+                        }}
+                        className="rounded-xl border bg-white/70 px-3 py-2 text-xs font-semibold dark:bg-white/6"
+                        aria-label={`Permissao do modulo ${module.name}`}
+                      >
+                        <option value="Total">Total</option>
+                        <option value="Edicao">Edicao</option>
+                        <option value="Leitura">Leitura</option>
+                      </select>
                     </td>
                     <td className="py-4 pr-4 text-[color:var(--muted-foreground)]">
                       {module.permission === "Total" && "Pode configurar, editar e aprovar"}
