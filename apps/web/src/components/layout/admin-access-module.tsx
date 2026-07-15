@@ -8,22 +8,49 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 import { cn } from "@/lib/utils";
-import { mockUsers } from "@/mocks/flow-data";
-import type { PageConfig } from "@/types/flow";
+import { useUserDirectoryStore } from "@/stores/user-directory-store";
+import type { ManagedUser, PageConfig, RoleKey } from "@/types/flow";
 
-const inviteUserSchema = z.object({
-  name: z.string().min(3, "Informe um nome com pelo menos 3 caracteres."),
-  email: z.email("Informe um email valido."),
-  role: z.string().min(1, "Selecione um perfil de acesso."),
-});
+const passwordRule = z
+  .string()
+  .min(8, "A senha precisa ter pelo menos 8 caracteres.")
+  .regex(/[a-z]/, "Inclua pelo menos uma letra minuscula.")
+  .regex(/[A-Z]/, "Inclua pelo menos uma letra maiuscula.")
+  .regex(/[0-9]/, "Inclua pelo menos um numero.");
+
+const inviteUserSchema = z
+  .object({
+    name: z.string().min(3, "Informe um nome com pelo menos 3 caracteres."),
+    email: z.email("Informe um email valido."),
+    profileName: z.string().min(1, "Selecione um perfil de acesso."),
+    jobTitle: z.string().min(1, "Selecione um cargo."),
+    squad: z.string().min(2, "Informe a squad do usuario."),
+    password: passwordRule,
+    passwordConfirmation: z.string(),
+  })
+  .refine((values) => values.password === values.passwordConfirmation, {
+    message: "As senhas informadas precisam ser iguais.",
+    path: ["passwordConfirmation"],
+  });
 
 const editUserSchema = z.object({
   name: z.string().min(3, "Informe um nome com pelo menos 3 caracteres."),
   email: z.email("Informe um email valido."),
-  roleLabel: z.string().min(1, "Selecione um perfil de acesso."),
+  profileName: z.string().min(1, "Selecione um perfil de acesso."),
+  jobTitle: z.string().min(1, "Selecione um cargo."),
   squad: z.string().min(2, "Informe a squad do usuario."),
   status: z.enum(["Ativo", "Pendente", "Suspenso"]),
 });
+
+const changePasswordSchema = z
+  .object({
+    password: passwordRule,
+    passwordConfirmation: z.string(),
+  })
+  .refine((values) => values.password === values.passwordConfirmation, {
+    message: "As senhas informadas precisam ser iguais.",
+    path: ["passwordConfirmation"],
+  });
 
 const createProfileSchema = z.object({
   name: z.string().min(3, "Defina um nome claro para o perfil."),
@@ -33,17 +60,8 @@ const createProfileSchema = z.object({
 
 type InviteUserForm = z.infer<typeof inviteUserSchema>;
 type EditUserForm = z.infer<typeof editUserSchema>;
+type ChangePasswordForm = z.infer<typeof changePasswordSchema>;
 type CreateProfileForm = z.infer<typeof createProfileSchema>;
-
-type PortalUser = {
-  id: string;
-  name: string;
-  email: string;
-  roleLabel: string;
-  squad: string;
-  status: "Ativo" | "Pendente" | "Suspenso";
-  lastAccess: string;
-};
 
 type AccessProfile = {
   id: string;
@@ -65,54 +83,6 @@ type RoleCatalog = {
   headcount: number;
   responsibilities: string[];
 };
-
-const initialPortalUsers: PortalUser[] = [
-  {
-    id: "user-1",
-    name: "Júlia Lima",
-    email: "julia@flowjl.com",
-    roleLabel: "Administrador",
-    squad: "Diretoria",
-    status: "Ativo",
-    lastAccess: "Hoje, 09:14",
-  },
-  {
-    id: "user-2",
-    name: "Marina Costa",
-    email: "marina@flowjl.com",
-    roleLabel: "Operações",
-    squad: "Ops Core",
-    status: "Ativo",
-    lastAccess: "Hoje, 08:42",
-  },
-  {
-    id: "user-3",
-    name: "Lucas Freitas",
-    email: "lucas@flowjl.com",
-    roleLabel: "Tráfego Pago",
-    squad: "Growth",
-    status: "Pendente",
-    lastAccess: "Convite enviado",
-  },
-  {
-    id: "user-4",
-    name: "Paulo Nunes",
-    email: "paulo@flowjl.com",
-    roleLabel: "Aprovações",
-    squad: "Governança",
-    status: "Ativo",
-    lastAccess: "Ontem, 18:11",
-  },
-  {
-    id: "user-5",
-    name: "Clara Borges",
-    email: "clara@flowjl.com",
-    roleLabel: "Social Media",
-    squad: "Conteúdo",
-    status: "Suspenso",
-    lastAccess: "07 Jul, 16:03",
-  },
-];
 
 const accessProfiles: AccessProfile[] = [
   {
@@ -198,8 +168,21 @@ const roleCatalog: RoleCatalog[] = [
   },
 ];
 
-const roleOptions = mockUsers.map((user) => user.roleLabel);
+const profileOptions = accessProfiles.map((profile) => profile.name);
+const jobTitleOptions = roleCatalog.map((role) => role.name);
 const scopeOptions = ["Operação completa", "Governança", "Performance", "Conteúdo", "Leitura executiva"];
+
+function getAccessRole(profileName: string): { role: RoleKey; roleLabel: string } {
+  if (profileName === "Administrador Flow JL") {
+    return { role: "admin", roleLabel: "Administrador" };
+  }
+
+  if (profileName === "Aprovador Executivo") {
+    return { role: "approver", roleLabel: "Aprovações" };
+  }
+
+  return { role: "operations", roleLabel: "Operações" };
+}
 
 export function AdminAccessModule({ page, path }: { page: PageConfig; path: string }) {
   if (path === "/usuarios") {
@@ -214,17 +197,23 @@ export function AdminAccessModule({ page, path }: { page: PageConfig; path: stri
 }
 
 function UsersAdminModule({ page }: { page: PageConfig }) {
-  const [users, setUsers] = useState(initialPortalUsers);
-  const [selectedUserId, setSelectedUserId] = useState(initialPortalUsers[0]?.id ?? "");
+  const users = useUserDirectoryStore((state) => state.users);
+  const addUser = useUserDirectoryStore((state) => state.addUser);
+  const updateUser = useUserDirectoryStore((state) => state.updateUser);
+  const [selectedUserId, setSelectedUserId] = useState("u-admin");
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<PortalUser["status"] | "Todos">("Todos");
+  const [statusFilter, setStatusFilter] = useState<ManagedUser["status"] | "Todos">("Todos");
 
   const inviteForm = useForm<InviteUserForm>({
     resolver: zodResolver(inviteUserSchema),
     defaultValues: {
       name: "",
       email: "",
-      role: roleOptions[0] ?? "Administrador",
+      profileName: profileOptions[0] ?? "Administrador Flow JL",
+      jobTitle: jobTitleOptions[0] ?? "Administrador do Portal",
+      squad: "",
+      password: "",
+      passwordConfirmation: "",
     },
   });
 
@@ -233,9 +222,18 @@ function UsersAdminModule({ page }: { page: PageConfig }) {
     defaultValues: {
       name: "",
       email: "",
-      roleLabel: roleOptions[0] ?? "Administrador",
+      profileName: profileOptions[0] ?? "Administrador Flow JL",
+      jobTitle: jobTitleOptions[0] ?? "Administrador do Portal",
       squad: "",
       status: "Ativo",
+    },
+  });
+
+  const passwordForm = useForm<ChangePasswordForm>({
+    resolver: zodResolver(changePasswordSchema),
+    defaultValues: {
+      password: "",
+      passwordConfirmation: "",
     },
   });
 
@@ -247,7 +245,9 @@ function UsersAdminModule({ page }: { page: PageConfig }) {
       const term = search.toLowerCase();
       const matchesSearch =
         term === "" ||
-        [user.name, user.email, user.roleLabel, user.squad].some((value) => value.toLowerCase().includes(term));
+        [user.name, user.email, user.profileName, user.jobTitle, user.squad].some((value) =>
+          value.toLowerCase().includes(term),
+        );
 
       return matchesStatus && matchesSearch;
     });
@@ -258,12 +258,14 @@ function UsersAdminModule({ page }: { page: PageConfig }) {
       editForm.reset({
         name: selectedUser.name,
         email: selectedUser.email,
-        roleLabel: selectedUser.roleLabel,
+        profileName: selectedUser.profileName,
+        jobTitle: selectedUser.jobTitle,
         squad: selectedUser.squad,
         status: selectedUser.status,
       });
+      passwordForm.reset({ password: "", passwordConfirmation: "" });
     }
-  }, [editForm, selectedUser, users]);
+  }, [editForm, passwordForm, selectedUser, users]);
 
   return (
     <section className="page-grid">
@@ -272,11 +274,11 @@ function UsersAdminModule({ page }: { page: PageConfig }) {
         icon={<Users2 className="h-5 w-5" />}
         eyebrow="Acesso administrativo"
         title="Controle de usuários do portal"
-        description="Gerencie convites, acompanhe acessos recentes, edite cadastros e mantenha a governança do portal Flow JL centralizada no administrador."
+        description="Gerencie credenciais, perfis, cargos e status de cada usuario com a governança do portal centralizada no administrador."
         highlights={[
-          "Entrada principal pelo login com credenciais simuladas",
-          "Monitoramento de status ativo, pendente e suspenso",
-          "Pronto para evoluir com API real de identidade",
+          "Redefinicao controlada de senha pelo administrador",
+          "Perfil e cargo vinculados individualmente",
+          "Credenciais persistidas e usadas no proximo login",
         ]}
       />
 
@@ -296,14 +298,14 @@ function UsersAdminModule({ page }: { page: PageConfig }) {
             <input
               value={search}
               onChange={(event) => setSearch(event.target.value)}
-              placeholder="Buscar por nome, email ou squad"
+              placeholder="Buscar por nome, email, perfil, cargo ou squad"
               className="min-w-[260px] flex-1 rounded-2xl border bg-white/70 px-4 py-3 text-sm dark:bg-white/6"
             />
             {["Todos", "Ativo", "Pendente", "Suspenso"].map((status) => (
               <button
                 key={status}
                 type="button"
-                onClick={() => setStatusFilter(status as PortalUser["status"] | "Todos")}
+                onClick={() => setStatusFilter(status as ManagedUser["status"] | "Todos")}
                 className={cn(
                   "rounded-full border px-3 py-2 text-sm",
                   statusFilter === status ? "bg-[color:var(--primary)] text-[color:var(--primary-foreground)]" : "bg-white/70 dark:bg-white/6",
@@ -318,7 +320,7 @@ function UsersAdminModule({ page }: { page: PageConfig }) {
             <table className="min-w-full text-left text-sm">
               <thead>
                 <tr className="text-[color:var(--muted-foreground)]">
-                  {["usuario", "perfil", "squad", "status", "ultimo acesso"].map((column) => (
+                  {["usuario", "perfil", "cargo", "squad", "status", "ultimo acesso"].map((column) => (
                     <th key={column} className="pb-4 pr-4 font-medium capitalize">
                       {column}
                     </th>
@@ -337,7 +339,8 @@ function UsersAdminModule({ page }: { page: PageConfig }) {
                         <p className="mt-1 text-xs text-[color:var(--muted-foreground)]">{user.email}</p>
                       </button>
                     </td>
-                    <td className="py-4 pr-4">{user.roleLabel}</td>
+                    <td className="py-4 pr-4">{user.profileName}</td>
+                    <td className="py-4 pr-4">{user.jobTitle}</td>
                     <td className="py-4 pr-4">{user.squad}</td>
                     <td className="py-4 pr-4">
                       <span
@@ -374,20 +377,21 @@ function UsersAdminModule({ page }: { page: PageConfig }) {
             {selectedUser ? (
               <form
                 onSubmit={editForm.handleSubmit((values) => {
-                  setUsers((currentUsers) =>
-                    currentUsers.map((user) =>
-                      user.id === selectedUser.id
-                        ? {
-                            ...user,
-                            name: values.name,
-                            email: values.email,
-                            roleLabel: values.roleLabel,
-                            squad: values.squad,
-                            status: values.status,
-                          }
-                        : user,
-                    ),
-                  );
+                  const accessRole =
+                    values.profileName === selectedUser.profileName
+                      ? { role: selectedUser.role, roleLabel: selectedUser.roleLabel }
+                      : getAccessRole(values.profileName);
+
+                  updateUser(selectedUser.id, {
+                    name: values.name,
+                    email: values.email.trim().toLowerCase(),
+                    profileName: values.profileName,
+                    jobTitle: values.jobTitle,
+                    squad: values.squad,
+                    status: values.status,
+                    focus: values.squad,
+                    ...accessRole,
+                  });
                   toast.success(`Cadastro de ${values.name} atualizado com sucesso.`);
                 })}
                 className="mt-6 grid gap-4"
@@ -407,14 +411,26 @@ function UsersAdminModule({ page }: { page: PageConfig }) {
                     placeholder="email@flowjl.com"
                   />
                 </Field>
-                <Field label="Perfil de acesso" error={editForm.formState.errors.roleLabel?.message}>
+                <Field label="Perfil de acesso" error={editForm.formState.errors.profileName?.message}>
                   <select
-                    {...editForm.register("roleLabel")}
+                    {...editForm.register("profileName")}
                     className="rounded-2xl border bg-white/70 px-4 py-3 text-sm dark:bg-white/6"
                   >
-                    {roleOptions.map((role) => (
-                      <option key={role} value={role}>
-                        {role}
+                    {profileOptions.map((profile) => (
+                      <option key={profile} value={profile}>
+                        {profile}
+                      </option>
+                    ))}
+                  </select>
+                </Field>
+                <Field label="Cargo" error={editForm.formState.errors.jobTitle?.message}>
+                  <select
+                    {...editForm.register("jobTitle")}
+                    className="rounded-2xl border bg-white/70 px-4 py-3 text-sm dark:bg-white/6"
+                  >
+                    {jobTitleOptions.map((jobTitle) => (
+                      <option key={jobTitle} value={jobTitle}>
+                        {jobTitle}
                       </option>
                     ))}
                   </select>
@@ -454,6 +470,66 @@ function UsersAdminModule({ page }: { page: PageConfig }) {
           <div className="glass rounded-[2rem] border p-6">
             <div className="flex items-center gap-3">
               <div className="rounded-2xl bg-[color:var(--primary)]/12 p-3 text-[color:var(--primary)]">
+                <KeyRound className="h-5 w-5" />
+              </div>
+              <div>
+                <h3 className="font-display text-xl font-semibold">Alterar senha</h3>
+                <p className="text-sm text-[color:var(--muted-foreground)]">
+                  Redefina a credencial de {selectedUser?.name ?? "um usuario selecionado"}.
+                </p>
+              </div>
+            </div>
+
+            {selectedUser ? (
+              <form
+                onSubmit={passwordForm.handleSubmit((values) => {
+                  updateUser(selectedUser.id, { password: values.password });
+                  passwordForm.reset({ password: "", passwordConfirmation: "" });
+                  toast.success(`Senha de ${selectedUser.name} alterada com sucesso.`);
+                })}
+                className="mt-6 grid gap-4"
+              >
+                <Field label="Nova senha" error={passwordForm.formState.errors.password?.message}>
+                  <input
+                    type="password"
+                    {...passwordForm.register("password")}
+                    className="rounded-2xl border bg-white/70 px-4 py-3 text-sm dark:bg-white/6"
+                    placeholder="Minimo de 8 caracteres"
+                    autoComplete="new-password"
+                  />
+                </Field>
+                <Field label="Confirmar nova senha" error={passwordForm.formState.errors.passwordConfirmation?.message}>
+                  <input
+                    type="password"
+                    {...passwordForm.register("passwordConfirmation")}
+                    className="rounded-2xl border bg-white/70 px-4 py-3 text-sm dark:bg-white/6"
+                    placeholder="Repita a nova senha"
+                    autoComplete="new-password"
+                  />
+                </Field>
+
+                <div className="rounded-2xl border bg-white/55 p-4 text-xs leading-5 text-[color:var(--muted-foreground)] dark:bg-white/5">
+                  Use no minimo 8 caracteres, com letra maiuscula, minuscula e numero.
+                </div>
+
+                <button
+                  type="submit"
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[color:var(--primary)] px-5 py-3 font-medium text-[color:var(--primary-foreground)]"
+                >
+                  <KeyRound className="h-4 w-4" />
+                  Atualizar senha
+                </button>
+              </form>
+            ) : (
+              <div className="mt-6 rounded-3xl border bg-white/70 p-4 text-sm text-[color:var(--muted-foreground)] dark:bg-white/6">
+                Selecione um usuario para alterar a senha.
+              </div>
+            )}
+          </div>
+
+          <div className="glass rounded-[2rem] border p-6">
+            <div className="flex items-center gap-3">
+              <div className="rounded-2xl bg-[color:var(--primary)]/12 p-3 text-[color:var(--primary)]">
                 <UserPlus2 className="h-5 w-5" />
               </div>
               <div>
@@ -464,23 +540,39 @@ function UsersAdminModule({ page }: { page: PageConfig }) {
 
             <form
               onSubmit={inviteForm.handleSubmit((values) => {
-                const newUser: PortalUser = {
-                  id: `user-${values.email.trim().toLowerCase()}`,
+                const normalizedEmail = values.email.trim().toLowerCase();
+
+                if (users.some((user) => user.email.toLowerCase() === normalizedEmail)) {
+                  inviteForm.setError("email", { message: "Ja existe um usuario cadastrado com este email." });
+                  return;
+                }
+
+                const accessRole = getAccessRole(values.profileName);
+                const newUser: ManagedUser = {
+                  id: `u-${normalizedEmail.replace(/[^a-z0-9]/g, "-")}`,
                   name: values.name,
-                  email: values.email,
-                  roleLabel: values.role,
-                  squad: "Nova squad",
+                  email: normalizedEmail,
+                  password: values.password,
+                  profileName: values.profileName,
+                  jobTitle: values.jobTitle,
+                  squad: values.squad,
                   status: "Pendente",
                   lastAccess: "Convite enviado",
+                  focus: values.squad,
+                  ...accessRole,
                 };
 
-                setUsers((currentUsers) => [newUser, ...currentUsers]);
+                addUser(newUser);
                 setSelectedUserId(newUser.id);
                 toast.success(`Convite enviado para ${values.name}.`);
                 inviteForm.reset({
                   name: "",
                   email: "",
-                  role: values.role,
+                  profileName: values.profileName,
+                  jobTitle: values.jobTitle,
+                  squad: "",
+                  password: "",
+                  passwordConfirmation: "",
                 });
               })}
               className="mt-6 grid gap-4"
@@ -500,17 +592,54 @@ function UsersAdminModule({ page }: { page: PageConfig }) {
                   placeholder="email@flowjl.com"
                 />
               </Field>
-              <Field label="Perfil de acesso" error={inviteForm.formState.errors.role?.message}>
+              <Field label="Perfil de acesso" error={inviteForm.formState.errors.profileName?.message}>
                 <select
-                  {...inviteForm.register("role")}
+                  {...inviteForm.register("profileName")}
                   className="rounded-2xl border bg-white/70 px-4 py-3 text-sm dark:bg-white/6"
                 >
-                  {roleOptions.map((role) => (
-                    <option key={role} value={role}>
-                      {role}
+                  {profileOptions.map((profile) => (
+                    <option key={profile} value={profile}>
+                      {profile}
                     </option>
                   ))}
                 </select>
+              </Field>
+              <Field label="Cargo" error={inviteForm.formState.errors.jobTitle?.message}>
+                <select
+                  {...inviteForm.register("jobTitle")}
+                  className="rounded-2xl border bg-white/70 px-4 py-3 text-sm dark:bg-white/6"
+                >
+                  {jobTitleOptions.map((jobTitle) => (
+                    <option key={jobTitle} value={jobTitle}>
+                      {jobTitle}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+              <Field label="Squad" error={inviteForm.formState.errors.squad?.message}>
+                <input
+                  {...inviteForm.register("squad")}
+                  className="rounded-2xl border bg-white/70 px-4 py-3 text-sm dark:bg-white/6"
+                  placeholder="Ex: Growth"
+                />
+              </Field>
+              <Field label="Senha temporaria" error={inviteForm.formState.errors.password?.message}>
+                <input
+                  type="password"
+                  {...inviteForm.register("password")}
+                  className="rounded-2xl border bg-white/70 px-4 py-3 text-sm dark:bg-white/6"
+                  placeholder="Defina a senha inicial"
+                  autoComplete="new-password"
+                />
+              </Field>
+              <Field label="Confirmar senha" error={inviteForm.formState.errors.passwordConfirmation?.message}>
+                <input
+                  type="password"
+                  {...inviteForm.register("passwordConfirmation")}
+                  className="rounded-2xl border bg-white/70 px-4 py-3 text-sm dark:bg-white/6"
+                  placeholder="Repita a senha inicial"
+                  autoComplete="new-password"
+                />
               </Field>
 
               <button

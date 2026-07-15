@@ -18,6 +18,14 @@ export type AppUser = {
   focus: string;
 };
 
+export type ManagedUser = AppUser & {
+  profileName: string;
+  jobTitle: string;
+  squad: string;
+  status: "Ativo" | "Pendente" | "Suspenso";
+  lastAccess: string;
+};
+
 export type NavItem = {
   label: string;
   href: string;

@@ -10,7 +10,6 @@ import {
   Clapperboard,
   Compass,
   LayoutDashboard,
-  LogIn,
   LogOut,
   Megaphone,
   Menu,
@@ -32,9 +31,10 @@ import { useTheme } from "next-themes";
 import { useEffect } from "react";
 
 import { cn } from "@/lib/utils";
-import { getPageConfig, mockUsers, navItems, notifications } from "@/mocks/flow-data";
+import { getPageConfig, navItems, notifications } from "@/mocks/flow-data";
 import { useAuthStore } from "@/stores/auth-store";
 import { useUiStore } from "@/stores/ui-store";
+import { initialManagedUsers, useUserDirectoryStore } from "@/stores/user-directory-store";
 
 const iconMap = {
   LayoutDashboard,
@@ -60,7 +60,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const currentUserId = useAuthStore((state) => state.currentUserId);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const logout = useAuthStore((state) => state.logout);
-  const setCurrentUserId = useAuthStore((state) => state.setCurrentUserId);
+  const users = useUserDirectoryStore((state) => state.users);
   const sidebarCollapsed = useUiStore((state) => state.sidebarCollapsed);
   const setSidebarCollapsed = useUiStore((state) => state.setSidebarCollapsed);
   const commandOpen = useUiStore((state) => state.commandOpen);
@@ -71,7 +71,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const setExperienceState = useUiStore((state) => state.setExperienceState);
   const { theme, setTheme } = useTheme();
 
-  const user = mockUsers.find((entry) => entry.id === currentUserId) ?? mockUsers[0];
+  const user = users.find((entry) => entry.id === currentUserId) ?? users[0] ?? initialManagedUsers[0];
   const visibleNavItems = navItems.filter((item) => getPageConfig(item.href).allowedRoles.includes(user.role));
 
   useEffect(() => {
@@ -214,20 +214,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
-              <label className="flex items-center gap-2 rounded-2xl border bg-white/65 px-3 py-2 text-sm dark:bg-white/6">
-                <span className="text-[color:var(--muted-foreground)]">Perfil</span>
-                <select
-                  value={user.id}
-                  onChange={(event) => setCurrentUserId(event.target.value)}
-                  className="bg-transparent font-medium"
-                >
-                  {mockUsers.map((entry) => (
-                    <option key={entry.id} value={entry.id}>
-                      {entry.name} · {entry.roleLabel}
-                    </option>
-                  ))}
-                </select>
-              </label>
+              <div className="flex items-center gap-3 rounded-2xl border bg-white/65 px-4 py-2 text-sm dark:bg-white/6">
+                <ShieldCheck className="h-4 w-4 text-[color:var(--primary)]" />
+                <div>
+                  <p className="font-medium">{user.name}</p>
+                  <p className="text-xs text-[color:var(--muted-foreground)]">
+                    {user.profileName} · {user.jobTitle}
+                  </p>
+                </div>
+              </div>
 
               <label className="flex items-center gap-2 rounded-2xl border bg-white/65 px-3 py-2 text-sm dark:bg-white/6">
                 <span className="text-[color:var(--muted-foreground)]">Estado</span>
@@ -243,26 +238,16 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 </select>
               </label>
 
-              <div className="flex items-center gap-2">
-                <Link
-                  href="/login"
+              {isAuthenticated && (
+                <button
+                  type="button"
+                  onClick={handleLogout}
                   className="inline-flex items-center gap-2 rounded-2xl border bg-white/65 px-4 py-2 text-sm font-medium hover:bg-white dark:bg-white/6"
                 >
-                  <LogIn className="h-4 w-4" />
-                  Trocar perfil
-                </Link>
-
-                {isAuthenticated && (
-                  <button
-                    type="button"
-                    onClick={handleLogout}
-                    className="inline-flex items-center gap-2 rounded-2xl border bg-white/65 px-4 py-2 text-sm font-medium hover:bg-white dark:bg-white/6"
-                  >
-                    <LogOut className="h-4 w-4" />
-                    Sair
-                  </button>
-                )}
-              </div>
+                  <LogOut className="h-4 w-4" />
+                  Sair
+                </button>
+              )}
             </div>
           </div>
         </header>

@@ -9,7 +9,6 @@ type AuthState = {
   hydrated: boolean;
   login: (userId: string) => void;
   logout: () => void;
-  setCurrentUserId: (userId: string) => void;
   setHydrated: (hydrated: boolean) => void;
 };
 
@@ -21,7 +20,6 @@ export const useAuthStore = create<AuthState>()(
       hydrated: false,
       login: (currentUserId) => set({ currentUserId, isAuthenticated: true }),
       logout: () => set({ currentUserId: null, isAuthenticated: false }),
-      setCurrentUserId: (currentUserId) => set({ currentUserId }),
       setHydrated: (hydrated) => set({ hydrated }),
     }),
     {
