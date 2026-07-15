@@ -50,6 +50,53 @@ export type JobRole = {
   responsibilities: string[];
 };
 
+export type StrategyStatus = "Rascunho" | "Em validacao" | "Aprovada" | "Arquivada";
+
+export type DigitalStrategy = {
+  id: string;
+  name: string;
+  objective: string;
+  audience: string;
+  promise: string;
+  channels: string[];
+  owner: string;
+  status: StrategyStatus;
+};
+
+export type LaunchPhase = "Planejamento" | "Captacao" | "Aquecimento" | "Lancamento" | "Pos-lancamento";
+export type LaunchStatus = "Planejado" | "Em andamento" | "Pausado" | "Concluido";
+
+export type LaunchPlan = {
+  id: string;
+  name: string;
+  strategyId: string;
+  product: string;
+  owner: string;
+  phase: LaunchPhase;
+  status: LaunchStatus;
+  startDate: string;
+  endDate: string;
+  revenueGoal: number;
+  budget: number;
+};
+
+export type ScheduleStatus = "Pendente" | "Em andamento" | "Bloqueado" | "Concluido";
+export type SchedulePriority = "Alta" | "Media" | "Baixa";
+
+export type PlanningScheduleItem = {
+  id: string;
+  title: string;
+  launchId: string;
+  owner: string;
+  squad: string;
+  startDate: string;
+  endDate: string;
+  status: ScheduleStatus;
+  priority: SchedulePriority;
+  dependencyId: string;
+  notes: string;
+};
+
 export type NavItem = {
   label: string;
   href: string;
