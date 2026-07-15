@@ -8,9 +8,10 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 import { cn } from "@/lib/utils";
+import { initialJobRoles, useJobRoleDirectoryStore } from "@/stores/job-role-directory-store";
 import { initialAccessProfiles, useProfileDirectoryStore } from "@/stores/profile-directory-store";
 import { useUserDirectoryStore } from "@/stores/user-directory-store";
-import type { AccessProfile, ManagedUser, PageConfig, ProfilePermission, RoleKey } from "@/types/flow";
+import type { AccessProfile, JobRole, ManagedUser, PageConfig, ProfilePermission, RoleKey } from "@/types/flow";
 
 const passwordRule = z
   .string()
@@ -64,59 +65,18 @@ const createProfileSchema = z.object({
   role: z.enum(["admin", "strategist", "social-media", "traffic-manager", "operations", "approver"]),
 });
 
+const jobRoleSchema = z.object({
+  name: z.string().trim().min(3, "Informe um nome com pelo menos 3 caracteres."),
+  scope: z.string().trim().min(5, "Descreva o escopo principal do cargo."),
+  reportsTo: z.string().trim().min(2, "Informe a lideranca responsavel pelo cargo."),
+  headcount: z.number().int("Informe um numero inteiro.").min(0, "A quantidade nao pode ser negativa.").max(999),
+  responsibilities: z.string().trim().min(5, "Informe pelo menos uma responsabilidade."),
+});
+
 type InviteUserForm = z.infer<typeof inviteUserSchema>;
 type EditUserForm = z.infer<typeof editUserSchema>;
 type CreateProfileForm = z.infer<typeof createProfileSchema>;
-
-type RoleCatalog = {
-  id: string;
-  name: string;
-  scope: string;
-  reportsTo: string;
-  headcount: number;
-  responsibilities: string[];
-};
-
-const roleCatalog: RoleCatalog[] = [
-  {
-    id: "cargo-1",
-    name: "Administrador do Portal",
-    scope: "Gestão total de acesso e governança",
-    reportsTo: "Diretoria JL",
-    headcount: 2,
-    responsibilities: [
-      "Gerenciar usuarios, perfis e cargos",
-      "Liberar acessos criticos do portal",
-      "Auditar mudancas sensiveis de permissao",
-    ],
-  },
-  {
-    id: "cargo-2",
-    name: "Coordenador Operacional",
-    scope: "Execução e dependências entre squads",
-    reportsTo: "Administrador do Portal",
-    headcount: 4,
-    responsibilities: [
-      "Acompanhar cronogramas e filas operacionais",
-      "Atualizar status criticos do lancamento",
-      "Escalar bloqueios de producao e aprovacao",
-    ],
-  },
-  {
-    id: "cargo-3",
-    name: "Especialista de Performance",
-    scope: "Midia, investimento e indicadores",
-    reportsTo: "Coordenador Operacional",
-    headcount: 3,
-    responsibilities: [
-      "Operar campanhas e verbas",
-      "Revisar indicadores de performance",
-      "Sinalizar riscos de meta e janela de lancamento",
-    ],
-  },
-];
-
-const jobTitleOptions = roleCatalog.map((role) => role.name);
+type JobRoleForm = z.infer<typeof jobRoleSchema>;
 const profileRoleOptions: Array<{ value: RoleKey; label: string }> = [
   { value: "admin", label: "Administrador" },
   { value: "strategist", label: "Estratégia Digital" },
@@ -159,7 +119,9 @@ function UsersAdminModule({ page }: { page: PageConfig }) {
   const addUser = useUserDirectoryStore((state) => state.addUser);
   const updateUser = useUserDirectoryStore((state) => state.updateUser);
   const profiles = useProfileDirectoryStore((state) => state.profiles);
+  const jobRoles = useJobRoleDirectoryStore((state) => state.roles);
   const profileOptions = profiles.map((profile) => profile.name);
+  const jobTitleOptions = jobRoles.map((role) => role.name);
   const [selectedUserId, setSelectedUserId] = useState("u-admin");
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<ManagedUser["status"] | "Todos">("Todos");
@@ -965,8 +927,58 @@ function ProfilesAdminModule({ page }: { page: PageConfig }) {
 }
 
 function RolesAdminModule({ page }: { page: PageConfig }) {
-  const [selectedRoleId, setSelectedRoleId] = useState(roleCatalog[0]?.id ?? "");
-  const selectedRole = roleCatalog.find((role) => role.id === selectedRoleId) ?? roleCatalog[0];
+  const roles = useJobRoleDirectoryStore((state) => state.roles);
+  const addRole = useJobRoleDirectoryStore((state) => state.addRole);
+  const updateRole = useJobRoleDirectoryStore((state) => state.updateRole);
+  const users = useUserDirectoryStore((state) => state.users);
+  const syncUsersForJobTitle = useUserDirectoryStore((state) => state.syncUsersForJobTitle);
+  const [selectedRoleId, setSelectedRoleId] = useState(initialJobRoles[0]?.id ?? "");
+  const selectedRole = roles.find((role) => role.id === selectedRoleId) ?? roles[0];
+
+  const createForm = useForm<JobRoleForm>({
+    resolver: zodResolver(jobRoleSchema),
+    defaultValues: {
+      name: "",
+      scope: "",
+      reportsTo: "Diretoria JL",
+      headcount: 1,
+      responsibilities: "",
+    },
+  });
+
+  const editForm = useForm<JobRoleForm>({
+    resolver: zodResolver(jobRoleSchema),
+    defaultValues: {
+      name: "",
+      scope: "",
+      reportsTo: "",
+      headcount: 0,
+      responsibilities: "",
+    },
+  });
+
+  useEffect(() => {
+    if (selectedRole) {
+      editForm.reset({
+        name: selectedRole.name,
+        scope: selectedRole.scope,
+        reportsTo: selectedRole.reportsTo,
+        headcount: selectedRole.headcount,
+        responsibilities: selectedRole.responsibilities.join("\n"),
+      });
+    }
+  }, [editForm, roles, selectedRole]);
+
+  function parseResponsibilities(value: string) {
+    return value
+      .split(/\r?\n/)
+      .map((responsibility) => responsibility.trim())
+      .filter(Boolean);
+  }
+
+  function getMemberCount(roleName: string) {
+    return users.filter((user) => user.jobTitle === roleName).length;
+  }
 
   return (
     <section className="page-grid">
@@ -977,47 +989,139 @@ function RolesAdminModule({ page }: { page: PageConfig }) {
         title="Cargos e estrutura de responsabilidade"
         description="Organize os cargos do portal web e mantenha a separacao de responsabilidade sob controle total do administrador."
         highlights={[
-          "Somente administrador pode cadastrar ou editar cargos",
-          "Cargos orientam perfis, aprovacoes e responsabilidade operacional",
-          "Estrutura pronta para evoluir com hierarquia real na API",
+          "Cadastro e edicao exclusivos do administrador",
+          "Usuarios sincronizados quando o cargo muda",
+          "Hierarquia e responsabilidades persistidas no portal",
         ]}
       />
 
       <div className="grid gap-5 xl:grid-cols-[0.92fr_1.08fr]">
-        <div className="glass rounded-[2rem] border p-6">
-          <h3 className="font-display text-xl font-semibold">Catalogo de cargos</h3>
-          <p className="mt-1 text-sm text-[color:var(--muted-foreground)]">
-            Area visivel apenas para o administrador do portal.
-          </p>
+        <div className="grid gap-5">
+          <div className="glass rounded-[2rem] border p-6">
+            <h3 className="font-display text-xl font-semibold">Catalogo de cargos</h3>
+            <p className="mt-1 text-sm text-[color:var(--muted-foreground)]">
+              Selecione um cargo para revisar ou editar sua estrutura.
+            </p>
 
-          <div className="mt-6 space-y-3">
-            {roleCatalog.map((role) => {
-              const active = role.id === selectedRoleId;
+            <div className="mt-6 space-y-3">
+              {roles.map((role) => {
+                const active = role.id === selectedRoleId;
 
-              return (
-                <button
-                  key={role.id}
-                  type="button"
-                  onClick={() => setSelectedRoleId(role.id)}
-                  className={cn(
-                    "w-full rounded-3xl border p-4 text-left transition",
-                    active
-                      ? "border-[color:var(--primary)] bg-[color:var(--primary)]/8 shadow-sm"
-                      : "bg-white/70 hover:border-[color:var(--primary)]/30 dark:bg-white/6",
-                  )}
-                >
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <p className="font-semibold">{role.name}</p>
-                      <p className="mt-1 text-sm text-[color:var(--muted-foreground)]">{role.scope}</p>
+                return (
+                  <button
+                    key={role.id}
+                    type="button"
+                    onClick={() => setSelectedRoleId(role.id)}
+                    className={cn(
+                      "w-full rounded-3xl border p-4 text-left transition",
+                      active
+                        ? "border-[color:var(--primary)] bg-[color:var(--primary)]/8 shadow-sm"
+                        : "bg-white/70 hover:border-[color:var(--primary)]/30 dark:bg-white/6",
+                    )}
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <p className="font-semibold">{role.name}</p>
+                        <p className="mt-1 text-sm text-[color:var(--muted-foreground)]">{role.scope}</p>
+                      </div>
+                      <span className="rounded-full bg-[color:var(--secondary)] px-3 py-1 text-xs font-medium text-[color:var(--secondary-foreground)]">
+                        {getMemberCount(role.name)} usuarios
+                      </span>
                     </div>
-                    <span className="rounded-full bg-[color:var(--secondary)] px-3 py-1 text-xs font-medium text-[color:var(--secondary-foreground)]">
-                      {role.headcount} vagas
-                    </span>
-                  </div>
-                </button>
-              );
-            })}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="glass rounded-[2rem] border p-6">
+            <h3 className="font-display text-xl font-semibold">Cadastrar novo cargo</h3>
+            <p className="mt-1 text-sm text-[color:var(--muted-foreground)]">
+              Defina a posicao, a hierarquia e as responsabilidades iniciais.
+            </p>
+
+            <form
+              data-testid="create-job-role-form"
+              onSubmit={createForm.handleSubmit((values) => {
+                const normalizedName = values.name.trim();
+
+                if (roles.some((role) => role.name.toLowerCase() === normalizedName.toLowerCase())) {
+                  createForm.setError("name", { message: "Ja existe um cargo cadastrado com este nome." });
+                  return;
+                }
+
+                const role: JobRole = {
+                  id: `cargo-${normalizedName.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${roles.length + 1}`,
+                  name: normalizedName,
+                  scope: values.scope.trim(),
+                  reportsTo: values.reportsTo.trim(),
+                  headcount: values.headcount,
+                  responsibilities: parseResponsibilities(values.responsibilities),
+                };
+
+                addRole(role);
+                setSelectedRoleId(role.id);
+                toast.success(`Cargo ${role.name} cadastrado com sucesso.`);
+                createForm.reset({
+                  name: "",
+                  scope: "",
+                  reportsTo: values.reportsTo,
+                  headcount: 1,
+                  responsibilities: "",
+                });
+              })}
+              className="mt-6 grid gap-4"
+            >
+              <Field label="Nome do cargo" error={createForm.formState.errors.name?.message}>
+                <input
+                  {...createForm.register("name")}
+                  className="rounded-2xl border bg-white/70 px-4 py-3 text-sm dark:bg-white/6"
+                  placeholder="Ex: Lider de Growth"
+                />
+              </Field>
+              <Field label="Escopo principal" error={createForm.formState.errors.scope?.message}>
+                <textarea
+                  {...createForm.register("scope")}
+                  className="min-h-24 rounded-2xl border bg-white/70 px-4 py-3 text-sm dark:bg-white/6"
+                  placeholder="Descreva o objetivo principal deste cargo"
+                />
+              </Field>
+              <Field label="Reporta para" error={createForm.formState.errors.reportsTo?.message}>
+                <input
+                  list="create-role-report-options"
+                  {...createForm.register("reportsTo")}
+                  className="rounded-2xl border bg-white/70 px-4 py-3 text-sm dark:bg-white/6"
+                  placeholder="Ex: Diretoria JL"
+                />
+                <datalist id="create-role-report-options">
+                  <option value="Diretoria JL" />
+                  {roles.map((role) => <option key={role.id} value={role.name} />)}
+                </datalist>
+              </Field>
+              <Field label="Quantidade planejada" error={createForm.formState.errors.headcount?.message}>
+                <input
+                  type="number"
+                  min={0}
+                  max={999}
+                  {...createForm.register("headcount", { valueAsNumber: true })}
+                  className="rounded-2xl border bg-white/70 px-4 py-3 text-sm dark:bg-white/6"
+                />
+              </Field>
+              <Field label="Responsabilidades" error={createForm.formState.errors.responsibilities?.message}>
+                <textarea
+                  {...createForm.register("responsibilities")}
+                  className="min-h-28 rounded-2xl border bg-white/70 px-4 py-3 text-sm dark:bg-white/6"
+                  placeholder={"Informe uma responsabilidade por linha"}
+                />
+              </Field>
+
+              <button
+                type="submit"
+                className="inline-flex items-center justify-center rounded-2xl bg-[color:var(--primary)] px-5 py-3 font-medium text-[color:var(--primary-foreground)]"
+              >
+                Cadastrar cargo
+              </button>
+            </form>
           </div>
         </div>
 
@@ -1032,10 +1136,101 @@ function RolesAdminModule({ page }: { page: PageConfig }) {
             </div>
           </div>
 
+          <form
+            data-testid="edit-job-role-form"
+            onSubmit={editForm.handleSubmit((values) => {
+              const nextName = values.name.trim();
+
+              if (
+                roles.some(
+                  (role) => role.id !== selectedRole.id && role.name.toLowerCase() === nextName.toLowerCase(),
+                )
+              ) {
+                editForm.setError("name", { message: "Ja existe outro cargo cadastrado com este nome." });
+                return;
+              }
+
+              const previousName = selectedRole.name;
+              updateRole(selectedRole.id, {
+                name: nextName,
+                scope: values.scope.trim(),
+                reportsTo: values.reportsTo.trim(),
+                headcount: values.headcount,
+                responsibilities: parseResponsibilities(values.responsibilities),
+              });
+              syncUsersForJobTitle(previousName, nextName);
+              toast.success(`Cargo ${nextName} atualizado com sucesso.`);
+            })}
+            className="mt-6 grid gap-4 rounded-3xl border bg-white/55 p-5 dark:bg-white/5 md:grid-cols-2"
+          >
+            <div className="md:col-span-2">
+              <h4 className="font-display text-lg font-semibold">Editar cargo selecionado</h4>
+              <p className="mt-1 text-sm text-[color:var(--muted-foreground)]">
+                Mudancas de nome sao aplicadas aos usuarios e subordinados vinculados.
+              </p>
+            </div>
+            <Field label="Nome do cargo" error={editForm.formState.errors.name?.message}>
+              <input
+                data-testid="edit-job-role-name"
+                {...editForm.register("name")}
+                className="rounded-2xl border bg-white/70 px-4 py-3 text-sm dark:bg-white/6"
+              />
+            </Field>
+            <Field label="Reporta para" error={editForm.formState.errors.reportsTo?.message}>
+              <input
+                data-testid="edit-job-role-reports-to"
+                list="edit-role-report-options"
+                {...editForm.register("reportsTo")}
+                className="rounded-2xl border bg-white/70 px-4 py-3 text-sm dark:bg-white/6"
+              />
+              <datalist id="edit-role-report-options">
+                <option value="Diretoria JL" />
+                {roles.filter((role) => role.id !== selectedRole.id).map((role) => (
+                  <option key={role.id} value={role.name} />
+                ))}
+              </datalist>
+            </Field>
+            <div className="md:col-span-2">
+              <Field label="Escopo principal" error={editForm.formState.errors.scope?.message}>
+                <textarea
+                  data-testid="edit-job-role-scope"
+                  {...editForm.register("scope")}
+                  className="min-h-24 rounded-2xl border bg-white/70 px-4 py-3 text-sm dark:bg-white/6"
+                />
+              </Field>
+            </div>
+            <Field label="Quantidade planejada" error={editForm.formState.errors.headcount?.message}>
+              <input
+                data-testid="edit-job-role-headcount"
+                type="number"
+                min={0}
+                max={999}
+                {...editForm.register("headcount", { valueAsNumber: true })}
+                className="rounded-2xl border bg-white/70 px-4 py-3 text-sm dark:bg-white/6"
+              />
+            </Field>
+            <div className="md:col-span-2">
+              <Field label="Responsabilidades" error={editForm.formState.errors.responsibilities?.message}>
+                <textarea
+                  data-testid="edit-job-role-responsibilities"
+                  {...editForm.register("responsibilities")}
+                  className="min-h-32 rounded-2xl border bg-white/70 px-4 py-3 text-sm dark:bg-white/6"
+                />
+              </Field>
+            </div>
+            <button
+              type="submit"
+              className="inline-flex items-center justify-center rounded-2xl bg-[color:var(--primary)] px-5 py-3 font-medium text-[color:var(--primary-foreground)] md:col-span-2"
+            >
+              Salvar alteracoes do cargo
+            </button>
+          </form>
+
           <div className="mt-6 grid gap-4 md:grid-cols-3">
             {[
               ["Responsavel por", selectedRole.scope],
-              ["Quantidade atual", `${selectedRole.headcount}`],
+              ["Usuarios vinculados", `${getMemberCount(selectedRole.name)}`],
+              ["Quantidade planejada", `${selectedRole.headcount}`],
               ["Acesso ao cadastro", "Administrador"],
             ].map(([label, value]) => (
               <div key={label} className="rounded-3xl border bg-white/70 p-4 dark:bg-white/6">
@@ -1059,7 +1254,7 @@ function RolesAdminModule({ page }: { page: PageConfig }) {
               items={[
                 "Nao administradores nao visualizam o modulo na navegacao.",
                 "Acesso direto por URL continua bloqueado por permissao.",
-                "Mudancas de cargo devem refletir em perfis e trilhas de aprovacao.",
+                "Mudancas de nome refletem nos usuarios e na hierarquia vinculada.",
               ]}
             />
             <InfoPanel
